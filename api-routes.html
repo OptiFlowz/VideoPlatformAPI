@@ -1,0 +1,1295 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OptiFlowz Video Platform API Documentation</title>
+  <style>
+    :root {
+      --bg: #030712;
+      --panel: rgba(15, 23, 42, 0.76);
+      --panel-strong: rgba(17, 24, 39, 0.94);
+      --text: #f8fafc;
+      --muted: #b7c2d6;
+      --border: rgba(148, 163, 184, 0.23);
+      --code: #f8fafc;
+      --blue: #4095ff;
+      --blue-strong: #0b67db;
+      --get: #16a34a;
+      --post: #0ea5e9;
+      --patch: #f59e0b;
+      --put: #8b5cf6;
+      --delete: #ef4444;
+      --public: #64748b;
+      --auth: #2563eb;
+      --admin: #dc2626;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #000;
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(0, 0, 0, 0.92);
+      color: #fff;
+      padding: 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+      backdrop-filter: blur(12px);
+    }
+
+    header::before {
+      display: none;
+    }
+
+    header .wrap {
+      max-width: none;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      min-height: 64px;
+      padding: 0 28px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+      color: #fff;
+      text-decoration: none;
+    }
+
+    .menu-toggle {
+      display: none;
+      width: 40px;
+      height: 40px;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      flex: 0 0 auto;
+    }
+
+    .menu-toggle span,
+    .menu-toggle::before,
+    .menu-toggle::after {
+      content: "";
+      display: block;
+      width: 16px;
+      height: 2px;
+      border-radius: 999px;
+      background: currentColor;
+      transition: transform 180ms ease, opacity 180ms ease;
+    }
+
+    .menu-toggle span {
+      margin: 4px 0;
+    }
+
+    body.menu-open .menu-toggle span {
+      opacity: 0;
+    }
+
+    body.menu-open .menu-toggle::before {
+      transform: translateY(6px) rotate(45deg);
+    }
+
+    body.menu-open .menu-toggle::after {
+      transform: translateY(-6px) rotate(-45deg);
+    }
+
+    .brand img {
+      width: 34px;
+      height: 34px;
+      object-fit: contain;
+    }
+
+    .brand-copy strong {
+      display: block;
+      font-size: 15px;
+      letter-spacing: 0;
+    }
+
+    .brand-copy span {
+      display: block;
+      color: #8b98ad;
+      font-size: 11px;
+      margin-top: 1px;
+    }
+
+    .top-links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #a1a1aa;
+      font-size: 14px;
+      font-weight: 650;
+    }
+
+    .top-links span {
+      display: inline-flex;
+      align-items: center;
+      min-height: 40px;
+      padding: 0 16px;
+      border-radius: 999px;
+    }
+
+    .top-links .active {
+      background: rgba(255, 255, 255, 0.10);
+      color: #fff;
+    }
+
+    .header-search {
+      position: relative;
+      flex: 0 1 240px;
+      max-width: 240px;
+      margin-left: auto;
+    }
+
+    .header-search input,
+    .sidebar-search input {
+      width: 100%;
+      min-height: 38px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.07);
+      color: var(--text);
+      padding: 0 14px 0 36px;
+      font: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 160ms ease, background 160ms ease;
+    }
+
+    .header-search input:focus,
+    .sidebar-search input:focus {
+      border-color: rgba(64, 149, 255, 0.64);
+      background: rgba(15, 23, 42, 0.86);
+    }
+
+    .header-search::before,
+    .sidebar-search::before {
+      content: "";
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      width: 12px;
+      height: 12px;
+      border: 2px solid #9ca3af;
+      border-radius: 50%;
+      transform: translateY(-50%);
+    }
+
+    .header-search::after,
+    .sidebar-search::after {
+      content: "";
+      position: absolute;
+      left: 25px;
+      top: 24px;
+      width: 6px;
+      height: 2px;
+      border-radius: 999px;
+      background: #9ca3af;
+      transform: rotate(45deg);
+    }
+
+    h1,
+    h2,
+    h3 {
+      line-height: 1.2;
+      margin: 0;
+    }
+
+    h1 {
+      max-width: 780px;
+      font-size: clamp(34px, 4vw, 48px);
+      letter-spacing: 0;
+    }
+
+    .intro {
+      max-width: 780px;
+      margin: 14px 0 0;
+      color: #a1a1aa;
+      font-size: 18px;
+    }
+
+    main {
+      padding: 0;
+    }
+
+    .docs-layout {
+      display: block;
+      max-width: none;
+      margin: 0;
+      padding: 0 40px 72px 0;
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 64px;
+      left: 0;
+      bottom: 0;
+      width: 300px;
+      height: auto;
+      overflow-y: auto;
+      padding: 34px 28px 40px 34px;
+      border-right: 1px solid rgba(255, 255, 255, 0.10);
+      background: #000;
+    }
+
+    .sidebar-search {
+      display: none;
+      position: relative;
+      margin: 0 0 24px;
+    }
+
+    .sidebar-search input {
+      border-radius: 10px;
+    }
+
+    .side-group {
+      margin-bottom: 28px;
+    }
+
+    .side-label {
+      color: #e5e7eb;
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      min-height: 34px;
+      color: #9ca3af;
+      text-decoration: none;
+      border-radius: 8px;
+      padding: 0 10px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .sidebar a:hover {
+      background: rgba(255, 255, 255, 0.07);
+      color: #fff;
+    }
+
+    .sidebar a.active {
+      background: rgba(255, 255, 255, 0.10);
+      color: #fff;
+    }
+
+    .content {
+      min-width: 0;
+      max-width: 920px;
+      margin-left: 372px;
+      padding-top: 42px;
+    }
+
+    .eyebrow {
+      color: #a1a1aa;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .overview-copy {
+      max-width: 780px;
+      margin: 44px 0 0;
+      color: #a1a1aa;
+      font-size: 17px;
+    }
+
+    .overview-copy p {
+      margin: 0 0 18px;
+    }
+
+    .divider {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.11);
+      margin: 54px 0 42px;
+    }
+
+    .endpoint-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      margin-bottom: 36px;
+    }
+
+    .overview-home > h2 {
+      margin: 0 0 24px;
+      font-size: 32px;
+    }
+
+    .endpoint-card {
+      display: block;
+      min-height: 190px;
+      padding: 26px 24px;
+      color: inherit;
+      text-decoration: none;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 14px;
+      background: #030303;
+      cursor: pointer;
+      transition: border-color 140ms ease, background 140ms ease, transform 140ms ease;
+    }
+
+    .endpoint-card:hover {
+      border-color: rgba(64, 149, 255, 0.52);
+      background: #070b13;
+      transform: translateY(-1px);
+    }
+
+    .card-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      margin-bottom: 22px;
+      color: #c9d4e8;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .endpoint-card h2 {
+      font-size: 22px;
+      margin-bottom: 10px;
+    }
+
+    .endpoint-card p {
+      margin: 0;
+      color: #a1a1aa;
+      font-size: 15px;
+    }
+
+    .route-docs {
+      display: none;
+    }
+
+    .view-hidden {
+      display: none !important;
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 64px;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 14px 0 20px;
+      margin: 0 0 14px;
+      background: rgba(0, 0, 0, 0.82);
+      border-bottom: 0;
+      backdrop-filter: blur(12px);
+    }
+
+    .toolbar input,
+    .toolbar select {
+      min-height: 42px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 10px;
+      background: #0b1220;
+      color: var(--text);
+      padding: 0 12px;
+      font: inherit;
+    }
+
+    .toolbar input::placeholder {
+      color: #8793a8;
+    }
+
+    .toolbar input {
+      width: 100%;
+    }
+
+    .notes,
+    .section {
+      background: #080d16;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      margin-bottom: 18px;
+      overflow: hidden;
+      box-shadow: none;
+      backdrop-filter: none;
+    }
+
+    .notes {
+      padding: 18px;
+    }
+
+    .notes h2 {
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+
+    .notes ul {
+      margin: 8px 0 0;
+      padding-left: 20px;
+    }
+
+    .section > h2 {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border);
+      font-size: 20px;
+    }
+
+    .base {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .route {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border);
+      background: transparent;
+    }
+
+    .route:last-child {
+      border-bottom: 0;
+    }
+
+    .route-head {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .method,
+    .auth {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 26px;
+      border-radius: 6px;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 2px 8px;
+      white-space: nowrap;
+    }
+
+    .method.get { background: var(--get); }
+    .method.post { background: var(--post); }
+    .method.patch { background: var(--patch); }
+    .method.put { background: var(--put); }
+    .method.delete { background: var(--delete); }
+    .auth.public { background: var(--public); }
+    .auth.optional { background: #52525b; }
+    .auth.auth { background: var(--auth); }
+    .auth.admin { background: var(--admin); }
+
+    code,
+    pre {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    }
+
+    .path {
+      color: var(--code);
+      font-size: 15px;
+      font-weight: 750;
+      word-break: break-word;
+    }
+
+    .desc {
+      color: var(--muted);
+      margin: 0 0 10px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .box {
+      background: rgba(3, 8, 20, 0.42);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 8px;
+      padding: 12px;
+      min-width: 0;
+    }
+
+    .box h3 {
+      color: #b6c7e8;
+      font-size: 13px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .box p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    pre {
+      overflow: auto;
+      max-height: 220px;
+      margin: 0;
+      padding: 10px;
+      border-radius: 6px;
+      background: rgba(1, 5, 14, 0.88);
+      color: #e4e7ec;
+      font-size: 12px;
+    }
+
+    .tok-key { color: #7dd3fc; }
+    .tok-string { color: #86efac; }
+    .tok-number { color: #fbbf24; }
+    .tok-bool { color: #c4b5fd; }
+    .tok-null { color: #fca5a5; }
+
+    .drawer-scrim {
+      display: none;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @media (max-width: 860px) {
+      header .wrap {
+        gap: 12px;
+        padding: 0 16px;
+      }
+
+      .menu-toggle {
+        display: inline-flex;
+        order: 3;
+        margin-left: auto;
+      }
+
+      .brand {
+        order: 1;
+      }
+
+      .brand-copy span {
+        display: none;
+      }
+
+      .header-search {
+        display: none;
+      }
+
+      .top-links {
+        display: none;
+      }
+
+      .docs-layout {
+        display: block;
+        padding: 0 18px 56px;
+      }
+
+      .sidebar {
+        position: fixed;
+        top: 64px;
+        left: 0;
+        bottom: 0;
+        z-index: 60;
+        width: min(82vw, 320px);
+        height: auto;
+        max-height: none;
+        display: block;
+        padding: 22px 18px 36px;
+        border-right: 1px solid rgba(255, 255, 255, 0.12);
+        margin-bottom: 0;
+        transform: translateX(-102%);
+        transition: transform 220ms ease;
+        box-shadow: 22px 0 80px rgba(0, 0, 0, 0.42);
+      }
+
+      .sidebar-search {
+        display: block;
+      }
+
+      body.menu-open .sidebar {
+        transform: translateX(0);
+      }
+
+      .drawer-scrim {
+        display: block;
+        position: fixed;
+        inset: 64px 0 0;
+        z-index: 55;
+        border: 0;
+        background: rgba(0, 0, 0, 0.58);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 220ms ease;
+      }
+
+      body.menu-open .drawer-scrim {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .content {
+        max-width: none;
+        margin-left: 0;
+        padding-top: 18px;
+      }
+
+      .toolbar {
+        grid-template-columns: 1fr;
+        top: 64px;
+      }
+
+      .endpoint-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .route-head {
+        grid-template-columns: auto 1fr;
+      }
+
+      .route-head .auth {
+        grid-column: 1 / -1;
+        justify-self: start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <button class="menu-toggle" type="button" aria-label="Open API navigation" aria-expanded="false">
+        <span></span>
+      </button>
+      <a class="brand" href="https://optiflowz.com" target="_blank" rel="noreferrer">
+        <img src="assets/OptiFlowzLogo.webp" alt="OptiFlowz logo" />
+        <span class="brand-copy">
+          <strong>OptiFlowz</strong>
+          <span>Video Platform API</span>
+        </span>
+      </a>
+      <label class="header-search" aria-label="Search all endpoints">
+        <input id="globalSearch" type="search" placeholder="Search..." autocomplete="off" />
+      </label>
+      <div class="top-links" aria-label="Top navigation">
+        <span>Documentation</span>
+        <span class="active">API Reference</span>
+      </div>
+    </div>
+  </header>
+  <button class="drawer-scrim" type="button" aria-label="Close API navigation"></button>
+
+  <main class="docs-layout">
+    <aside class="sidebar" aria-label="API sections">
+      <label class="sidebar-search" aria-label="Search all endpoints from navigation">
+        <input id="sidebarSearch" type="search" placeholder="Search..." autocomplete="off" />
+      </label>
+      <div class="side-group">
+        <div class="side-label">Overview</div>
+        <a href="#overview" data-target="overview">Overview</a>
+        <a href="#system" data-target="system">System</a>
+      </div>
+      <div class="side-group">
+        <div class="side-label">Core API</div>
+        <a href="#auth" data-target="auth">Auth</a>
+        <a href="#videos" data-target="videos">Videos</a>
+        <a href="#video-moderation" data-target="video-moderation">Video Moderation</a>
+        <a href="#people" data-target="people">People</a>
+        <a href="#comments" data-target="comments">Comments</a>
+      </div>
+      <div class="side-group">
+        <div class="side-label">Content</div>
+        <a href="#playlists" data-target="playlists">Playlists</a>
+        <a href="#playlist-moderation" data-target="playlist-moderation">Playlist Moderation</a>
+        <a href="#channels" data-target="channels">Channels</a>
+        <a href="#quizzes" data-target="quizzes">Quizzes</a>
+        <a href="#reports" data-target="reports">Reports</a>
+      </div>
+    </aside>
+
+    <div class="content">
+      <section id="overview" class="overview-home">
+        <div class="eyebrow">API Reference</div>
+        <h1>OptiFlowz API Reference</h1>
+        <p class="intro">Complete Express API reference for authentication, video delivery, playlists, quizzes, moderation, reports, and user-facing platform features.</p>
+
+        <div class="overview-copy">
+          <p>The OptiFlowz backend exposes REST endpoints for a video platform built around users, video assets, watch progress, playlists, comments, people, quiz attempts, certificates, and analytics.</p>
+          <p>Use the cards below to open a focused route group. Endpoints marked as protected require a Bearer JWT token, while moderation endpoints require an admin or uploader role.</p>
+        </div>
+
+        <div class="divider"></div>
+
+        <h2>Endpoints</h2>
+        <div class="endpoint-grid">
+          <a class="endpoint-card" href="#auth" data-target="auth">
+            <span class="card-icon">A</span>
+            <h2>Auth</h2>
+            <p>Register, login, OAuth, profile updates, password reset, and profile images.</p>
+          </a>
+          <a class="endpoint-card" href="#videos" data-target="videos">
+            <span class="card-icon">V</span>
+            <h2>Videos</h2>
+            <p>Search, playback details, upload initiation, progress, reactions, history, and recommendations.</p>
+          </a>
+          <a class="endpoint-card" href="#video-moderation" data-target="video-moderation">
+            <span class="card-icon">M</span>
+            <h2>Video Moderation</h2>
+            <p>Video metadata, thumbnails, subtitles, Mux track management, and generated details.</p>
+          </a>
+          <a class="endpoint-card" href="#playlists" data-target="playlists">
+            <span class="card-icon">P</span>
+            <h2>Playlists</h2>
+            <p>Playlist search, featured lists, saved playlists, and playlist video browsing.</p>
+          </a>
+          <a class="endpoint-card" href="#quizzes" data-target="quizzes">
+            <span class="card-icon">Q</span>
+            <h2>Quizzes</h2>
+            <p>Quiz management, questions, access rules, attempts, answers, certificates, and scoring.</p>
+          </a>
+          <a class="endpoint-card" href="#people" data-target="people">
+            <span class="card-icon">U</span>
+            <h2>People</h2>
+            <p>Speaker and chair profiles, search, sorting, profile images, and admin maintenance.</p>
+          </a>
+          <a class="endpoint-card" href="#comments" data-target="comments">
+            <span class="card-icon">C</span>
+            <h2>Comments</h2>
+            <p>Comment posting, replies, editing, deletion, and reactions.</p>
+          </a>
+          <a class="endpoint-card" href="#channels" data-target="channels">
+            <span class="card-icon">H</span>
+            <h2>Channels</h2>
+            <p>Channel details, published videos, and public playlist collections.</p>
+          </a>
+          <a class="endpoint-card" href="#reports" data-target="reports">
+            <span class="card-icon">R</span>
+            <h2>Reports</h2>
+            <p>PDF analytics export for video platform reporting.</p>
+          </a>
+        </div>
+      </section>
+
+      <div class="route-docs">
+      <div class="toolbar">
+        <input id="search" type="search" placeholder="Search endpoints..." />
+        <select id="method">
+          <option value="">All methods</option>
+          <option value="GET">GET</option>
+          <option value="POST">POST</option>
+          <option value="PATCH">PATCH</option>
+          <option value="PUT">PUT</option>
+          <option value="DELETE">DELETE</option>
+        </select>
+      </div>
+
+    <section class="notes" id="rules" data-section>
+      <h2>General rules</h2>
+      <ul>
+        <li>The local backend base URL is <code>http://localhost:4000</code>.</li>
+        <li>JSON routes use the header <code>Content-Type: application/json</code>.</li>
+        <li>Protected routes use the header <code>Authorization: Bearer &lt;jwt-token&gt;</code>.</li>
+        <li>Routes marked as Admin require a user with the role <code>admin</code> or <code>uploader</code>.</li>
+        <li>Routes marked as Optional also work without a token, but return personalized data when a token is provided.</li>
+        <li>Upload routes use <code>multipart/form-data</code>, usually the field <code>file</code>.</li>
+      </ul>
+    </section>
+
+    <section class="section" id="system" data-section>
+      <h2>System <span class="base">root</span></h2>
+
+      <article class="route" data-method="GET">
+        <div class="route-head">
+          <span class="method get">GET</span>
+          <code class="path">/health</code>
+          <span class="auth public">Public</span>
+        </div>
+        <p class="desc">Checks whether the API is running.</p>
+        <div class="grid">
+          <div class="box"><h3>Query</h3><p>None.</p></div>
+          <div class="box"><h3>Body</h3><p>None.</p></div>
+          <div class="box"><h3>Response</h3><pre>{ "ok": true }</pre></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="section" id="auth" data-section>
+      <h2>Auth <span class="base">/api/auth</span></h2>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/auth/register</code><span class="auth public">Public</span></div>
+        <p class="desc">Registers a new user and returns a JWT token.</p>
+        <div class="grid">
+          <div class="box"><h3>Body</h3><pre>{
+  "email": "user@example.com",
+  "password": "password123",
+  "full_name": "Full Name",
+  "description": "",
+  "eaes_member": false
+}</pre></div>
+          <div class="box"><h3>Validation</h3><p>Email must be valid, password must be at least 8 characters, and full name is required.</p></div>
+          <div class="box"><h3>Response</h3><pre>{
+  "user": { "email": "...", "role": "user" },
+  "token": "jwt"
+}</pre></div>
+        </div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/auth/login</code><span class="auth public">Public</span></div>
+        <p class="desc">Logs a user in with email and password.</p>
+        <div class="grid">
+          <div class="box"><h3>Body</h3><pre>{
+  "email": "user@example.com",
+  "password": "password123"
+}</pre></div>
+          <div class="box"><h3>Note</h3><p>The password is verified against a bcrypt hash.</p></div>
+          <div class="box"><h3>Response</h3><pre>{
+  "user": { "email": "...", "role": "user" },
+  "token": "jwt"
+}</pre></div>
+        </div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/auth/passwordResetRequest</code><span class="auth public">Public</span></div>
+        <p class="desc">Generates a password reset token and sends it through the external n8n webhook.</p>
+        <div class="grid">
+          <div class="box"><h3>Body</h3><pre>{ "email": "user@example.com" }</pre></div>
+          <div class="box"><h3>Limit</h3><p>This route is rate-limited to prevent abuse.</p></div>
+          <div class="box"><h3>Response</h3><pre>{
+  "message": "If that email is registered..."
+}</pre></div>
+        </div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/auth/passwordReset/verify</code><span class="auth public">Public</span></div>
+        <p class="desc">Checks whether the reset token is valid and not expired.</p>
+        <div class="grid">
+          <div class="box"><h3>Body</h3><pre>{
+  "email": "user@example.com",
+  "token": "ABC123"
+}</pre></div>
+          <div class="box"><h3>Validation</h3><p>The token is a short code, and email must be valid.</p></div>
+          <div class="box"><h3>Response</h3><pre>{ "valid": true }</pre></div>
+        </div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/auth/passwordReset</code><span class="auth public">Public</span></div>
+        <p class="desc">Changes the password when the reset token is valid.</p>
+        <div class="grid">
+          <div class="box"><h3>Body</h3><pre>{
+  "email": "user@example.com",
+  "token": "ABC123",
+  "newPassword": "newPassword123"
+}</pre></div>
+          <div class="box"><h3>Effect</h3><p>The new password is hashed and the token is marked as used.</p></div>
+          <div class="box"><h3>Response</h3><pre>{ "message": "Password reset successful" }</pre></div>
+        </div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/auth/me</code><span class="auth auth">Auth</span></div>
+        <p class="desc">Returns the currently authenticated user.</p>
+        <div class="grid">
+          <div class="box"><h3>Headers</h3><p><code>Authorization: Bearer token</code></p></div>
+          <div class="box"><h3>Body</h3><p>None.</p></div>
+          <div class="box"><h3>Response</h3><pre>{
+  "email": "...",
+  "full_name": "...",
+  "role": "user"
+}</pre></div>
+        </div>
+      </article>
+
+      <article class="route" data-method="PATCH">
+        <div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/auth/user-update</code><span class="auth auth">Auth</span></div>
+        <p class="desc">Updates the basic user profile fields.</p>
+        <div class="grid">
+          <div class="box"><h3>Body</h3><pre>{
+  "full_name": "New name",
+  "description": "Profile description",
+  "eaes_member": true
+}</pre></div>
+          <div class="box"><h3>Note</h3><p>All fields are optional, but at least one field must be sent.</p></div>
+          <div class="box"><h3>Response</h3><p>Updated user profile.</p></div>
+        </div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/auth/user/profile-picture</code><span class="auth auth">Auth</span></div>
+        <p class="desc">Uploads or removes the user profile picture.</p>
+        <div class="grid">
+          <div class="box"><h3>Content-Type</h3><p><code>multipart/form-data</code></p></div>
+          <div class="box"><h3>Body</h3><p>Field <code>file</code>, type: jpeg/png/webp, up to 4 MB. If no file is sent, the image is removed.</p></div>
+          <div class="box"><h3>Response</h3><pre>{ "image_url": "https://..." }</pre></div>
+        </div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/auth/oauth/:provider</code><span class="auth public">Public</span></div>
+        <p class="desc">OAuth login. The currently supported provider is <code>google</code>.</p>
+        <div class="grid">
+          <div class="box"><h3>Path</h3><p><code>provider=google</code></p></div>
+          <div class="box"><h3>Body</h3><pre>{ "code": "google-oauth-code" }</pre></div>
+          <div class="box"><h3>Response</h3><p>User profile and JWT token.</p></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="section" id="videos" data-section>
+      <h2>Videos <span class="base">/api/videos</span></h2>
+
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/videos/upload/initiate</code><span class="auth admin">Admin</span></div><p class="desc">Creates the video database record and a Mux direct upload URL.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "title": "Video title", "language_code": "en", "language_name": "English" }</pre></div><div class="box"><h3>Integration</h3><p>Mux API direct upload.</p></div><div class="box"><h3>Response</h3><pre>{ "video_id": "uuid", "upload": { "upload_id": "...", "upload_url": "..." } }</pre></div></div></article>
+
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/videos/heartbeat</code><span class="auth optional">Optional</span></div><p class="desc">Records playback heartbeat and client information.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "view_id": "uuid", "seq": 1, "is_playing": true }</pre></div><div class="box"><h3>Headers</h3><p>Uses the IP, user-agent, origin, and referer from the request.</p></div><div class="box"><h3>Response</h3><p>JSON processing status.</p></div></div></article>
+
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/videos/generate-chapters</code><span class="auth admin">Admin</span></div><p class="desc">Generates video chapters through the Mux AI workflow.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "videoId": "uuid", "languageCode": "en" }</pre></div><div class="box"><h3>Integration</h3><p><code>@mux/ai/workflows</code></p></div><div class="box"><h3>Response</h3><p>Generated chapter data result.</p></div></div></article>
+
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/videos/webhook/mux</code><span class="auth public">Webhook</span></div><p class="desc">Receives Mux webhook events and updates video status.</p><div class="grid"><div class="box"><h3>Headers</h3><p><code>Mux-Signature</code> is required.</p></div><div class="box"><h3>Body</h3><p>Raw JSON payload from Mux.</p></div><div class="box"><h3>Security</h3><p>The signature is verified with <code>MUX_WEBHOOK_SECRET</code>.</p></div></div></article>
+
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/search</code><span class="auth optional">Optional</span></div><p class="desc">Searches video content with filters, sorting, and pagination.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>q</code>, <code>category</code>, <code>tags</code>, <code>person</code>, <code>sort</code>, <code>limit</code>, <code>page</code></p></div><div class="box"><h3>Sort</h3><p><code>relevance</code>, <code>date</code>, <code>views</code>, <code>likes</code></p></div><div class="box"><h3>Response</h3><p>Video list and pagination.</p></div></div></article>
+
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/trending</code><span class="auth optional">Optional</span></div><p class="desc">Returns trending videos by recent view count.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Trending video list.</p></div></div></article>
+
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/categories</code><span class="auth auth">Auth</span></div><p class="desc">Returns video categories.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Category list.</p></div></div></article>
+
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/user/history</code><span class="auth auth">Auth</span></div><p class="desc">Returns the authenticated user's watch history.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code></p></div><div class="box"><h3>Auth</h3><p>Uses the user ID from the JWT token.</p></div><div class="box"><h3>Response</h3><p>Videos sorted by most recent watch time.</p></div></div></article>
+
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/user/continue</code><span class="auth auth">Auth</span></div><p class="desc">Returns videos the user has not finished.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code></p></div><div class="box"><h3>Logic</h3><p>Uses watch progress from the database.</p></div><div class="box"><h3>Response</h3><p>Continue-watching list.</p></div></div></article>
+
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/user/liked</code><span class="auth auth">Auth</span></div><p class="desc">Returns videos liked by the user.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Liked video list.</p></div></div></article>
+
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/user/recommended</code><span class="auth auth">Auth</span></div><p class="desc">Personalized recommendations based on watch history, categories, and tags.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Recommended video list.</p></div></div></article>
+
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/videos/:id/progress</code><span class="auth auth">Auth</span></div><p class="desc">Updates the user's progress for a specific video.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>id</code> - video ID</p></div><div class="box"><h3>Body</h3><pre>{ "progressSeconds": 120 }</pre></div><div class="box"><h3>Response</h3><p>Updated watch progress.</p></div></div></article>
+
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/videos/:id/like</code><span class="auth auth">Auth</span></div><p class="desc">Sets or changes the user video reaction to <code>like</code>.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>id</code> - video ID</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Reaction state and reaction counts.</p></div></div></article>
+
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/videos/:id/dislike</code><span class="auth auth">Auth</span></div><p class="desc">Sets or changes the user video reaction to <code>dislike</code>.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>id</code> - video ID</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Reaction state and reaction counts.</p></div></div></article>
+
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/:id/similar</code><span class="auth optional">Optional</span></div><p class="desc">Returns similar videos by categories and tags.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>id</code> - video ID</p></div><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code></p></div><div class="box"><h3>Response</h3><p>Similar video list.</p></div></div></article>
+
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/:id/comments</code><span class="auth optional">Optional</span></div><p class="desc">Returns video comments with pagination and sorting.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>id</code> - video ID</p></div><div class="box"><h3>Query</h3><p><code>page</code>, <code>limit</code>, <code>sort=new|top</code></p></div><div class="box"><h3>Response</h3><p>Comments and pagination metadata.</p></div></div></article>
+
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/:id</code><span class="auth optional">Optional</span></div><p class="desc">Returns one video's details and records a view.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>id</code> - video ID</p></div><div class="box"><h3>Effect</h3><p>May increase the view count and return the user's progress when authenticated.</p></div><div class="box"><h3>Response</h3><p>Video details, categories, people, and playlists.</p></div></div></article>
+    </section>
+
+    <section class="section" id="video-moderation" data-section>
+      <h2>Video Moderation <span class="base">/api/video-moderation</span></h2>
+
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/video-moderation/subtitle/:videoId</code><span class="auth admin">Admin</span></div><p class="desc">Fetches the video subtitle from the Mux text track.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>lang</code> - language code.</p></div><div class="box"><h3>Path</h3><p><code>videoId</code></p></div><div class="box"><h3>Response</h3><p>WEBVTT text.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/video-moderation/subtitle/replace/:videoId</code><span class="auth admin">Admin</span></div><p class="desc">Uploads a VTT file and replaces the subtitle on the Mux asset.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>lang</code>, <code>name</code></p></div><div class="box"><h3>Body</h3><p><code>multipart/form-data</code>, field <code>file</code>.</p></div><div class="box"><h3>Response</h3><p>Created track information.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/video-moderation/subtitle/replacev2/:videoId</code><span class="auth admin">Admin</span></div><p class="desc">Replaces the subtitle by sending VTT content through JSON.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>lang</code>, <code>name</code></p></div><div class="box"><h3>Body</h3><pre>{ "vtt": "WEBVTT\n\n..." }</pre></div><div class="box"><h3>Response</h3><p>Created track information.</p></div></div></article>
+      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/video-moderation/subtitle/:videoId</code><span class="auth admin">Admin</span></div><p class="desc">Deletes the subtitle for the selected language from the Mux asset.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>lang</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Deletion status.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/video-moderation/subtitle/autogenerate/:videoId</code><span class="auth admin">Admin</span></div><p class="desc">Automatically translates/generates a subtitle and attaches it to Mux.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>lang</code>, <code>name</code></p></div><div class="box"><h3>Integration</h3><p>n8n webhook i Mux text tracks.</p></div><div class="box"><h3>Response</h3><p>Subtitle creation result.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/video-moderation/subtitle/autogenerate/:videoId</code><span class="auth admin">Admin</span></div><p class="desc">Returns a preview of the auto-generated subtitle without replacing the existing one.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>lang</code>, <code>name</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>VTT preview or JSON result.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/video-moderation/details/autogenerate/:videoId</code><span class="auth admin">Admin</span></div><p class="desc">Generates a suggested set of video details from the transcript/subtitle.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>type</code></p></div><div class="box"><h3>Integration</h3><p>n8n webhook for detail generation.</p></div><div class="box"><h3>Response</h3><p>Suggested title/description/tags.</p></div></div></article>
+      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/video-moderation/video-details/:videoId</code><span class="auth admin">Admin</span></div><p class="desc">Updates video metadata.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{
+  "title": "Title",
+  "description": "Description",
+  "category": "Education",
+  "tags": ["tag"],
+  "published_at": "2026-01-01T10:00:00Z",
+  "visibility": "public",
+  "chair_ids": ["uuid"],
+  "speaker_ids": ["uuid"]
+}</pre></div><div class="box"><h3>Effect</h3><p>Updates the video, categories/people, and related records.</p></div><div class="box"><h3>Response</h3><p>Updated video.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/video-moderation/:videoId/thumbnail</code><span class="auth admin">Admin</span></div><p class="desc">Uploads a thumbnail for the video.</p><div class="grid"><div class="box"><h3>Body</h3><p><code>multipart/form-data</code>, field <code>file</code>, jpeg/png/webp.</p></div><div class="box"><h3>Storage</h3><p>The image is optimized and stored on R2/S3.</p></div><div class="box"><h3>Response</h3><pre>{ "thumbnail_url": "https://..." }</pre></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/video-moderation/my/videos</code><span class="auth auth">Auth</span></div><p class="desc">Returns videos uploaded by the user or videos the user can administer.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>page</code>, <code>limit</code>, <code>sort_by</code>, <code>sort_dir</code></p></div><div class="box"><h3>Sort</h3><p>Sort columns are allowlisted.</p></div><div class="box"><h3>Response</h3><p>Video list and pagination.</p></div></div></article>
+      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/video-moderation/video/:videoId</code><span class="auth admin">Admin</span></div><p class="desc">Requests video deletion, including the Mux asset.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>videoId</code></p></div><div class="box"><h3>Effect</h3><p>Deletes the asset on Mux, while the database is cleaned through the matching flow.</p></div><div class="box"><h3>Response</h3><p>Deletion request status.</p></div></div></article>
+    </section>
+
+    <section class="section" id="people" data-section>
+      <h2>People <span class="base">/api/people</span></h2>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/people/search</code><span class="auth optional">Optional</span></div><p class="desc">Searches people/speakers.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>q</code>, <code>limit</code>, <code>page</code></p></div><div class="box"><h3>Response</h3><p>Results and pagination.</p></div><div class="box"><h3>Note</h3><p>Uses full-text search and related video counts.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/people</code><span class="auth optional">Optional</span></div><p class="desc">Returns all people with pagination and sorting.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code>, <code>sortBy=name|total_video_count</code>, <code>sortOrder=asc|desc</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>People list and pagination/sorting metadata.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/people/:personId</code><span class="auth optional">Optional</span></div><p class="desc">Fetches one person's details.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>personId</code> UUID.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Person details.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/people/create</code><span class="auth admin">Admin</span></div><p class="desc">Creates a new person/speaker.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "name": "Person name", "description": "Description" }</pre></div><div class="box"><h3>Validation</h3><p>Name is required.</p></div><div class="box"><h3>Response</h3><p>Created person.</p></div></div></article>
+      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/people/:personId</code><span class="auth admin">Admin</span></div><p class="desc">Updates person details.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "name": "New name", "description": "New description" }</pre></div><div class="box"><h3>Path</h3><p><code>personId</code></p></div><div class="box"><h3>Response</h3><p>Updated person.</p></div></div></article>
+      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/people/:personId/image</code><span class="auth admin">Admin</span></div><p class="desc">Uploads the person image.</p><div class="grid"><div class="box"><h3>Body</h3><p><code>multipart/form-data</code>, field <code>file</code>, jpeg/png/webp.</p></div><div class="box"><h3>Storage</h3><p>The image is stored on R2/S3.</p></div><div class="box"><h3>Response</h3><p>Updated person with <code>image_url</code>.</p></div></div></article>
+      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/people/:personId</code><span class="auth admin">Admin</span></div><p class="desc">Deletes the person and their image if it exists.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>personId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "deleted": true }</pre></div></div></article>
+    </section>
+
+    <section class="section" id="playlists" data-section>
+      <h2>Playlists <span class="base">/api/playlists</span></h2>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/playlists/search</code><span class="auth optional">Optional</span></div><p class="desc">Searches playlists by tags, sorting, and pagination.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>q</code>, <code>tags</code>, <code>sort</code>, <code>limit</code>, <code>page</code></p></div><div class="box"><h3>Sort</h3><p><code>relevance</code>, <code>date</code>, <code>views</code>, <code>videos</code></p></div><div class="box"><h3>Response</h3><p>Playlists and pagination metadata.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/playlists/featured</code><span class="auth optional">Optional</span></div><p class="desc">Returns featured playlists for the home page.</p><div class="grid"><div class="box"><h3>Query</h3><p>None.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Featured playlist list.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/playlists/:id/save</code><span class="auth auth">Auth</span></div><p class="desc">Toggles saving the playlist for the user.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>id</code> - playlist ID.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "saved": true, "save_count": 12 }</pre></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/playlists/user/saved</code><span class="auth auth">Auth</span></div><p class="desc">Returns playlists saved by the user.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>limit</code>, <code>offset</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Saved playlist list.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/playlists/:id/videos</code><span class="auth optional">Optional</span></div><p class="desc">Returns videos that belong to the playlist.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code>, <code>sort</code>, <code>order</code></p></div><div class="box"><h3>Path</h3><p><code>id</code> - playlist ID.</p></div><div class="box"><h3>Response</h3><p>Videos and pagination.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/playlists/:id</code><span class="auth optional">Optional</span></div><p class="desc">Returns one playlist's details.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>id</code> - playlist ID.</p></div><div class="box"><h3>Effect</h3><p>May return whether the user has saved the playlist.</p></div><div class="box"><h3>Response</h3><p>Playlist details.</p></div></div></article>
+    </section>
+
+    <section class="section" id="playlist-moderation" data-section>
+      <h2>Playlist Moderation <span class="base">/api/playlists-moderation</span></h2>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/playlists-moderation/my/playlists</code><span class="auth admin">Admin</span></div><p class="desc">Lists playlists the user can administer.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>page</code>, <code>limit</code>, <code>sort</code>, <code>order</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Playlists and pagination.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/playlists-moderation/playlist/create</code><span class="auth admin">Admin</span></div><p class="desc">Creates a new playlist.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "title": "Playlist title" }</pre></div><div class="box"><h3>Note</h3><p>The playlist is created by the currently authenticated user.</p></div><div class="box"><h3>Response</h3><p>Created playlist.</p></div></div></article>
+      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/playlists-moderation/playlist-details/:playlistId</code><span class="auth admin">Admin</span></div><p class="desc">Updates playlist details.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "title": "Title", "description": "Description", "category": "Education", "tags": ["tag"], "status": "published", "featured": true }</pre></div><div class="box"><h3>Path</h3><p><code>playlistId</code></p></div><div class="box"><h3>Response</h3><p>Updated playlist.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/playlists-moderation/:playlistId/thumbnail</code><span class="auth admin">Admin</span></div><p class="desc">Uploads a playlist thumbnail.</p><div class="grid"><div class="box"><h3>Body</h3><p><code>multipart/form-data</code>, field <code>file</code>.</p></div><div class="box"><h3>Path</h3><p><code>playlistId</code></p></div><div class="box"><h3>Response</h3><pre>{ "thumbnail_url": "https://..." }</pre></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/playlists-moderation/:playlistId/items</code><span class="auth admin">Admin</span></div><p class="desc">Adds a video to the playlist.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "video_id": "uuid", "position": 1 }</pre></div><div class="box"><h3>Path</h3><p><code>playlistId</code></p></div><div class="box"><h3>Response</h3><p>Added playlist item.</p></div></div></article>
+      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/playlists-moderation/:playlistId/items/:videoId</code><span class="auth admin">Admin</span></div><p class="desc">Removes a video from the playlist.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>playlistId</code>, <code>videoId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Removal status.</p></div></div></article>
+      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/playlists-moderation/:playlistId/items/move</code><span class="auth admin">Admin</span></div><p class="desc">Moves a video to a new position in the playlist.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "video_id": "uuid", "to_position": 3 }</pre></div><div class="box"><h3>Path</h3><p><code>playlistId</code></p></div><div class="box"><h3>Response</h3><p>Updated order.</p></div></div></article>
+      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/playlists-moderation/playlist/:playlistId</code><span class="auth admin">Admin</span></div><p class="desc">Deletes the playlist.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>playlistId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "deleted": true }</pre></div></div></article>
+    </section>
+
+    <section class="section" id="comments" data-section>
+      <h2>Comments <span class="base">/api/comments</span></h2>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/comments/post</code><span class="auth auth">Auth</span></div><p class="desc">Adds a comment or reply to a video.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "video_id": "uuid", "parent_id": null, "content": "Comment" }</pre></div><div class="box"><h3>Validation</h3><p>Content is required and passes through text moderation.</p></div><div class="box"><h3>Response</h3><p>Created comment.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/comments/:id/replies</code><span class="auth optional">Optional</span></div><p class="desc">Returns replies to a comment.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>page</code>, <code>limit</code>, <code>sort=new|top</code></p></div><div class="box"><h3>Path</h3><p><code>id</code> - parent comment ID.</p></div><div class="box"><h3>Response</h3><p>Replies and pagination.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/comments/:id/like</code><span class="auth auth">Auth</span></div><p class="desc">Likes a comment or changes the reaction.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>id</code> - comment ID.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Reaction state and counts.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/comments/:id/dislike</code><span class="auth auth">Auth</span></div><p class="desc">Dislikes a comment or changes the reaction.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>id</code> - comment ID.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Reaction state and counts.</p></div></div></article>
+      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/comments/:id/edit</code><span class="auth auth">Auth</span></div><p class="desc">Updates a comment when the user owns it.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "content": "Updated comment" }</pre></div><div class="box"><h3>IDOR protection</h3><p>The backend verifies <code>user_id</code> of the comment.</p></div><div class="box"><h3>Response</h3><p>Updated comment.</p></div></div></article>
+      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/comments/:id/delete</code><span class="auth auth">Auth</span></div><p class="desc">Soft-deletes a comment. The owner can delete their comment, and an admin can delete any comment.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>id</code> - comment ID.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "deleted": true }</pre></div></div></article>
+    </section>
+
+    <section class="section" id="channels" data-section>
+      <h2>Channels <span class="base">/api/channels</span></h2>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/channels/:id</code><span class="auth optional">Optional</span></div><p class="desc">Returns channel/user details.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>id</code> - user/channel ID.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Channel data.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/channels/:id/videos</code><span class="auth optional">Optional</span></div><p class="desc">Returns videos from one channel.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>page</code>, <code>limit</code>, <code>sort</code>, <code>order</code></p></div><div class="box"><h3>Path</h3><p><code>id</code></p></div><div class="box"><h3>Response</h3><p>Videos and pagination.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/channels/:id/playlists</code><span class="auth optional">Optional</span></div><p class="desc">Returns playlists from one channel.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>page</code>, <code>limit</code>, <code>sort</code>, <code>order</code></p></div><div class="box"><h3>Path</h3><p><code>id</code></p></div><div class="box"><h3>Response</h3><p>Playlists and pagination.</p></div></div></article>
+    </section>
+
+    <section class="section" id="reports" data-section>
+      <h2>Reports <span class="base">/api/reports</span></h2>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/reports/video-analytics.pdf</code><span class="auth admin">Admin</span></div><p class="desc">Generates a PDF analytics report for the video platform.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>range</code>, <code>from</code>, <code>to</code>, <code>groupBy</code>, <code>includePrivate</code>, <code>timezone</code></p></div><div class="box"><h3>Response</h3><p><code>application/pdf</code>, attachment filename.</p></div><div class="box"><h3>Integration</h3><p>Puppeteer generates the PDF from an HTML report.</p></div></div></article>
+    </section>
+
+    <section class="section" id="quizzes" data-section>
+      <h2>Quizzes <span class="base">/api/quizzes</span></h2>
+
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/create</code><span class="auth admin">Admin</span></div><p class="desc">Creates a quiz.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "title": "Quiz", "description": "Description", "time_limit_seconds": 600, "max_attempts": 3, "passing_score_percentage": 70 }</pre></div><div class="box"><h3>Ownership</h3><p>The quiz is assigned to the creator from the JWT token.</p></div><div class="box"><h3>Response</h3><p>Created quiz.</p></div></div></article>
+      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/quizzes/:quizId</code><span class="auth admin">Admin</span></div><p class="desc">Updates basic quiz fields.</p><div class="grid"><div class="box"><h3>Body</h3><p>Partial update of quiz fields.</p></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Response</h3><p>Updated quiz.</p></div></div></article>
+      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/quizzes/:quizId</code><span class="auth admin">Admin</span></div><p class="desc">Deletes the quiz when the user created it or has administration rights.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "deleted": true }</pre></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/user</code><span class="auth admin">Admin</span></div><p class="desc">Returns quizzes created by the current admin/uploader.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>page</code>, <code>limit</code>, <code>sort</code>, <code>order</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Quiz list.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/certificates</code><span class="auth auth">Auth</span></div><p class="desc">Returns the user's certificates.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code> if supported.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Certificate list.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/certificate/generate</code><span class="auth auth">Auth</span></div><p class="desc">Generates a PDF certificate for a passed quiz.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "quizId": "uuid", "attemptId": "uuid" }</pre></div><div class="box"><h3>Response</h3><p><code>application/pdf</code> attachment.</p></div><div class="box"><h3>Integration</h3><p>Puppeteer renders the certificate.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/details</code><span class="auth optional">Optional</span></div><p class="desc">Returns public quiz details for a video/playlist context.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Quiz details.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/requirements</code><span class="auth auth">Auth</span></div><p class="desc">Checks whether the user meets the requirements to start the quiz.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Logic</h3><p>Checks access rules and watch progress.</p></div><div class="box"><h3>Response</h3><pre>{ "hasMetRequirements": true }</pre></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/requirements/videos</code><span class="auth auth">Auth</span></div><p class="desc">Returns videos the user must watch to access the quiz.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Required videos and progress list.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/questions</code><span class="auth admin">Admin</span></div><p class="desc">Returns all quiz questions for administration.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>page</code>, <code>limit</code>, <code>sortBy</code>, <code>sortOrder</code></p></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Response</h3><p>Questions, options, matching pairs, and pagination.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/:quizId/question/create</code><span class="auth admin">Admin</span></div><p class="desc">Adds a question to the quiz.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{
+  "question_text": "Question?",
+  "question_type": "single_choice",
+  "explanation": "Explanation",
+  "points": 1,
+  "position": 1,
+  "options": [{ "option_text": "A", "is_correct": true }],
+  "pairs": []
+}</pre></div><div class="box"><h3>Types</h3><p>Multiple question types are supported, including options and matching pairs.</p></div><div class="box"><h3>Response</h3><p>Created question.</p></div></div></article>
+      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/quizzes/question/:questionId</code><span class="auth admin">Admin</span></div><p class="desc">Updates the question and related options/pairs.</p><div class="grid"><div class="box"><h3>Body</h3><p>Same structure as creation, with all supported fields.</p></div><div class="box"><h3>Path</h3><p><code>questionId</code></p></div><div class="box"><h3>Response</h3><p>Updated question.</p></div></div></article>
+      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/quizzes/question/:questionId</code><span class="auth admin">Admin</span></div><p class="desc">Deletes a question from the quiz.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>questionId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "deleted": true }</pre></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/rules</code><span class="auth admin">Admin</span></div><p class="desc">Returns quiz access rules.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Access rule list.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/:quizId/rule/create</code><span class="auth admin">Admin</span></div><p class="desc">Adds an access rule to the quiz.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "video_id": "uuid", "playlist_id": null, "required_percentage": 80, "required_seconds": 300 }</pre></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Response</h3><p>Created rule.</p></div></div></article>
+      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/quizzes/rule/:ruleId</code><span class="auth admin">Admin</span></div><p class="desc">Updates a quiz access rule.</p><div class="grid"><div class="box"><h3>Body</h3><p>Access rule fields.</p></div><div class="box"><h3>Path</h3><p><code>ruleId</code></p></div><div class="box"><h3>Response</h3><p>Updated rule.</p></div></div></article>
+      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/quizzes/rule/:ruleId</code><span class="auth admin">Admin</span></div><p class="desc">Deletes a quiz access rule.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>ruleId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "deleted": true }</pre></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/question-sources</code><span class="auth admin">Admin</span></div><p class="desc">Returns quiz question sources.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Question source list.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/:quizId/question-source/create</code><span class="auth admin">Admin</span></div><p class="desc">Adds a question source to the quiz.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "source_type": "video", "video_id": "uuid", "playlist_id": null, "question_count": 5 }</pre></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Response</h3><p>Created question source.</p></div></div></article>
+      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/quizzes/question-source/:sourceId</code><span class="auth admin">Admin</span></div><p class="desc">Updates a question source.</p><div class="grid"><div class="box"><h3>Body</h3><p>Question source fields.</p></div><div class="box"><h3>Path</h3><p><code>sourceId</code></p></div><div class="box"><h3>Response</h3><p>Updated source.</p></div></div></article>
+      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/quizzes/question-source/:sourceId</code><span class="auth admin">Admin</span></div><p class="desc">Deletes a question source.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>sourceId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "deleted": true }</pre></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/:quizId/attempt/start</code><span class="auth auth">Auth</span></div><p class="desc">Starts a new quiz attempt for the user.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Logic</h3><p>Checks requirements, attempt count, and creates an attempt with questions.</p></div><div class="box"><h3>Response</h3><p>Attempt metadata.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/attempts</code><span class="auth auth">Auth</span></div><p class="desc">Returns the user's attempts for the quiz.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Attempt list.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/attempt/:attemptId/questions</code><span class="auth auth">Auth</span></div><p class="desc">Returns questions for the active quiz attempt.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>attemptId</code></p></div><div class="box"><h3>Security</h3><p>A user can only see their own attempt.</p></div><div class="box"><h3>Response</h3><p>Questions, options, and saved answers.</p></div></div></article>
+      <article class="route" data-method="PUT"><div class="route-head"><span class="method put">PUT</span><code class="path">/api/quizzes/attempt/:attemptId/question/:questionId/answer</code><span class="auth auth">Auth</span></div><p class="desc">Saves an answer during the attempt.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "answer": "answer value or object" }</pre></div><div class="box"><h3>Path</h3><p><code>attemptId</code>, <code>questionId</code></p></div><div class="box"><h3>Response</h3><p>Saved answer and result when applicable.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/attempt/:attemptId/submit</code><span class="auth auth">Auth</span></div><p class="desc">Submits the attempt, grades the quiz, and finishes the attempt.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>attemptId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Quiz result, pass/fail, and score.</p></div></div></article>
+    </section>
+    </div>
+    </div>
+  </main>
+
+  <script>
+    const searchInput = document.getElementById("search");
+    const globalSearch = document.getElementById("globalSearch");
+    const sidebarSearch = document.getElementById("sidebarSearch");
+    const searchFields = [globalSearch, sidebarSearch, searchInput].filter(Boolean);
+    const methodSelect = document.getElementById("method");
+    const routes = Array.from(document.querySelectorAll(".route"));
+    const sections = Array.from(document.querySelectorAll("[data-section]"));
+    const routeSections = sections.filter((section) => section.classList.contains("section"));
+    const overviewHome = document.querySelector(".overview-home");
+    const routeDocs = document.querySelector(".route-docs");
+    const navTargets = Array.from(document.querySelectorAll("[data-target]"));
+    const menuToggle = document.querySelector(".menu-toggle");
+    const drawerScrim = document.querySelector(".drawer-scrim");
+    let currentTarget = location.hash.replace("#", "") || "overview";
+    let activeSearchField = globalSearch;
+
+    function escapeHtml(value) {
+      return value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function highlightCodeBlocks() {
+      document.querySelectorAll("pre").forEach((block) => {
+        const source = escapeHtml(block.textContent);
+        block.innerHTML = source
+          .replace(/("(?:\\\\.|[^"\\\\])*")(\s*:)?/g, (match, string, colon) => {
+            return colon ? `<span class="tok-key">${string}</span>${colon}` : `<span class="tok-string">${string}</span>`;
+          })
+          .replace(/\b(true|false)\b/g, '<span class="tok-bool">$1</span>')
+          .replace(/\bnull\b/g, '<span class="tok-null">null</span>')
+          .replace(/\b(-?\d+(?:\.\d+)?)\b/g, '<span class="tok-number">$1</span>');
+      });
+    }
+
+    function closeMenu() {
+      document.body.classList.remove("menu-open");
+      menuToggle?.setAttribute("aria-expanded", "false");
+    }
+
+    function toggleMenu() {
+      const isOpen = document.body.classList.toggle("menu-open");
+      menuToggle?.setAttribute("aria-expanded", String(isOpen));
+    }
+
+    function getSearchTerm() {
+      return (activeSearchField?.value || "").trim().toLowerCase();
+    }
+
+    function setActiveNav(target) {
+      navTargets.forEach((item) => {
+        item.classList.toggle("active", item.dataset.target === target);
+      });
+    }
+
+    function showView(target = "overview") {
+      const requested = target || "overview";
+      const exists = requested === "overview" || routeSections.some((section) => section.id === requested);
+      const normalized = exists ? requested : "overview";
+      currentTarget = normalized;
+      const hasSearch = Boolean(getSearchTerm());
+      const isOverview = normalized === "overview" && !hasSearch;
+
+      overviewHome.classList.toggle("view-hidden", !isOverview);
+      routeDocs.style.display = isOverview ? "none" : "block";
+
+      routeSections.forEach((section) => {
+        section.classList.toggle("view-hidden", !hasSearch && section.id !== normalized);
+      });
+
+      const rules = document.getElementById("rules");
+      if (rules) {
+        rules.classList.toggle("view-hidden", hasSearch || (!isOverview && normalized !== "system"));
+      }
+
+      setActiveNav(hasSearch ? "" : normalized);
+      applyFilters();
+
+      if (!isOverview) {
+        window.scrollTo({ top: 0, behavior: "auto" });
+      }
+    }
+
+    function applyFilters() {
+      const term = getSearchTerm();
+      const method = methodSelect.value;
+      const hasSearch = Boolean(term);
+
+      if (!hasSearch && currentTarget === "overview") {
+        overviewHome.classList.remove("view-hidden");
+        routeDocs.style.display = "none";
+        setActiveNav("overview");
+        return;
+      }
+
+      if (hasSearch) {
+        overviewHome.classList.add("view-hidden");
+        routeDocs.style.display = "block";
+        routeSections.forEach((section) => section.classList.remove("view-hidden"));
+        document.getElementById("rules")?.classList.add("view-hidden");
+        setActiveNav("");
+      } else if (routeDocs.style.display === "none") {
+        return;
+      } else {
+        routeSections.forEach((section) => {
+          section.classList.toggle("view-hidden", section.id !== currentTarget);
+        });
+        setActiveNav(currentTarget);
+      }
+
+      routes.forEach((route) => {
+        const methodMatches = !method || route.dataset.method === method;
+        const textMatches = !term || route.textContent.toLowerCase().includes(term);
+        route.classList.toggle("hidden", !(methodMatches && textMatches));
+      });
+
+      sections.forEach((section) => {
+        if (section.classList.contains("view-hidden")) return;
+        const visibleRoutes = Array.from(section.querySelectorAll(".route")).some((route) => !route.classList.contains("hidden"));
+        if (section.classList.contains("section")) {
+          section.classList.toggle("hidden", !visibleRoutes);
+        }
+      });
+    }
+
+    searchFields.forEach((field) => {
+      field.addEventListener("input", () => {
+        activeSearchField = field;
+        applyFilters();
+      });
+    });
+
+    methodSelect.addEventListener("change", applyFilters);
+    menuToggle?.addEventListener("click", toggleMenu);
+    drawerScrim?.addEventListener("click", closeMenu);
+
+    navTargets.forEach((item) => {
+      item.addEventListener("click", (event) => {
+        event.preventDefault();
+        const target = item.dataset.target || "overview";
+        searchFields.forEach((field) => {
+          field.value = "";
+        });
+        activeSearchField = globalSearch;
+        history.replaceState(null, "", `#${target}`);
+        showView(target);
+        closeMenu();
+      });
+    });
+
+    window.addEventListener("hashchange", () => {
+      showView(location.hash.replace("#", "") || "overview");
+    });
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeMenu();
+    });
+
+    highlightCodeBlocks();
+    showView(currentTarget);
+  </script>
+</body>
+</html>

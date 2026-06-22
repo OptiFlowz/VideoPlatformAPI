@@ -143,17 +143,24 @@
       font-weight: 650;
     }
 
-    .top-links span {
+    .top-links a {
       display: inline-flex;
       align-items: center;
       min-height: 40px;
       padding: 0 16px;
       border-radius: 999px;
+      color: inherit;
+      text-decoration: none;
     }
 
-    .top-links .active {
+    .top-links a:hover,
+    .top-links a.active {
       background: rgba(255, 255, 255, 0.10);
       color: #fff;
+    }
+
+    .mobile-sidebar-switch {
+      display: none;
     }
 
     .header-search {
@@ -161,6 +168,10 @@
       flex: 0 1 240px;
       max-width: 240px;
       margin-left: auto;
+    }
+
+    body.documentation-mode .header-search {
+      visibility: hidden;
     }
 
     .header-search input,
@@ -297,6 +308,14 @@
       color: #fff;
     }
 
+    .sidebar-mode {
+      display: block;
+    }
+
+    .sidebar-mode.view-hidden {
+      display: none !important;
+    }
+
     .content {
       min-width: 0;
       max-width: 920px;
@@ -386,6 +405,103 @@
 
     .route-docs {
       display: none;
+    }
+
+    .documentation-page {
+      display: none;
+    }
+
+    .doc-panel {
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      background: #05070c;
+      overflow: hidden;
+    }
+
+    .doc-panel-head {
+      padding: 22px 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+    }
+
+    .doc-panel-head h2 {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .doc-panel-head p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 720px;
+    }
+
+    .erd-toolbar {
+      position: sticky;
+      top: 64px;
+      z-index: 15;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+      background: rgba(5, 7, 12, 0.94);
+      backdrop-filter: blur(10px);
+    }
+
+    .erd-toolbar button,
+    .erd-zoom-label {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+      background: #0b1220;
+      color: #e5e7eb;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .erd-toolbar button {
+      min-width: 38px;
+      padding: 0 11px;
+      cursor: pointer;
+    }
+
+    .erd-toolbar button:hover {
+      border-color: rgba(64, 149, 255, 0.56);
+      background: #101827;
+      color: #fff;
+    }
+
+    .erd-zoom-label {
+      min-width: 68px;
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .erd-viewer {
+      overflow: auto;
+      height: min(720px, calc(100vh - 292px));
+      background: #2f2f2f;
+      overscroll-behavior: contain;
+    }
+
+    .erd-canvas {
+      position: relative;
+      width: 1800px;
+      height: 1085px;
+      min-width: 100%;
+    }
+
+    .erd-canvas img {
+      display: block;
+      width: 3550px;
+      max-width: none;
+      height: auto;
+      transform-origin: 0 0;
+      user-select: none;
+      -webkit-user-drag: none;
     }
 
     .view-hidden {
@@ -606,6 +722,33 @@
         display: none;
       }
 
+      .mobile-sidebar-switch {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+        margin-bottom: 18px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+      }
+
+      .mobile-sidebar-switch a {
+        display: flex;
+        align-items: center;
+        min-height: 38px;
+        border-radius: 8px;
+        padding: 0 10px;
+        color: #9ca3af;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      .mobile-sidebar-switch a.active,
+      .mobile-sidebar-switch a:hover {
+        background: rgba(255, 255, 255, 0.10);
+        color: #fff;
+      }
+
       .docs-layout {
         display: block;
         padding: 0 18px 56px;
@@ -673,6 +816,19 @@
         grid-template-columns: 1fr;
       }
 
+      .erd-viewer {
+        height: calc(100vh - 252px);
+      }
+
+      .erd-toolbar {
+        top: 64px;
+        flex-wrap: wrap;
+      }
+
+      .erd-toolbar button {
+        flex: 1 1 auto;
+      }
+
       .route-head {
         grid-template-columns: auto 1fr;
       }
@@ -701,38 +857,50 @@
         <input id="globalSearch" type="search" placeholder="Search..." autocomplete="off" />
       </label>
       <div class="top-links" aria-label="Top navigation">
-        <span>Documentation</span>
-        <span class="active">API Reference</span>
+        <a href="#erd-diagram" data-top-tab="documentation">Documentation</a>
+        <a href="#overview" class="active" data-top-tab="api">API Reference</a>
       </div>
     </div>
   </header>
   <button class="drawer-scrim" type="button" aria-label="Close API navigation"></button>
 
   <main class="docs-layout">
-    <aside class="sidebar" aria-label="API sections">
-      <label class="sidebar-search" aria-label="Search all endpoints from navigation">
+    <aside class="sidebar" aria-label="Page sections">
+      <nav class="mobile-sidebar-switch" aria-label="Mobile page navigation">
+        <a href="#overview" class="active" data-top-tab="api">API Reference</a>
+        <a href="#erd-diagram" data-top-tab="documentation">Documentation</a>
+      </nav>
+      <label class="sidebar-search api-sidebar" aria-label="Search all endpoints from navigation">
         <input id="sidebarSearch" type="search" placeholder="Search..." autocomplete="off" />
       </label>
-      <div class="side-group">
-        <div class="side-label">Overview</div>
-        <a href="#overview" data-target="overview">Overview</a>
-        <a href="#system" data-target="system">System</a>
+      <div class="sidebar-mode api-sidebar">
+        <div class="side-group">
+          <div class="side-label">Overview</div>
+          <a href="#overview" data-target="overview">Overview</a>
+          <a href="#system" data-target="system">System</a>
+        </div>
+        <div class="side-group">
+          <div class="side-label">Core API</div>
+          <a href="#auth" data-target="auth">Auth</a>
+          <a href="#videos" data-target="videos">Videos</a>
+          <a href="#video-moderation" data-target="video-moderation">Video Moderation</a>
+          <a href="#people" data-target="people">People</a>
+          <a href="#comments" data-target="comments">Comments</a>
+        </div>
+        <div class="side-group">
+          <div class="side-label">Content</div>
+          <a href="#playlists" data-target="playlists">Playlists</a>
+          <a href="#playlist-moderation" data-target="playlist-moderation">Playlist Moderation</a>
+          <a href="#channels" data-target="channels">Channels</a>
+          <a href="#quizzes" data-target="quizzes">Quizzes</a>
+          <a href="#reports" data-target="reports">Reports</a>
+        </div>
       </div>
-      <div class="side-group">
-        <div class="side-label">Core API</div>
-        <a href="#auth" data-target="auth">Auth</a>
-        <a href="#videos" data-target="videos">Videos</a>
-        <a href="#video-moderation" data-target="video-moderation">Video Moderation</a>
-        <a href="#people" data-target="people">People</a>
-        <a href="#comments" data-target="comments">Comments</a>
-      </div>
-      <div class="side-group">
-        <div class="side-label">Content</div>
-        <a href="#playlists" data-target="playlists">Playlists</a>
-        <a href="#playlist-moderation" data-target="playlist-moderation">Playlist Moderation</a>
-        <a href="#channels" data-target="channels">Channels</a>
-        <a href="#quizzes" data-target="quizzes">Quizzes</a>
-        <a href="#reports" data-target="reports">Reports</a>
+      <div class="sidebar-mode documentation-sidebar view-hidden">
+        <div class="side-group">
+          <div class="side-label">Documentation</div>
+          <a href="#erd-diagram" data-doc-target="erd-diagram">ERD Diagram</a>
+        </div>
       </div>
     </aside>
 
@@ -1125,6 +1293,33 @@
       <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/attempt/:attemptId/submit</code><span class="auth auth">Auth</span></div><p class="desc">Submits the attempt, grades the quiz, and finishes the attempt.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>attemptId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Quiz result, pass/fail, and score.</p></div></div></article>
     </section>
     </div>
+
+      <section id="erd-diagram" class="documentation-page view-hidden">
+        <div class="eyebrow">Documentation</div>
+        <h1>ERD Diagram</h1>
+        <p class="intro">Database entity relationship diagram for the OptiFlowz Video Platform backend.</p>
+
+        <div class="divider"></div>
+
+        <div class="doc-panel">
+          <div class="doc-panel-head">
+            <h2>Database Schema</h2>
+            <p>The diagram shows the main database tables and relationships used by videos, playlists, users, comments, quiz attempts, certificates, categories, people, and analytics.</p>
+          </div>
+          <div class="erd-toolbar" aria-label="ERD zoom controls">
+            <button type="button" data-erd-zoom="out" aria-label="Zoom out">-</button>
+            <span class="erd-zoom-label" aria-live="polite">50%</span>
+            <button type="button" data-erd-zoom="in" aria-label="Zoom in">+</button>
+            <button type="button" data-erd-zoom="reset">Reset</button>
+            <button type="button" data-erd-zoom="fit">Fit width</button>
+          </div>
+          <div class="erd-viewer">
+            <div class="erd-canvas">
+              <img src="assets/ERD Schema.png" alt="OptiFlowz database ERD diagram" />
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   </main>
 
@@ -1140,10 +1335,752 @@
     const overviewHome = document.querySelector(".overview-home");
     const routeDocs = document.querySelector(".route-docs");
     const navTargets = Array.from(document.querySelectorAll("[data-target]"));
+    const docTargets = Array.from(document.querySelectorAll("[data-doc-target]"));
+    const topTabs = Array.from(document.querySelectorAll("[data-top-tab]"));
+    const apiSidebars = Array.from(document.querySelectorAll(".api-sidebar"));
+    const documentationSidebars = Array.from(document.querySelectorAll(".documentation-sidebar"));
+    const documentationPages = Array.from(document.querySelectorAll(".documentation-page"));
     const menuToggle = document.querySelector(".menu-toggle");
     const drawerScrim = document.querySelector(".drawer-scrim");
+    const erdViewer = document.querySelector(".erd-viewer");
+    const erdCanvas = document.querySelector(".erd-canvas");
+    const erdImage = document.querySelector(".erd-canvas img");
+    const erdZoomLabel = document.querySelector(".erd-zoom-label");
+    const erdZoomControls = Array.from(document.querySelectorAll("[data-erd-zoom]"));
     let currentTarget = location.hash.replace("#", "") || "overview";
     let activeSearchField = globalSearch;
+    let erdZoom = 0.5;
+    const documentationTargets = new Set(docTargets.map((item) => item.dataset.docTarget));
+    const ERD_MIN_ZOOM = 0.18;
+    const ERD_MAX_ZOOM = 2.5;
+    const ERD_DEFAULT_ZOOM = 0.5;
+    const responseExamples = {
+      "/api/auth/user-update": `{
+  "id": "user_uuid",
+  "email": "user@example.com",
+  "full_name": "New name",
+  "description": "Profile description",
+  "eaes_member": true,
+  "image_url": "https://..."
+}`,
+      "/api/auth/oauth/:provider": `{
+  "user": {
+    "id": "user_uuid",
+    "email": "user@example.com",
+    "full_name": "Full Name",
+    "role": "user"
+  },
+  "token": "jwt"
+}`,
+      "/api/videos/heartbeat": `{
+  "ok": true,
+  "view_id": "uuid",
+  "watch_seconds": 120,
+  "last_heartbeat_at": "2026-06-23T00:00:00.000Z"
+}`,
+      "/api/videos/generate-chapters": `{
+  "video_id": "uuid",
+  "chapters": [
+    { "start": 0, "end": 92, "title": "Introduction" }
+  ]
+}`,
+      "/api/videos/search": `{
+  "videos": [
+    {
+      "id": "video_uuid",
+      "title": "Video title",
+      "description": "Short description",
+      "thumbnail_url": "https://...",
+      "duration_seconds": 420,
+      "view_count": 1280,
+      "like_count": 42,
+      "categories": ["Education"],
+      "tags": ["surgery", "training"]
+    }
+  ],
+  "pagination": {
+    "total": 42,
+    "page": 1,
+    "limit": 20,
+    "totalPages": 3
+  }
+}`,
+      "/api/videos/trending": `{
+  "videos": [
+    {
+      "id": "video_uuid",
+      "title": "Trending video",
+      "thumbnail_url": "https://...",
+      "duration_seconds": 360,
+      "recent_views": 240,
+      "view_count": 1840
+    }
+  ],
+  "pagination": { "page": 1, "limit": 20 }
+}`,
+      "/api/videos/categories": `{
+  "categories": [
+    { "id": "uuid", "name": "Education", "color": "#4095ff", "number": 1 }
+  ],
+  "pagination": { "page": 1, "limit": 20 }
+}`,
+      "/api/videos/user/history": `{
+  "videos": [
+    {
+      "id": "video_uuid",
+      "title": "Watched video",
+      "progress_seconds": 180,
+      "last_watched_at": "2026-06-23T00:00:00.000Z"
+    }
+  ],
+  "pagination": { "page": 1, "limit": 20 }
+}`,
+      "/api/videos/user/continue": `{
+  "videos": [
+    {
+      "id": "video_uuid",
+      "title": "Continue watching",
+      "progress_seconds": 180,
+      "duration_seconds": 600,
+      "progress_percentage": 30
+    }
+  ],
+  "pagination": { "page": 1, "limit": 20 }
+}`,
+      "/api/videos/user/liked": `{
+  "videos": [
+    {
+      "id": "video_uuid",
+      "title": "Liked video",
+      "thumbnail_url": "https://...",
+      "liked_at": "2026-06-23T00:00:00.000Z"
+    }
+  ],
+  "pagination": { "page": 1, "limit": 20 }
+}`,
+      "/api/videos/user/recommended": `{
+  "videos": [
+    {
+      "id": "video_uuid",
+      "title": "Recommended video",
+      "thumbnail_url": "https://...",
+      "score": 0.92,
+      "reason": "Based on watch history"
+    }
+  ],
+  "pagination": { "page": 1, "limit": 20 }
+}`,
+      "/api/videos/:id/progress": `{
+  "video_id": "uuid",
+  "user_id": "user_uuid",
+  "progress_seconds": 120,
+  "completed": false,
+  "updated_at": "2026-06-23T00:00:00.000Z"
+}`,
+      "/api/videos/:id/like": `{
+  "reaction": "like",
+  "like_count": 43,
+  "dislike_count": 2
+}`,
+      "/api/videos/:id/dislike": `{
+  "reaction": "dislike",
+  "like_count": 42,
+  "dislike_count": 3
+}`,
+      "/api/videos/:id/similar": `{
+  "videos": [
+    {
+      "id": "video_uuid",
+      "title": "Similar video",
+      "thumbnail_url": "https://...",
+      "matched_tags": ["training"]
+    }
+  ],
+  "pagination": { "page": 1, "limit": 12 }
+}`,
+      "/api/videos/:id/comments": `{
+  "comments": [
+    {
+      "id": "comment_uuid",
+      "content": "Great explanation.",
+      "user": { "id": "user_uuid", "full_name": "Full Name" },
+      "like_count": 4,
+      "reply_count": 1,
+      "created_at": "2026-06-23T00:00:00.000Z"
+    }
+  ],
+  "pagination": { "page": 1, "limit": 20, "total": 12 }
+}`,
+      "/api/videos/:id": `{
+  "video": {
+    "id": "video_uuid",
+    "title": "Video title",
+    "description": "Full description",
+    "playback_url": "https://stream.mux.com/...",
+    "thumbnail_url": "https://...",
+    "duration_seconds": 420,
+    "categories": ["Education"],
+    "people": [{ "id": "person_uuid", "name": "Speaker Name", "type": "speaker" }],
+    "playlists": [{ "id": "playlist_uuid", "title": "Playlist title" }],
+    "user_progress": { "progress_seconds": 120, "completed": false }
+  }
+}`,
+      "/api/video-moderation/subtitle/:videoId": `WEBVTT
+
+00:00:00.000 --> 00:00:04.000
+Subtitle text...`,
+      "/api/video-moderation/subtitle/replace/:videoId": `{
+  "track_id": "mux_track_id",
+  "language_code": "en",
+  "name": "English",
+  "status": "ready"
+}`,
+      "/api/video-moderation/subtitle/replacev2/:videoId": `{
+  "track_id": "mux_track_id",
+  "language_code": "en",
+  "name": "English",
+  "status": "ready"
+}`,
+      "/api/video-moderation/subtitle/autogenerate/:videoId": `{
+  "video_id": "uuid",
+  "language_code": "en",
+  "track_id": "mux_track_id",
+  "status": "created"
+}`,
+      "/api/video-moderation/details/autogenerate/:videoId": `{
+  "title": "Suggested title",
+  "description": "Suggested description",
+  "tags": ["training", "education"],
+  "chapters": [
+    { "start": 0, "title": "Introduction" }
+  ]
+}`,
+      "/api/video-moderation/video-details/:videoId": `{
+  "id": "video_uuid",
+  "title": "Title",
+  "description": "Description",
+  "category": "Education",
+  "tags": ["tag"],
+  "visibility": "public",
+  "published_at": "2026-01-01T10:00:00.000Z"
+}`,
+      "/api/video-moderation/my/videos": `{
+  "videos": [
+    {
+      "id": "video_uuid",
+      "title": "My video",
+      "status": "ready",
+      "visibility": "public",
+      "view_count": 120
+    }
+  ],
+  "pagination": { "page": 1, "limit": 20, "total": 8 }
+}`,
+      "/api/video-moderation/video/:videoId": `{
+  "deleted": true,
+  "video_id": "uuid",
+  "mux_asset_deleted": true
+}`,
+      "/api/people/search": `{
+  "people": [
+    {
+      "id": "person_uuid",
+      "name": "Speaker Name",
+      "image_url": "https://...",
+      "total_video_count": 12
+    }
+  ],
+  "pagination": { "page": 1, "limit": 20, "total": 5 }
+}`,
+      "/api/people": `{
+  "people": [
+    {
+      "id": "person_uuid",
+      "name": "Speaker Name",
+      "description": "Biography",
+      "image_url": "https://...",
+      "total_video_count": 12
+    }
+  ],
+  "pagination": { "page": 1, "limit": 20, "total": 25 },
+  "sort": { "sortBy": "name", "sortOrder": "asc" }
+}`,
+      "/api/people/:personId": `{
+  "id": "person_uuid",
+  "name": "Speaker Name",
+  "description": "Biography",
+  "image_url": "https://...",
+  "total_video_count": 12
+}`,
+      "/api/people/create": `{
+  "id": "person_uuid",
+  "name": "Person name",
+  "description": "Description",
+  "image_url": null
+}`,
+      "/api/people/:personId": `{
+  "id": "person_uuid",
+  "name": "New name",
+  "description": "New description",
+  "image_url": "https://..."
+}`,
+      "/api/playlists/search": `{
+  "playlists": [
+    {
+      "id": "playlist_uuid",
+      "title": "Playlist title",
+      "description": "Description",
+      "thumbnail_url": "https://...",
+      "video_count": 8,
+      "save_count": 32
+    }
+  ],
+  "pagination": { "total": 42, "page": 1, "limit": 20, "totalPages": 3 }
+}`,
+      "/api/playlists/featured": `{
+  "playlists": [
+    {
+      "id": "playlist_uuid",
+      "title": "Featured playlist",
+      "thumbnail_url": "https://...",
+      "video_count": 8,
+      "featured": true
+    }
+  ]
+}`,
+      "/api/playlists/user/saved": `{
+  "playlists": [
+    {
+      "id": "playlist_uuid",
+      "title": "Saved playlist",
+      "thumbnail_url": "https://...",
+      "saved_at": "2026-06-23T00:00:00.000Z"
+    }
+  ],
+  "pagination": { "limit": 20, "offset": 0 }
+}`,
+      "/api/playlists/:id/videos": `{
+  "videos": [
+    {
+      "id": "video_uuid",
+      "title": "Playlist video",
+      "thumbnail_url": "https://...",
+      "position": 1,
+      "duration_seconds": 420
+    }
+  ],
+  "pagination": { "page": 1, "limit": 20, "total": 8 }
+}`,
+      "/api/playlists/:id": `{
+  "id": "playlist_uuid",
+  "title": "Playlist title",
+  "description": "Description",
+  "thumbnail_url": "https://...",
+  "video_count": 8,
+  "saved": true,
+  "created_by": { "id": "user_uuid", "full_name": "Creator Name" }
+}`,
+      "/api/playlists-moderation/my/playlists": `{
+  "playlists": [
+    {
+      "id": "playlist_uuid",
+      "title": "My playlist",
+      "status": "published",
+      "video_count": 8,
+      "featured": false
+    }
+  ],
+  "pagination": { "page": 1, "limit": 20, "total": 6 }
+}`,
+      "/api/playlists-moderation/playlist/create": `{
+  "id": "playlist_uuid",
+  "title": "Playlist title",
+  "created_by": "user_uuid",
+  "status": "draft"
+}`,
+      "/api/playlists-moderation/playlist-details/:playlistId": `{
+  "id": "playlist_uuid",
+  "title": "Title",
+  "description": "Description",
+  "category": "Education",
+  "tags": ["tag"],
+  "status": "published",
+  "featured": true
+}`,
+      "/api/playlists-moderation/:playlistId/items": `{
+  "playlist_id": "playlist_uuid",
+  "video_id": "video_uuid",
+  "position": 1,
+  "added_at": "2026-06-23T00:00:00.000Z"
+}`,
+      "/api/playlists-moderation/:playlistId/items/:videoId": `{
+  "removed": true,
+  "playlist_id": "playlist_uuid",
+  "video_id": "video_uuid"
+}`,
+      "/api/playlists-moderation/:playlistId/items/move": `{
+  "playlist_id": "playlist_uuid",
+  "video_id": "video_uuid",
+  "position": 3,
+  "items": [
+    { "video_id": "video_uuid", "position": 3 }
+  ]
+}`,
+      "/api/comments/post": `{
+  "id": "comment_uuid",
+  "video_id": "video_uuid",
+  "parent_id": null,
+  "content": "Comment",
+  "user_id": "user_uuid",
+  "created_at": "2026-06-23T00:00:00.000Z"
+}`,
+      "/api/comments/:id/replies": `{
+  "replies": [
+    {
+      "id": "comment_uuid",
+      "content": "Reply text",
+      "user": { "id": "user_uuid", "full_name": "Full Name" },
+      "like_count": 2,
+      "created_at": "2026-06-23T00:00:00.000Z"
+    }
+  ],
+  "pagination": { "page": 1, "limit": 20, "total": 4 }
+}`,
+      "/api/comments/:id/like": `{
+  "reaction": "like",
+  "like_count": 3,
+  "dislike_count": 0
+}`,
+      "/api/comments/:id/dislike": `{
+  "reaction": "dislike",
+  "like_count": 2,
+  "dislike_count": 1
+}`,
+      "/api/comments/:id/edit": `{
+  "id": "comment_uuid",
+  "content": "Updated comment",
+  "updated_at": "2026-06-23T00:00:00.000Z"
+}`,
+      "/api/channels/:id": `{
+  "id": "user_uuid",
+  "full_name": "Channel name",
+  "description": "Channel description",
+  "image_url": "https://...",
+  "video_count": 24,
+  "playlist_count": 6
+}`,
+      "/api/channels/:id/videos": `{
+  "videos": [
+    {
+      "id": "video_uuid",
+      "title": "Channel video",
+      "thumbnail_url": "https://...",
+      "published_at": "2026-06-23T00:00:00.000Z"
+    }
+  ],
+  "pagination": { "page": 1, "limit": 20, "total": 24 }
+}`,
+      "/api/channels/:id/playlists": `{
+  "playlists": [
+    {
+      "id": "playlist_uuid",
+      "title": "Channel playlist",
+      "thumbnail_url": "https://...",
+      "video_count": 8
+    }
+  ],
+  "pagination": { "page": 1, "limit": 20, "total": 6 }
+}`,
+      "/api/reports/video-analytics.pdf": `HTTP 200
+Content-Type: application/pdf
+Content-Disposition: attachment; filename="video-analytics-2026-06-23.pdf"
+
+<binary PDF content>`,
+      "/api/quizzes/create": `{
+  "id": "quiz_uuid",
+  "title": "Quiz",
+  "description": "Description",
+  "time_limit_seconds": 600,
+  "max_attempts": 3,
+  "passing_score_percentage": 70,
+  "created_by": "user_uuid"
+}`,
+      "/api/quizzes/:quizId": `{
+  "id": "quiz_uuid",
+  "title": "Updated quiz",
+  "description": "Updated description",
+  "is_active": true,
+  "updated_at": "2026-06-23T00:00:00.000Z"
+}`,
+      "/api/quizzes/user": `{
+  "quizzes": [
+    {
+      "id": "quiz_uuid",
+      "title": "Quiz",
+      "question_count": 10,
+      "attempt_count": 24,
+      "is_active": true
+    }
+  ],
+  "pagination": { "page": 1, "limit": 20, "total": 5 }
+}`,
+      "/api/quizzes/certificates": `{
+  "certificates": [
+    {
+      "id": "certificate_uuid",
+      "quiz_id": "quiz_uuid",
+      "quiz_title": "Quiz",
+      "issued_at": "2026-06-23T00:00:00.000Z",
+      "score_percentage": 92
+    }
+  ]
+}`,
+      "/api/quizzes/certificate/generate": `HTTP 200
+Content-Type: application/pdf
+Content-Disposition: attachment; filename="certificate.pdf"
+
+<binary PDF content>`,
+      "/api/quizzes/:quizId/details": `{
+  "id": "quiz_uuid",
+  "title": "Quiz",
+  "description": "Description",
+  "time_limit_seconds": 600,
+  "max_attempts": 3,
+  "passing_score_percentage": 70,
+  "has_certificate": true
+}`,
+      "/api/quizzes/:quizId/requirements/videos": `{
+  "videos": [
+    {
+      "id": "video_uuid",
+      "title": "Required video",
+      "required_percentage": 80,
+      "progress_percentage": 65,
+      "met": false
+    }
+  ],
+  "all_met": false
+}`,
+      "/api/quizzes/:quizId/questions": `{
+  "questions": [
+    {
+      "id": "question_uuid",
+      "question_text": "Question text?",
+      "question_type": "single_choice",
+      "points": 1,
+      "options": [
+        { "id": "option_uuid", "option_text": "Answer A", "is_correct": true }
+      ],
+      "pairs": []
+    }
+  ],
+  "pagination": { "page": 1, "limit": 20, "total": 10 }
+}`,
+      "/api/quizzes/:quizId/question/create": `{
+  "id": "question_uuid",
+  "quiz_id": "quiz_uuid",
+  "question_text": "Question text?",
+  "question_type": "single_choice",
+  "points": 1,
+  "options": [
+    { "id": "option_uuid", "option_text": "Answer A", "is_correct": true }
+  ],
+  "pairs": []
+}`,
+      "/api/quizzes/question/:questionId": `{
+  "id": "question_uuid",
+  "question_text": "Updated question?",
+  "question_type": "single_choice",
+  "points": 2,
+  "options": [],
+  "pairs": []
+}`,
+      "/api/quizzes/:quizId/rules": `{
+  "rules": [
+    {
+      "id": "rule_uuid",
+      "quiz_id": "quiz_uuid",
+      "video_id": "video_uuid",
+      "playlist_id": null,
+      "required_percentage": 80,
+      "required_seconds": 300,
+      "is_active": true
+    }
+  ]
+}`,
+      "/api/quizzes/:quizId/rule/create": `{
+  "id": "rule_uuid",
+  "quiz_id": "quiz_uuid",
+  "video_id": "video_uuid",
+  "playlist_id": null,
+  "required_percentage": 80,
+  "required_seconds": 300,
+  "is_active": true
+}`,
+      "/api/quizzes/rule/:ruleId": `{
+  "id": "rule_uuid",
+  "required_percentage": 90,
+  "required_seconds": 360,
+  "is_active": true
+}`,
+      "/api/quizzes/:quizId/question-sources": `{
+  "sources": [
+    {
+      "id": "source_uuid",
+      "quiz_id": "quiz_uuid",
+      "source_type": "video",
+      "video_id": "video_uuid",
+      "playlist_id": null,
+      "question_count": 5
+    }
+  ]
+}`,
+      "/api/quizzes/:quizId/question-source/create": `{
+  "id": "source_uuid",
+  "quiz_id": "quiz_uuid",
+  "source_type": "video",
+  "video_id": "video_uuid",
+  "playlist_id": null,
+  "question_count": 5
+}`,
+      "/api/quizzes/question-source/:sourceId": `{
+  "id": "source_uuid",
+  "source_type": "video",
+  "question_count": 8,
+  "include_general_questions": true
+}`,
+      "/api/quizzes/:quizId/attempt/start": `{
+  "attempt": {
+    "id": "attempt_uuid",
+    "quiz_id": "quiz_uuid",
+    "attempt_number": 1,
+    "status": "in_progress",
+    "started_at": "2026-06-23T00:00:00.000Z"
+  },
+  "questions": [
+    { "id": "question_uuid", "question_text": "Question text?", "position": 1 }
+  ]
+}`,
+      "/api/quizzes/:quizId/attempts": `{
+  "attempts": [
+    {
+      "id": "attempt_uuid",
+      "attempt_number": 1,
+      "status": "submitted",
+      "score_percentage": 92,
+      "passed": true,
+      "submitted_at": "2026-06-23T00:00:00.000Z"
+    }
+  ]
+}`,
+      "/api/quizzes/attempt/:attemptId/questions": `{
+  "attempt_id": "attempt_uuid",
+  "questions": [
+    {
+      "id": "question_uuid",
+      "question_text": "Question text?",
+      "question_type": "single_choice",
+      "options": [
+        { "id": "option_uuid", "option_text": "Answer A" }
+      ],
+      "saved_answer": "option_uuid"
+    }
+  ]
+}`,
+      "/api/quizzes/attempt/:attemptId/question/:questionId/answer": `{
+  "attempt_id": "attempt_uuid",
+  "question_id": "question_uuid",
+  "answer_json": "option_uuid",
+  "is_correct": true,
+  "awarded_points": 1
+}`,
+      "/api/quizzes/attempt/:attemptId/submit": `{
+  "attempt_id": "attempt_uuid",
+  "status": "submitted",
+  "score": 9,
+  "max_score": 10,
+  "score_percentage": 90,
+  "passed": true,
+  "submitted_at": "2026-06-23T00:00:00.000Z"
+}`
+    };
+    responseExamples["GET /api/video-moderation/subtitle/:videoId"] = responseExamples["/api/video-moderation/subtitle/:videoId"];
+    responseExamples["DELETE /api/video-moderation/subtitle/:videoId"] = `{
+  "deleted": true,
+  "video_id": "uuid",
+  "language_code": "en"
+}`;
+    responseExamples["GET /api/people/:personId"] = `{
+  "id": "person_uuid",
+  "name": "Speaker Name",
+  "description": "Biography",
+  "image_url": "https://...",
+  "total_video_count": 12
+}`;
+    responseExamples["PATCH /api/people/:personId"] = `{
+  "id": "person_uuid",
+  "name": "New name",
+  "description": "New description",
+  "image_url": "https://..."
+}`;
+    responseExamples["PATCH /api/people/:personId/image"] = `{
+  "id": "person_uuid",
+  "name": "Speaker Name",
+  "description": "Biography",
+  "image_url": "https://..."
+}`;
+
+    function clamp(value, min, max) {
+      return Math.min(Math.max(value, min), max);
+    }
+
+    function getErdNaturalSize() {
+      return {
+        width: erdImage?.naturalWidth || 3550,
+        height: erdImage?.naturalHeight || 2140,
+      };
+    }
+
+    function renderErdZoom({ preserveCenter = true } = {}) {
+      if (!erdViewer || !erdCanvas || !erdImage) return;
+
+      const size = getErdNaturalSize();
+      const previousWidth = erdCanvas.offsetWidth || size.width * erdZoom;
+      const previousHeight = erdCanvas.offsetHeight || size.height * erdZoom;
+      const centerX = previousWidth > 0 ? (erdViewer.scrollLeft + erdViewer.clientWidth / 2) / previousWidth : 0;
+      const centerY = previousHeight > 0 ? (erdViewer.scrollTop + erdViewer.clientHeight / 2) / previousHeight : 0;
+      const nextWidth = Math.round(size.width * erdZoom);
+      const nextHeight = Math.round(size.height * erdZoom);
+
+      erdCanvas.style.width = `${nextWidth}px`;
+      erdCanvas.style.height = `${nextHeight}px`;
+      erdImage.style.width = `${size.width}px`;
+      erdImage.style.transform = `scale(${erdZoom})`;
+
+      if (erdZoomLabel) {
+        erdZoomLabel.textContent = `${Math.round(erdZoom * 100)}%`;
+      }
+
+      if (preserveCenter) {
+        requestAnimationFrame(() => {
+          erdViewer.scrollLeft = Math.max(0, centerX * nextWidth - erdViewer.clientWidth / 2);
+          erdViewer.scrollTop = Math.max(0, centerY * nextHeight - erdViewer.clientHeight / 2);
+        });
+      }
+    }
+
+    function setErdZoom(nextZoom, options = {}) {
+      erdZoom = clamp(nextZoom, ERD_MIN_ZOOM, ERD_MAX_ZOOM);
+      renderErdZoom(options);
+    }
+
+    function fitErdToWidth() {
+      if (!erdViewer) return;
+      const size = getErdNaturalSize();
+      setErdZoom(erdViewer.clientWidth / size.width, { preserveCenter: false });
+      erdViewer.scrollLeft = 0;
+      erdViewer.scrollTop = 0;
+    }
 
     function escapeHtml(value) {
       return value
@@ -1162,6 +2099,27 @@
           .replace(/\b(true|false)\b/g, '<span class="tok-bool">$1</span>')
           .replace(/\bnull\b/g, '<span class="tok-null">null</span>')
           .replace(/\b(-?\d+(?:\.\d+)?)\b/g, '<span class="tok-number">$1</span>');
+      });
+    }
+
+    function addConcreteResponseExamples() {
+      routes.forEach((route) => {
+        const method = route.dataset.method;
+        const path = route.querySelector(".path")?.textContent?.trim();
+        if (!method || !path) return;
+
+        const responseBox = Array.from(route.querySelectorAll(".box")).find((box) => {
+          return box.querySelector("h3")?.textContent?.trim().toLowerCase() === "response";
+        });
+
+        if (!responseBox || responseBox.querySelector("pre")) return;
+
+        const example = responseExamples[`${method} ${path}`] || responseExamples[path];
+        if (!example) return;
+
+        const pre = document.createElement("pre");
+        pre.textContent = example;
+        responseBox.querySelector("p")?.replaceWith(pre);
       });
     }
 
@@ -1185,7 +2143,62 @@
       });
     }
 
+    function setActiveDocNav(target) {
+      docTargets.forEach((item) => {
+        item.classList.toggle("active", item.dataset.docTarget === target);
+      });
+    }
+
+    function setTopTab(mode) {
+      topTabs.forEach((item) => {
+        item.classList.toggle("active", item.dataset.topTab === mode);
+      });
+    }
+
+    function setSidebarMode(mode) {
+      const isDocumentation = mode === "documentation";
+      apiSidebars.forEach((item) => item.classList.toggle("view-hidden", isDocumentation));
+      documentationSidebars.forEach((item) => item.classList.toggle("view-hidden", !isDocumentation));
+      document.body.classList.toggle("documentation-mode", isDocumentation);
+    }
+
+    function clearSearchFields() {
+      searchFields.forEach((field) => {
+        field.value = "";
+      });
+    }
+
+    function showDocumentation(target = "erd-diagram") {
+      const normalized = documentationTargets.has(target) ? target : "erd-diagram";
+      currentTarget = normalized;
+      clearSearchFields();
+      activeSearchField = globalSearch;
+      methodSelect.value = "";
+
+      overviewHome.classList.add("view-hidden");
+      routeDocs.style.display = "none";
+      routeSections.forEach((section) => section.classList.add("view-hidden"));
+      sections.forEach((section) => section.classList.remove("hidden"));
+      routes.forEach((route) => route.classList.remove("hidden"));
+      documentationPages.forEach((page) => {
+        page.classList.toggle("view-hidden", page.id !== normalized);
+        page.style.display = page.id === normalized ? "block" : "none";
+      });
+
+      setSidebarMode("documentation");
+      setTopTab("documentation");
+      setActiveNav("");
+      setActiveDocNav(normalized);
+      requestAnimationFrame(() => renderErdZoom({ preserveCenter: false }));
+      window.scrollTo({ top: 0, behavior: "auto" });
+    }
+
     function showView(target = "overview") {
+      if (documentationTargets.has(target)) {
+        showDocumentation(target);
+        return;
+      }
+
       const requested = target || "overview";
       const exists = requested === "overview" || routeSections.some((section) => section.id === requested);
       const normalized = exists ? requested : "overview";
@@ -1193,6 +2206,13 @@
       const hasSearch = Boolean(getSearchTerm());
       const isOverview = normalized === "overview" && !hasSearch;
 
+      documentationPages.forEach((page) => {
+        page.classList.add("view-hidden");
+        page.style.display = "none";
+      });
+      setSidebarMode("api");
+      setTopTab("api");
+      setActiveDocNav("");
       overviewHome.classList.toggle("view-hidden", !isOverview);
       routeDocs.style.display = isOverview ? "none" : "block";
 
@@ -1266,14 +2286,61 @@
     menuToggle?.addEventListener("click", toggleMenu);
     drawerScrim?.addEventListener("click", closeMenu);
 
+    erdImage?.addEventListener("load", () => {
+      renderErdZoom({ preserveCenter: false });
+    });
+
+    erdZoomControls.forEach((control) => {
+      control.addEventListener("click", () => {
+        const action = control.dataset.erdZoom;
+
+        if (action === "in") {
+          setErdZoom(erdZoom + 0.15);
+        } else if (action === "out") {
+          setErdZoom(erdZoom - 0.15);
+        } else if (action === "reset") {
+          setErdZoom(ERD_DEFAULT_ZOOM, { preserveCenter: false });
+        } else if (action === "fit") {
+          fitErdToWidth();
+        }
+      });
+    });
+
+    erdViewer?.addEventListener("wheel", (event) => {
+      if (!event.ctrlKey && !event.metaKey) return;
+
+      event.preventDefault();
+      const direction = event.deltaY > 0 ? -1 : 1;
+      setErdZoom(erdZoom + direction * 0.12);
+    }, { passive: false });
+
     navTargets.forEach((item) => {
       item.addEventListener("click", (event) => {
         event.preventDefault();
         const target = item.dataset.target || "overview";
-        searchFields.forEach((field) => {
-          field.value = "";
-        });
+        clearSearchFields();
         activeSearchField = globalSearch;
+        history.replaceState(null, "", `#${target}`);
+        showView(target);
+        closeMenu();
+      });
+    });
+
+    docTargets.forEach((item) => {
+      item.addEventListener("click", (event) => {
+        event.preventDefault();
+        const target = item.dataset.docTarget || "erd-diagram";
+        history.replaceState(null, "", `#${target}`);
+        showDocumentation(target);
+        closeMenu();
+      });
+    });
+
+    topTabs.forEach((item) => {
+      item.addEventListener("click", (event) => {
+        event.preventDefault();
+        const mode = item.dataset.topTab;
+        const target = mode === "documentation" ? "erd-diagram" : "overview";
         history.replaceState(null, "", `#${target}`);
         showView(target);
         closeMenu();
@@ -1288,6 +2355,7 @@
       if (event.key === "Escape") closeMenu();
     });
 
+    addConcreteResponseExamples();
     highlightCodeBlocks();
     showView(currentTarget);
   </script>

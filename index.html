@@ -29,6 +29,10 @@
       box-sizing: border-box;
     }
 
+    html {
+      scroll-padding-top: 64px;
+    }
+
     body {
       margin: 0;
       background: #000;
@@ -409,6 +413,32 @@
 
     .documentation-page {
       display: none;
+    }
+
+    .doc-overview-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 36px;
+    }
+
+    .doc-overview-item {
+      min-height: 158px;
+      padding: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      border-radius: 12px;
+      background: #030303;
+    }
+
+    .doc-overview-item h2 {
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+
+    .doc-overview-item p {
+      margin: 0;
+      color: #a1a1aa;
+      font-size: 15px;
     }
 
     .doc-panel {
@@ -812,6 +842,10 @@
         grid-template-columns: 1fr;
       }
 
+      .doc-overview-grid {
+        grid-template-columns: 1fr;
+      }
+
       .grid {
         grid-template-columns: 1fr;
       }
@@ -857,7 +891,7 @@
         <input id="globalSearch" type="search" placeholder="Search..." autocomplete="off" />
       </label>
       <div class="top-links" aria-label="Top navigation">
-        <a href="#erd-diagram" data-top-tab="documentation">Documentation</a>
+        <a href="#documentation-overview" data-top-tab="documentation">Documentation</a>
         <a href="#overview" class="active" data-top-tab="api">API Reference</a>
       </div>
     </div>
@@ -868,7 +902,7 @@
     <aside class="sidebar" aria-label="Page sections">
       <nav class="mobile-sidebar-switch" aria-label="Mobile page navigation">
         <a href="#overview" class="active" data-top-tab="api">API Reference</a>
-        <a href="#erd-diagram" data-top-tab="documentation">Documentation</a>
+        <a href="#documentation-overview" data-top-tab="documentation">Documentation</a>
       </nav>
       <label class="sidebar-search api-sidebar" aria-label="Search all endpoints from navigation">
         <input id="sidebarSearch" type="search" placeholder="Search..." autocomplete="off" />
@@ -899,6 +933,7 @@
       <div class="sidebar-mode documentation-sidebar view-hidden">
         <div class="side-group">
           <div class="side-label">Documentation</div>
+          <a href="#documentation-overview" data-doc-target="documentation-overview">Overview</a>
           <a href="#erd-diagram" data-doc-target="erd-diagram">ERD Diagram</a>
         </div>
       </div>
@@ -1294,6 +1329,34 @@
     </section>
     </div>
 
+      <section id="documentation-overview" class="documentation-page view-hidden">
+        <div class="eyebrow">Documentation</div>
+        <h1>OptiFlowz Backend Overview</h1>
+        <p class="intro">High-level map of the Express backend that powers the OptiFlowz video platform.</p>
+
+        <div class="overview-copy">
+          <p>The backend is organized as a modular Express API. The application configures CORS, request parsing, Mux webhook parsing, route registration, not-found handling, and centralized error handling before exposing the platform under <code>/api</code>.</p>
+          <p>Core modules cover authentication, video discovery and playback, video and playlist moderation, people profiles, comments, channels, quizzes, certificates, and PDF analytics reports. Most public browsing endpoints accept optional authentication, while user actions and moderation workflows rely on JWT authentication and role checks.</p>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="doc-overview-grid">
+          <div class="doc-overview-item">
+            <h2>Request Flow</h2>
+            <p>Requests enter through the Express app, pass through CORS and JSON parsing, then fan out to module routes registered from <code>src/routes/index.js</code>.</p>
+          </div>
+          <div class="doc-overview-item">
+            <h2>Media Pipeline</h2>
+            <p>Video upload, playback, thumbnails, subtitles, generated chapters, and webhook updates are handled through Mux and moderation services.</p>
+          </div>
+          <div class="doc-overview-item">
+            <h2>Learning Layer</h2>
+            <p>Quizzes connect videos and playlists with access rules, attempts, answers, grading, and certificate generation.</p>
+          </div>
+        </div>
+      </section>
+
       <section id="erd-diagram" class="documentation-page view-hidden">
         <div class="eyebrow">Documentation</div>
         <h1>ERD Diagram</h1>
@@ -1351,6 +1414,7 @@
     let activeSearchField = globalSearch;
     let erdZoom = 0.5;
     const documentationTargets = new Set(docTargets.map((item) => item.dataset.docTarget));
+    const DEFAULT_DOCUMENTATION_TARGET = "documentation-overview";
     const ERD_MIN_ZOOM = 0.18;
     const ERD_MAX_ZOOM = 2.5;
     const ERD_DEFAULT_ZOOM = 0.5;
@@ -2168,8 +2232,12 @@ Content-Disposition: attachment; filename="certificate.pdf"
       });
     }
 
-    function showDocumentation(target = "erd-diagram") {
-      const normalized = documentationTargets.has(target) ? target : "erd-diagram";
+    function scrollPageTop() {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    }
+
+    function showDocumentation(target = DEFAULT_DOCUMENTATION_TARGET) {
+      const normalized = documentationTargets.has(target) ? target : DEFAULT_DOCUMENTATION_TARGET;
       currentTarget = normalized;
       clearSearchFields();
       activeSearchField = globalSearch;
@@ -2189,8 +2257,10 @@ Content-Disposition: attachment; filename="certificate.pdf"
       setTopTab("documentation");
       setActiveNav("");
       setActiveDocNav(normalized);
-      requestAnimationFrame(() => renderErdZoom({ preserveCenter: false }));
-      window.scrollTo({ top: 0, behavior: "auto" });
+      if (normalized === "erd-diagram") {
+        requestAnimationFrame(() => renderErdZoom({ preserveCenter: false }));
+      }
+      requestAnimationFrame(scrollPageTop);
     }
 
     function showView(target = "overview") {
@@ -2228,9 +2298,7 @@ Content-Disposition: attachment; filename="certificate.pdf"
       setActiveNav(hasSearch ? "" : normalized);
       applyFilters();
 
-      if (!isOverview) {
-        window.scrollTo({ top: 0, behavior: "auto" });
-      }
+      requestAnimationFrame(scrollPageTop);
     }
 
     function applyFilters() {
@@ -2340,7 +2408,7 @@ Content-Disposition: attachment; filename="certificate.pdf"
       item.addEventListener("click", (event) => {
         event.preventDefault();
         const mode = item.dataset.topTab;
-        const target = mode === "documentation" ? "erd-diagram" : "overview";
+        const target = mode === "documentation" ? DEFAULT_DOCUMENTATION_TARGET : "overview";
         history.replaceState(null, "", `#${target}`);
         showView(target);
         closeMenu();

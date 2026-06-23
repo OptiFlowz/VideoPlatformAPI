@@ -653,6 +653,37 @@
       width: 100%;
     }
 
+    .filter-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin: -6px 0 16px;
+      color: #8b98ad;
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .filter-hint {
+      color: #6b7280;
+    }
+
+    .no-results {
+      display: none;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      background: #070707;
+      padding: 28px;
+      color: #9ca3af;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 650;
+    }
+
+    .no-results.is-visible {
+      display: block;
+    }
+
     .notes,
     .section {
       background: #070707;
@@ -706,7 +737,7 @@
 
     .route-head {
       display: grid;
-      grid-template-columns: auto 1fr auto;
+      grid-template-columns: auto 1fr auto auto;
       gap: 10px;
       align-items: center;
       margin-bottom: 10px;
@@ -735,6 +766,30 @@
     .auth.optional { background: #52525b; }
     .auth.auth { background: var(--auth); }
     .auth.admin { background: var(--admin); }
+
+    .copy-route {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 26px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
+      background: transparent;
+      color: #9ca3af;
+      padding: 2px 8px;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .copy-route:hover,
+    .copy-route:focus-visible {
+      border-color: rgba(255, 255, 255, 0.24);
+      color: #fff;
+      outline: none;
+    }
 
     code,
     pre {
@@ -803,6 +858,63 @@
 
     .hidden {
       display: none;
+    }
+
+    .toast {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 90;
+      transform: translateY(18px);
+      opacity: 0;
+      pointer-events: none;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 999px;
+      background: #111;
+      color: #fff;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 800;
+      transition: opacity 160ms ease, transform 160ms ease;
+    }
+
+    .toast.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .back-to-top {
+      position: fixed;
+      right: 22px;
+      bottom: 76px;
+      z-index: 35;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 999px;
+      background: #111;
+      color: #fff;
+      font: inherit;
+      font-size: 18px;
+      font-weight: 900;
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(12px);
+      transition: opacity 160ms ease, transform 160ms ease, border-color 160ms ease;
+    }
+
+    .back-to-top.is-visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .back-to-top:hover {
+      border-color: rgba(255, 255, 255, 0.28);
     }
 
     @media (max-width: 860px) {
@@ -950,7 +1062,8 @@
         grid-template-columns: auto 1fr;
       }
 
-      .route-head .auth {
+      .route-head .auth,
+      .route-head .copy-route {
         grid-column: 1 / -1;
         justify-self: start;
       }
@@ -1098,6 +1211,11 @@
           <option value="DELETE">DELETE</option>
         </select>
       </div>
+      <div class="filter-meta" aria-live="polite">
+        <span id="resultSummary">Showing all endpoints</span>
+        <span class="filter-hint">Press / to search</span>
+      </div>
+      <div id="noResults" class="no-results">No endpoints match the current search and method filter.</div>
 
     <section class="notes" id="rules" data-section>
       <h2>General rules</h2>
@@ -1474,6 +1592,8 @@
       </footer>
     </div>
   </main>
+  <button class="back-to-top" type="button" aria-label="Back to top">↑</button>
+  <div class="toast" role="status" aria-live="polite"></div>
 
   <script>
     const currentYear = document.getElementById("currentYear");
@@ -1487,6 +1607,8 @@
     const routeSections = sections.filter((section) => section.classList.contains("section"));
     const overviewHome = document.querySelector(".overview-home");
     const routeDocs = document.querySelector(".route-docs");
+    const resultSummary = document.getElementById("resultSummary");
+    const noResults = document.getElementById("noResults");
     const navTargets = Array.from(document.querySelectorAll("[data-target]"));
     const docTargets = Array.from(document.querySelectorAll("[data-doc-target]"));
     const topTabs = Array.from(document.querySelectorAll("[data-top-tab]"));
@@ -1500,6 +1622,8 @@
     const erdImage = document.querySelector(".erd-canvas img");
     const erdZoomLabel = document.querySelector(".erd-zoom-label");
     const erdZoomControls = Array.from(document.querySelectorAll("[data-erd-zoom]"));
+    const backToTop = document.querySelector(".back-to-top");
+    const toast = document.querySelector(".toast");
     let currentTarget = window.__initialHashTarget || location.hash.replace("#", "") || "overview";
     let activeSearchField = globalSearch;
     let erdZoom = 0.5;
@@ -2280,6 +2404,118 @@ Content-Disposition: attachment; filename="certificate.pdf"
       });
     }
 
+    function showToast(message) {
+      if (!toast) return;
+      toast.textContent = message;
+      toast.classList.add("is-visible");
+      window.clearTimeout(showToast.timeoutId);
+      showToast.timeoutId = window.setTimeout(() => {
+        toast.classList.remove("is-visible");
+      }, 1600);
+    }
+
+    function copyText(value) {
+      if (navigator.clipboard?.writeText) {
+        return navigator.clipboard.writeText(value);
+      }
+
+      const textarea = document.createElement("textarea");
+      textarea.value = value;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      textarea.remove();
+      return Promise.resolve();
+    }
+
+    function addRouteCopyButtons() {
+      routes.forEach((route) => {
+        const routeHead = route.querySelector(".route-head");
+        const method = route.dataset.method;
+        const path = route.querySelector(".path")?.textContent?.trim();
+        if (!routeHead || !method || !path || routeHead.querySelector(".copy-route")) return;
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "copy-route";
+        button.textContent = "Copy";
+        button.setAttribute("aria-label", `Copy ${method} ${path}`);
+        button.addEventListener("click", async () => {
+          try {
+            await copyText(`${method} ${path}`);
+            button.textContent = "Copied";
+            showToast("Endpoint copied");
+            window.setTimeout(() => {
+              button.textContent = "Copy";
+            }, 1200);
+          } catch (_error) {
+            showToast("Copy failed");
+          }
+        });
+
+        routeHead.appendChild(button);
+      });
+    }
+
+    function cacheRouteSearchText() {
+      routes.forEach((route) => {
+        route.dataset.searchText = route.textContent.toLowerCase();
+      });
+    }
+
+    function getCurrentRouteLabel() {
+      if (currentTarget === "system") return "System";
+      return routeSections.find((section) => section.id === currentTarget)?.querySelector("h2")?.firstChild?.textContent?.trim() || "selected group";
+    }
+
+    function getCurrentSectionRouteCount() {
+      if (currentTarget === "system") {
+        return document.querySelector("#system")?.querySelectorAll(".route").length || 0;
+      }
+
+      return routeSections.find((section) => section.id === currentTarget)?.querySelectorAll(".route").length || 0;
+    }
+
+    function updateResultSummary(visibleCount) {
+      if (!resultSummary) return;
+      const total = routes.length;
+      const term = getSearchTerm();
+      const method = methodSelect.value;
+      const hasFilter = Boolean(term || method);
+
+      if (!hasFilter) {
+        if (currentTarget === "overview") {
+          resultSummary.textContent = `Showing ${total} endpoints`;
+          return;
+        }
+
+        const sectionCount = getCurrentSectionRouteCount();
+        const routeLabel = getCurrentRouteLabel();
+        resultSummary.textContent = `Showing ${sectionCount} ${sectionCount === 1 ? "endpoint" : "endpoints"} in ${routeLabel}`;
+        return;
+      }
+
+      const filterText = [
+        method ? method : null,
+        term ? `"${term}"` : null,
+      ].filter(Boolean).join(" + ");
+
+      resultSummary.textContent = `Showing ${visibleCount} of ${total} endpoints${filterText ? ` for ${filterText}` : ""}`;
+    }
+
+    function getPreferredSearchField() {
+      if (routeDocs.style.display !== "none" && searchInput) return searchInput;
+      if (!document.body.classList.contains("documentation-mode") && globalSearch) return globalSearch;
+      return sidebarSearch || searchInput || globalSearch;
+    }
+
+    function updateBackToTop() {
+      backToTop?.classList.toggle("is-visible", window.scrollY > 360);
+    }
+
     function closeMenu() {
       document.body.classList.remove("menu-open");
       menuToggle?.setAttribute("aria-expanded", "false");
@@ -2428,6 +2664,8 @@ Content-Disposition: attachment; filename="certificate.pdf"
         overviewHome.classList.remove("view-hidden");
         routeDocs.style.display = "none";
         setActiveNav("overview");
+        updateResultSummary(routes.length);
+        noResults?.classList.remove("is-visible");
         return;
       }
 
@@ -2448,9 +2686,13 @@ Content-Disposition: attachment; filename="certificate.pdf"
 
       routes.forEach((route) => {
         const methodMatches = !method || route.dataset.method === method;
-        const textMatches = !term || route.textContent.toLowerCase().includes(term);
+        const textMatches = !term || (route.dataset.searchText || route.textContent.toLowerCase()).includes(term);
         route.classList.toggle("hidden", !(methodMatches && textMatches));
       });
+
+      const visibleRouteCount = routes.filter((route) => !route.classList.contains("hidden")).length;
+      updateResultSummary(visibleRouteCount);
+      noResults?.classList.toggle("is-visible", routeDocs.style.display !== "none" && visibleRouteCount === 0);
 
       sections.forEach((section) => {
         if (section.classList.contains("view-hidden")) return;
@@ -2471,6 +2713,8 @@ Content-Disposition: attachment; filename="certificate.pdf"
     methodSelect.addEventListener("change", applyFilters);
     menuToggle?.addEventListener("click", toggleMenu);
     drawerScrim?.addEventListener("click", closeMenu);
+    backToTop?.addEventListener("click", stabilizePageTopScroll);
+    window.addEventListener("scroll", updateBackToTop, { passive: true });
 
     erdImage?.addEventListener("load", () => {
       renderErdZoom({ preserveCenter: false });
@@ -2542,15 +2786,32 @@ Content-Disposition: attachment; filename="certificate.pdf"
     });
 
     window.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") closeMenu();
+      const activeTag = document.activeElement?.tagName?.toLowerCase();
+      const isTyping = activeTag === "input" || activeTag === "textarea" || activeTag === "select";
+
+      if (event.key === "/" && !isTyping) {
+        event.preventDefault();
+        getPreferredSearchField()?.focus();
+      }
+
+      if (event.key === "Escape") {
+        if (getSearchTerm()) {
+          clearSearchFields();
+          applyFilters();
+        }
+        closeMenu();
+      }
     });
 
     addConcreteResponseExamples();
+    cacheRouteSearchText();
+    addRouteCopyButtons();
     highlightCodeBlocks();
     showView(currentTarget);
     if (currentTarget) {
       history.replaceState(null, "", `#${currentTarget}`);
     }
+    updateBackToTop();
   </script>
 </body>
 </html>

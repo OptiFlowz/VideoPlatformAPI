@@ -4,6 +4,15 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>OptiFlowz Video Platform API Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;650;700;750;800;900&family=Geist+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script>
+    window.__initialHashTarget = window.location.hash.replace("#", "");
+    if (window.__initialHashTarget) {
+      window.history.replaceState(null, "", window.location.href.replace(window.location.hash, ""));
+    }
+  </script>
   <style>
     :root {
       --bg: #030712;
@@ -37,7 +46,7 @@
       margin: 0;
       background: #000;
       color: var(--text);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: "Geist", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       line-height: 1.5;
       min-height: 100vh;
     }
@@ -415,6 +424,33 @@
       display: none;
     }
 
+    .site-footer {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 54px;
+      padding: 22px 0 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.10);
+      color: #8b98ad;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .site-footer img {
+      width: 18px;
+      height: 18px;
+      object-fit: contain;
+    }
+
+    .site-footer a {
+      color: #dbeafe;
+      text-decoration: none;
+    }
+
+    .site-footer a:hover {
+      color: #fff;
+    }
+
     .doc-overview-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -657,7 +693,7 @@
 
     code,
     pre {
-      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-family: "Geist Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
     }
 
     .path {
@@ -882,7 +918,7 @@
       <button class="menu-toggle" type="button" aria-label="Open API navigation" aria-expanded="false">
         <span></span>
       </button>
-      <a class="brand" href="https://optiflowz.com" target="_blank" rel="noreferrer">
+      <a class="brand" href="#overview" data-target="overview">
         <img src="assets/OptiFlowzLogo.webp" alt="OptiFlowz logo" />
         <span class="brand-copy">
           <strong>OptiFlowz</strong>
@@ -1385,10 +1421,16 @@
           </div>
         </div>
       </section>
+
+      <footer class="site-footer">
+        <img src="assets/OptiFlowzLogo.webp" alt="" aria-hidden="true" />
+        <span><a href="https://optiflowz.com" target="_blank" rel="noreferrer">OptiFlowz</a> – Copyright © <span id="currentYear"></span> – All rights reserved</span>
+      </footer>
     </div>
   </main>
 
   <script>
+    const currentYear = document.getElementById("currentYear");
     const searchInput = document.getElementById("search");
     const globalSearch = document.getElementById("globalSearch");
     const sidebarSearch = document.getElementById("sidebarSearch");
@@ -1412,7 +1454,7 @@
     const erdImage = document.querySelector(".erd-canvas img");
     const erdZoomLabel = document.querySelector(".erd-zoom-label");
     const erdZoomControls = Array.from(document.querySelectorAll("[data-erd-zoom]"));
-    let currentTarget = location.hash.replace("#", "") || "overview";
+    let currentTarget = window.__initialHashTarget || location.hash.replace("#", "") || "overview";
     let activeSearchField = globalSearch;
     let erdZoom = 0.5;
     const documentationTargets = new Set(docTargets.map((item) => item.dataset.docTarget));
@@ -1420,6 +1462,9 @@
     const ERD_MIN_ZOOM = 0.18;
     const ERD_MAX_ZOOM = 2.5;
     const ERD_DEFAULT_ZOOM = 0.5;
+    if (currentYear) {
+      currentYear.textContent = String(new Date().getFullYear());
+    }
     const responseExamples = {
       "/api/auth/user-update": `{
   "id": "user_uuid",
@@ -2238,6 +2283,13 @@ Content-Disposition: attachment; filename="certificate.pdf"
       window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     }
 
+    function stabilizePageTopScroll() {
+      scrollPageTop();
+      requestAnimationFrame(scrollPageTop);
+      window.setTimeout(scrollPageTop, 0);
+      window.setTimeout(scrollPageTop, 80);
+    }
+
     function showDocumentation(target = DEFAULT_DOCUMENTATION_TARGET) {
       const normalized = documentationTargets.has(target) ? target : DEFAULT_DOCUMENTATION_TARGET;
       currentTarget = normalized;
@@ -2262,7 +2314,7 @@ Content-Disposition: attachment; filename="certificate.pdf"
       if (normalized === "erd-diagram") {
         requestAnimationFrame(() => renderErdZoom({ preserveCenter: false }));
       }
-      requestAnimationFrame(scrollPageTop);
+      stabilizePageTopScroll();
     }
 
     function showView(target = "overview") {
@@ -2300,7 +2352,7 @@ Content-Disposition: attachment; filename="certificate.pdf"
       setActiveNav(hasSearch ? "" : normalized);
       applyFilters();
 
-      requestAnimationFrame(scrollPageTop);
+      stabilizePageTopScroll();
     }
 
     function applyFilters() {
@@ -2421,6 +2473,10 @@ Content-Disposition: attachment; filename="certificate.pdf"
       showView(location.hash.replace("#", "") || "overview");
     });
 
+    window.addEventListener("load", () => {
+      if (location.hash) stabilizePageTopScroll();
+    });
+
     window.addEventListener("keydown", (event) => {
       if (event.key === "Escape") closeMenu();
     });
@@ -2428,6 +2484,9 @@ Content-Disposition: attachment; filename="certificate.pdf"
     addConcreteResponseExamples();
     highlightCodeBlocks();
     showView(currentTarget);
+    if (currentTarget) {
+      history.replaceState(null, "", `#${currentTarget}`);
+    }
   </script>
 </body>
 </html>

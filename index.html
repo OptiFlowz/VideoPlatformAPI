@@ -61,17 +61,39 @@
       box-sizing: border-box;
     }
 
+    .icon-sprite {
+      position: absolute;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+    }
+
+    .ui-icon {
+      display: block;
+      width: 1em;
+      height: 1em;
+      flex: 0 0 auto;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
     html {
       scroll-padding-top: 64px;
+      overscroll-behavior-y: none;
     }
 
     body {
       margin: 0;
+      padding-top: 64px;
       background: #000;
       color: var(--text);
       font-family: "Geist", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       line-height: 1.5;
       min-height: 100vh;
+      overscroll-behavior-y: none;
     }
 
     .skip-link {
@@ -97,8 +119,10 @@
     }
 
     header {
-      position: sticky;
+      position: fixed;
       top: 0;
+      right: 0;
+      left: 0;
       z-index: 40;
       background: rgba(0, 0, 0, 0.92);
       color: #fff;
@@ -347,6 +371,7 @@
     .sidebar a {
       display: flex;
       align-items: center;
+      gap: 10px;
       min-height: 34px;
       color: #9ca3af;
       text-decoration: none;
@@ -364,6 +389,18 @@
     .sidebar a.active {
       background: rgba(255, 255, 255, 0.10);
       color: #fff;
+    }
+
+    .nav-icon {
+      width: 16px;
+      height: 16px;
+      color: #718096;
+      transition: color 140ms ease;
+    }
+
+    .sidebar a:hover .nav-icon,
+    .sidebar a.active .nav-icon {
+      color: #8bc3ff;
     }
 
     .sidebar-mode {
@@ -450,6 +487,11 @@
       font-weight: 900;
     }
 
+    .card-icon .ui-icon {
+      width: 21px;
+      height: 21px;
+    }
+
     .endpoint-card h2 {
       font-size: 22px;
       margin-bottom: 10px;
@@ -504,11 +546,37 @@
     }
 
     .doc-overview-item {
+      display: block;
       min-height: 158px;
       padding: 22px;
       border: 1px solid rgba(255, 255, 255, 0.13);
       border-radius: 12px;
       background: #030303;
+      color: inherit;
+      text-decoration: none;
+      transition: border-color 140ms ease, background 140ms ease, transform 140ms ease;
+    }
+
+    a.doc-overview-item:hover {
+      border-color: rgba(255, 255, 255, 0.25);
+      background: #090909;
+      transform: translateY(-1px);
+    }
+
+    .doc-overview-icon {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      margin-bottom: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 9px;
+      color: #8bc3ff;
+    }
+
+    .doc-overview-icon .ui-icon {
+      width: 18px;
+      height: 18px;
     }
 
     .doc-overview-item h2 {
@@ -520,6 +588,203 @@
       margin: 0;
       color: #a1a1aa;
       font-size: 15px;
+    }
+
+    .doc-section {
+      margin-top: 44px;
+    }
+
+    .doc-section > h2 {
+      margin-bottom: 10px;
+      font-size: 26px;
+    }
+
+    .doc-section > p {
+      max-width: 760px;
+      margin: 0 0 22px;
+      color: #a1a1aa;
+      font-size: 16px;
+    }
+
+    .doc-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .doc-card {
+      min-width: 0;
+      padding: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      background: #050505;
+    }
+
+    .doc-card h3 {
+      margin: 0 0 9px;
+      color: #f8fafc;
+      font-size: 17px;
+    }
+
+    .doc-card p,
+    .doc-card li {
+      color: #a1a1aa;
+      font-size: 14px;
+    }
+
+    .doc-card p {
+      margin: 0;
+    }
+
+    .doc-card ul {
+      margin: 12px 0 0;
+      padding-left: 18px;
+    }
+
+    .doc-card li + li {
+      margin-top: 7px;
+    }
+
+    .flow-list {
+      display: grid;
+      gap: 0;
+      margin-top: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      overflow: hidden;
+      background: #050505;
+    }
+
+    .flow-step {
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      gap: 14px;
+      padding: 18px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+    }
+
+    .flow-step:last-child {
+      border-bottom: 0;
+    }
+
+    .flow-number {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border: 1px solid rgba(64, 149, 255, 0.38);
+      border-radius: 999px;
+      background: rgba(64, 149, 255, 0.10);
+      color: #8bc3ff;
+      font: 700 13px "Geist Mono", monospace;
+    }
+
+    .flow-step h3 {
+      margin: 1px 0 5px;
+      font-size: 16px;
+    }
+
+    .flow-step p {
+      margin: 0;
+      color: #a1a1aa;
+      font-size: 14px;
+    }
+
+    .module-tree {
+      margin: 22px 0 0;
+      padding: 20px 22px;
+      overflow-x: auto;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      background: #020202;
+      color: #cbd5e1;
+      font: 13px/1.75 "Geist Mono", ui-monospace, monospace;
+      white-space: pre;
+    }
+
+    .doc-callout {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 14px;
+      margin-top: 22px;
+      padding: 18px 20px;
+      border: 1px solid rgba(64, 149, 255, 0.24);
+      border-radius: 12px;
+      background: rgba(64, 149, 255, 0.07);
+    }
+
+    .doc-callout .ui-icon {
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
+      color: #8bc3ff;
+    }
+
+    .doc-callout strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .doc-callout p {
+      margin: 0;
+      color: #b7c2d6;
+      font-size: 14px;
+    }
+
+    .doc-table-wrap {
+      margin-top: 22px;
+      overflow-x: auto;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+    }
+
+    .doc-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #050505;
+      font-size: 14px;
+    }
+
+    .doc-table th,
+    .doc-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .doc-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .doc-table th {
+      color: #e5e7eb;
+      background: #0b0b0b;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .doc-table td {
+      color: #a1a1aa;
+    }
+
+    .doc-table code {
+      color: #dbeafe;
+    }
+
+    .doc-pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 0 8px;
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      border-radius: 999px;
+      color: #dbeafe;
+      background: rgba(255, 255, 255, 0.05);
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
     }
 
     .doc-panel {
@@ -959,6 +1224,7 @@
       .mobile-sidebar-switch a {
         display: flex;
         align-items: center;
+        gap: 10px;
         min-height: 38px;
         border-radius: 8px;
         padding: 0 10px;
@@ -1041,6 +1307,10 @@
         grid-template-columns: 1fr;
       }
 
+      .doc-grid {
+        grid-template-columns: 1fr;
+      }
+
       .grid {
         grid-template-columns: 1fr;
       }
@@ -1071,6 +1341,27 @@
   </style>
 </head>
 <body>
+  <svg class="icon-sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="icon-overview" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+    <symbol id="icon-system" viewBox="0 0 24 24"><path d="M3 12h4l2.2-5 4.1 10 2.2-5H21"/><path d="M4.5 5.5a10 10 0 0 1 15 0M4.5 18.5a10 10 0 0 0 15 0"/></symbol>
+    <symbol id="icon-auth" viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.6 2.8 8.2 7 10 4.2-1.8 7-5.4 7-10V6l-7-3Z"/><circle cx="12" cy="11" r="2"/><path d="M12 13v3"/></symbol>
+    <symbol id="icon-videos" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m10 8 6 4-6 4Z"/></symbol>
+    <symbol id="icon-video-moderation" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m9 9 5 3-5 3Z"/><path d="M17 8v3M15.5 9.5h3M17 14v2M16 15h2"/></symbol>
+    <symbol id="icon-people" viewBox="0 0 24 24"><circle cx="9" cy="9" r="3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><circle cx="17" cy="8" r="2.3"/><path d="M15.5 14.5a4.7 4.7 0 0 1 5 4.5"/></symbol>
+    <symbol id="icon-comments" viewBox="0 0 24 24"><path d="M20 15a3 3 0 0 1-3 3H9l-5 3v-6a3 3 0 0 1-1-2.2V7a3 3 0 0 1 3-3h11a3 3 0 0 1 3 3Z"/><path d="M8 9h8M8 13h5"/></symbol>
+    <symbol id="icon-playlists" viewBox="0 0 24 24"><path d="M4 6h11M4 11h8M4 16h7"/><path d="m16 13 5 3.5-5 3.5Z"/></symbol>
+    <symbol id="icon-playlist-moderation" viewBox="0 0 24 24"><path d="M4 6h11M4 11h8M4 16h7"/><path d="M18 13v7M14.5 16.5h7"/></symbol>
+    <symbol id="icon-channels" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M8.5 8.5a5 5 0 0 0 0 7M15.5 8.5a5 5 0 0 1 0 7M5.5 5.5a9 9 0 0 0 0 13M18.5 5.5a9 9 0 0 1 0 13"/></symbol>
+    <symbol id="icon-quizzes" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5V3h6v1.5M8.5 10l1.5 1.5 3-3M8.5 16l1.5 1.5 3-3M15 10h1M15 16h1"/></symbol>
+    <symbol id="icon-analytics" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/><path d="m4 7 5-4 6 6 6-5"/></symbol>
+    <symbol id="icon-reports" viewBox="0 0 24 24"><path d="M6 2h8l4 4v16H6Z"/><path d="M14 2v5h5M9 17v-3M12 17v-6M15 17v-2"/></symbol>
+    <symbol id="icon-book" viewBox="0 0 24 24"><path d="M4 4.5A3.5 3.5 0 0 1 7.5 3H11v17H7.5A3.5 3.5 0 0 0 4 21.5ZM20 4.5A3.5 3.5 0 0 0 16.5 3H13v17h3.5a3.5 3.5 0 0 1 3.5 1.5Z"/></symbol>
+    <symbol id="icon-architecture" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="5" rx="1"/><rect x="3" y="16" width="6" height="5" rx="1"/><rect x="15" y="16" width="6" height="5" rx="1"/><path d="M12 8v4M6 16v-4h12v4"/></symbol>
+    <symbol id="icon-security" viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.6 2.8 8.2 7 10 4.2-1.8 7-5.4 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-5"/></symbol>
+    <symbol id="icon-media" viewBox="0 0 24 24"><path d="M7 18H5a3 3 0 0 1-.4-6A7 7 0 0 1 18 10.5a4 4 0 0 1 1 7.5h-2"/><path d="M12 20V10M8.5 13.5 12 10l3.5 3.5"/></symbol>
+    <symbol id="icon-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></symbol>
+    <symbol id="icon-api" viewBox="0 0 24 24"><path d="m8 5-6 7 6 7M16 5l6 7-6 7M14 3l-4 18"/></symbol>
+  </svg>
   <a class="skip-link" href="#main-content">Skip to content</a>
   <header>
     <div class="wrap">
@@ -1098,8 +1389,8 @@
   <main id="main-content" class="docs-layout" tabindex="-1">
     <aside class="sidebar" aria-label="Page sections">
       <nav class="mobile-sidebar-switch" aria-label="Mobile page navigation">
-        <a href="#overview" class="active" data-top-tab="api">API Reference</a>
-        <a href="#documentation-overview" data-top-tab="documentation">Documentation</a>
+        <a href="#overview" class="active" data-top-tab="api"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-api"></use></svg><span>API Reference</span></a>
+        <a href="#documentation-overview" data-top-tab="documentation"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-book"></use></svg><span>Documentation</span></a>
       </nav>
       <label class="sidebar-search api-sidebar" aria-label="Search all endpoints from navigation">
         <input id="sidebarSearch" type="search" placeholder="Search..." autocomplete="off" />
@@ -1107,32 +1398,36 @@
       <div class="sidebar-mode api-sidebar">
         <div class="side-group">
           <div class="side-label">Overview</div>
-          <a href="#overview" data-target="overview">Overview</a>
-          <a href="#system" data-target="system">System</a>
+          <a href="#overview" data-target="overview"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-overview"></use></svg><span>Overview</span></a>
+          <a href="#system" data-target="system"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-system"></use></svg><span>System</span></a>
         </div>
         <div class="side-group">
           <div class="side-label">Core API</div>
-          <a href="#auth" data-target="auth">Auth</a>
-          <a href="#videos" data-target="videos">Videos</a>
-          <a href="#video-moderation" data-target="video-moderation">Video Moderation</a>
-          <a href="#people" data-target="people">People</a>
-          <a href="#comments" data-target="comments">Comments</a>
+          <a href="#auth" data-target="auth"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-auth"></use></svg><span>Auth</span></a>
+          <a href="#videos" data-target="videos"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-videos"></use></svg><span>Videos</span></a>
+          <a href="#video-moderation" data-target="video-moderation"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-video-moderation"></use></svg><span>Video Moderation</span></a>
+          <a href="#people" data-target="people"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-people"></use></svg><span>People</span></a>
+          <a href="#comments" data-target="comments"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-comments"></use></svg><span>Comments</span></a>
         </div>
         <div class="side-group">
           <div class="side-label">Content</div>
-          <a href="#playlists" data-target="playlists">Playlists</a>
-          <a href="#playlist-moderation" data-target="playlist-moderation">Playlist Moderation</a>
-          <a href="#channels" data-target="channels">Channels</a>
-          <a href="#quizzes" data-target="quizzes">Quizzes</a>
-          <a href="#analytics" data-target="analytics">Analytics</a>
-          <a href="#reports" data-target="reports">Reports</a>
+          <a href="#playlists" data-target="playlists"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-playlists"></use></svg><span>Playlists</span></a>
+          <a href="#playlist-moderation" data-target="playlist-moderation"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-playlist-moderation"></use></svg><span>Playlist Moderation</span></a>
+          <a href="#channels" data-target="channels"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-channels"></use></svg><span>Channels</span></a>
+          <a href="#quizzes" data-target="quizzes"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-quizzes"></use></svg><span>Quizzes</span></a>
+          <a href="#analytics" data-target="analytics"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-analytics"></use></svg><span>Analytics</span></a>
+          <a href="#reports" data-target="reports"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-reports"></use></svg><span>Reports</span></a>
         </div>
       </div>
       <div class="sidebar-mode documentation-sidebar view-hidden">
         <div class="side-group">
           <div class="side-label">Documentation</div>
-          <a href="#documentation-overview" data-doc-target="documentation-overview">Overview</a>
-          <a href="#erd-diagram" data-doc-target="erd-diagram">ERD Diagram</a>
+          <a href="#documentation-overview" data-doc-target="documentation-overview"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-book"></use></svg><span>Overview</span></a>
+          <a href="#architecture" data-doc-target="architecture"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-architecture"></use></svg><span>Architecture</span></a>
+          <a href="#authentication-roles" data-doc-target="authentication-roles"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-security"></use></svg><span>Authentication &amp; Roles</span></a>
+          <a href="#media-pipeline" data-doc-target="media-pipeline"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-media"></use></svg><span>Media Pipeline</span></a>
+          <a href="#analytics-tracking" data-doc-target="analytics-tracking"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-analytics"></use></svg><span>Analytics &amp; Tracking</span></a>
+          <a href="#erd-diagram" data-doc-target="erd-diagram"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-database"></use></svg><span>ERD Diagram</span></a>
         </div>
       </div>
     </aside>
@@ -1153,52 +1448,52 @@
         <h2>Endpoints</h2>
         <div class="endpoint-grid">
           <a class="endpoint-card" href="#auth" data-target="auth">
-            <span class="card-icon">A</span>
+            <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-auth"></use></svg></span>
             <h2>Auth</h2>
             <p>Register, login, OAuth, profile updates, password reset, and profile images.</p>
           </a>
           <a class="endpoint-card" href="#videos" data-target="videos">
-            <span class="card-icon">V</span>
+            <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-videos"></use></svg></span>
             <h2>Videos</h2>
             <p>Search, playback details, upload initiation, progress, reactions, history, and recommendations.</p>
           </a>
           <a class="endpoint-card" href="#video-moderation" data-target="video-moderation">
-            <span class="card-icon">M</span>
+            <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-video-moderation"></use></svg></span>
             <h2>Video Moderation</h2>
             <p>Video metadata, thumbnails, subtitles, Mux track management, and generated details.</p>
           </a>
           <a class="endpoint-card" href="#playlists" data-target="playlists">
-            <span class="card-icon">P</span>
+            <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-playlists"></use></svg></span>
             <h2>Playlists</h2>
             <p>Playlist search, featured lists, saved playlists, and playlist video browsing.</p>
           </a>
           <a class="endpoint-card" href="#quizzes" data-target="quizzes">
-            <span class="card-icon">Q</span>
+            <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-quizzes"></use></svg></span>
             <h2>Quizzes</h2>
             <p>Quiz management, questions, access rules, attempts, answers, certificates, and scoring.</p>
           </a>
           <a class="endpoint-card" href="#people" data-target="people">
-            <span class="card-icon">U</span>
+            <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-people"></use></svg></span>
             <h2>People</h2>
             <p>Speaker and chair profiles, search, sorting, profile images, and admin maintenance.</p>
           </a>
           <a class="endpoint-card" href="#comments" data-target="comments">
-            <span class="card-icon">C</span>
+            <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-comments"></use></svg></span>
             <h2>Comments</h2>
             <p>Comment posting, replies, editing, deletion, and reactions.</p>
           </a>
           <a class="endpoint-card" href="#channels" data-target="channels">
-            <span class="card-icon">H</span>
+            <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-channels"></use></svg></span>
             <h2>Channels</h2>
             <p>Channel details, published videos, and public playlist collections.</p>
           </a>
           <a class="endpoint-card" href="#analytics" data-target="analytics">
-            <span class="card-icon">N</span>
+            <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-analytics"></use></svg></span>
             <h2>Analytics</h2>
             <p>Video and channel performance, audience, geography, engagement, and time-series metrics.</p>
           </a>
           <a class="endpoint-card" href="#reports" data-target="reports">
-            <span class="card-icon">R</span>
+            <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-reports"></use></svg></span>
             <h2>Reports</h2>
             <p>PDF analytics export for video platform reporting.</p>
           </a>
@@ -1696,18 +1991,209 @@
         <div class="divider"></div>
 
         <div class="doc-overview-grid">
-          <div class="doc-overview-item">
-            <h2>Request Flow</h2>
-            <p>Requests enter through the Express app, pass through CORS and JSON parsing, then fan out to module routes registered from <code>src/routes/index.js</code>.</p>
-          </div>
-          <div class="doc-overview-item">
+          <a class="doc-overview-item" href="#architecture" data-doc-target="architecture">
+            <span class="doc-overview-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-architecture"></use></svg></span>
+            <h2>Architecture</h2>
+            <p>Express lifecycle, module boundaries, route registration, database pools, and shared infrastructure.</p>
+          </a>
+          <a class="doc-overview-item" href="#authentication-roles" data-doc-target="authentication-roles">
+            <span class="doc-overview-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-security"></use></svg></span>
+            <h2>Authentication &amp; Roles</h2>
+            <p>Bearer JWT handling, public and optional access, protected routes, and admin/uploader permissions.</p>
+          </a>
+          <a class="doc-overview-item" href="#media-pipeline" data-doc-target="media-pipeline">
+            <span class="doc-overview-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-media"></use></svg></span>
             <h2>Media Pipeline</h2>
-            <p>Video upload, playback, thumbnails, subtitles, generated chapters, and webhook updates are handled through Mux and moderation services.</p>
+            <p>Direct upload, Mux processing, signed webhooks, playback, thumbnails, subtitles, chapters, and deletion.</p>
+          </a>
+          <a class="doc-overview-item" href="#analytics-tracking" data-doc-target="analytics-tracking">
+            <span class="doc-overview-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-analytics"></use></svg></span>
+            <h2>Analytics &amp; Tracking</h2>
+            <p>View sessions, playback heartbeats, audience dimensions, aggregations, date filters, and reports.</p>
+          </a>
+          <a class="doc-overview-item" href="#erd-diagram" data-doc-target="erd-diagram">
+            <span class="doc-overview-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-database"></use></svg></span>
+            <h2>Database Model</h2>
+            <p>Explore the ERD for users, videos, playlists, comments, reactions, quizzes, certificates, and analytics.</p>
+          </a>
+          <a class="doc-overview-item" href="#overview" data-target="overview">
+            <span class="doc-overview-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-api"></use></svg></span>
+            <h2>API Reference</h2>
+            <p>Browse all route groups, request shapes, query parameters, authorization requirements, and responses.</p>
+          </a>
+        </div>
+      </section>
+
+      <section id="architecture" class="documentation-page view-hidden">
+        <div class="eyebrow">Documentation</div>
+        <h1>Backend Architecture</h1>
+        <p class="intro">How requests move through the Express application and where each backend responsibility lives.</p>
+
+        <div class="doc-section">
+          <h2>Request lifecycle</h2>
+          <p>The API has a thin application bootstrap and a central route registry. Cross-cutting middleware runs before requests enter a domain module.</p>
+          <div class="flow-list">
+            <div class="flow-step"><span class="flow-number">1</span><div><h3>Application bootstrap</h3><p><code>src/server.js</code> loads the environment, creates the Express app, starts the HTTP server, and initializes database role logging.</p></div></div>
+            <div class="flow-step"><span class="flow-number">2</span><div><h3>Global middleware</h3><p><code>src/app.js</code> enables trusted proxy headers, CORS, conditional JSON parsing, and a dedicated raw-body parser for the Mux webhook.</p></div></div>
+            <div class="flow-step"><span class="flow-number">3</span><div><h3>Route registration</h3><p><code>src/routes/index.js</code> mounts every domain router below <code>/api</code> and exposes the root <code>/health</code> check.</p></div></div>
+            <div class="flow-step"><span class="flow-number">4</span><div><h3>Domain handling</h3><p>Route middleware applies authentication and roles before controllers, handlers, and services validate input, enforce ownership, query PostgreSQL, or call external integrations.</p></div></div>
+            <div class="flow-step"><span class="flow-number">5</span><div><h3>Response and errors</h3><p>Handlers return JSON or binary output. Unmatched routes and unhandled errors fall through centralized 404 and 500 middleware.</p></div></div>
           </div>
-          <div class="doc-overview-item">
-            <h2>Learning Layer</h2>
-            <p>Quizzes connect videos and playlists with access rules, attempts, answers, grading, and certificate generation.</p>
+        </div>
+
+        <div class="doc-section">
+          <h2>Module boundaries</h2>
+          <p>The backend is organized by domain, with shared infrastructure kept outside business modules.</p>
+          <div class="doc-grid">
+            <div class="doc-card"><h3>Domain modules</h3><p><code>auth</code>, <code>videos</code>, <code>playlists</code>, <code>people</code>, <code>comments</code>, <code>channels</code>, <code>quizzes</code>, <code>analytics</code>, and <code>reports</code>.</p></div>
+            <div class="doc-card"><h3>Cross-cutting code</h3><p><code>config</code>, <code>database</code>, <code>middleware</code>, and <code>common</code> hold environment, DB pools, request processing, ownership checks, validation, logging, and response helpers.</p></div>
+            <div class="doc-card"><h3>Read/write separation</h3><p>Queries use explicit <code>readPool</code> and <code>writePool</code> connections. Production reads can be routed to a regional replica while writes remain on the leader.</p></div>
+            <div class="doc-card"><h3>Service integrations</h3><p>Mux handles video delivery, R2 stores uploaded images, n8n supports automation workflows, MaxMind resolves geography, and Puppeteer renders PDF reports and certificates.</p></div>
           </div>
+          <div class="module-tree">src/
+├── app.js                 Express configuration
+├── server.js              Process bootstrap
+├── config/                Environment and CORS
+├── database/              PostgreSQL read/write pools
+├── middleware/            Auth, parsers, error handling
+├── common/                Validation, ownership, logging
+├── routes/index.js        Central route registry
+└── modules/
+    ├── auth/              Identity and profiles
+    ├── videos/            Delivery and moderation
+    ├── playlists/         Public and admin collections
+    ├── people/ comments/ channels/
+    ├── quizzes/           Learning and certificates
+    ├── analytics/         Video and channel metrics
+    ├── reports/           PDF analytics export
+    └── storage/           Cloudflare R2 client</div>
+        </div>
+
+        <div class="doc-callout">
+          <svg class="ui-icon" aria-hidden="true"><use href="#icon-architecture"></use></svg>
+          <div><strong>Thin routes, focused handlers</strong><p>Most modular route files only compose middleware and controller functions. Database-heavy and integration-heavy behavior lives in handlers and services, keeping the public route map easy to scan.</p></div>
+        </div>
+      </section>
+
+      <section id="authentication-roles" class="documentation-page view-hidden">
+        <div class="eyebrow">Documentation</div>
+        <h1>Authentication &amp; Roles</h1>
+        <p class="intro">JWT authentication, optional personalization, role gates, and resource ownership rules used throughout the API.</p>
+
+        <div class="doc-section">
+          <h2>Access levels</h2>
+          <p>Each route declares its access policy through composable Express middleware.</p>
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead><tr><th>Level</th><th>Token behavior</th><th>Typical usage</th></tr></thead>
+              <tbody>
+                <tr><td><span class="doc-pill">Public</span></td><td>No Bearer token is required.</td><td>Registration, login, password reset, OAuth, health, and the signed Mux webhook.</td></tr>
+                <tr><td><span class="doc-pill">Optional</span></td><td>A valid token populates <code>req.user</code>; a missing or invalid token is treated as anonymous.</td><td>Video search and details, playlists, people, comments, and channel browsing with optional personalization.</td></tr>
+                <tr><td><span class="doc-pill">Auth</span></td><td><code>requireAuth</code> verifies <code>Authorization: Bearer &lt;token&gt;</code>. Missing or invalid tokens return 401.</td><td>User profile, history, reactions, progress, saved playlists, quiz attempts, and certificates.</td></tr>
+                <tr><td><span class="doc-pill">Admin</span></td><td><code>requireAdmin</code> runs after authentication and accepts roles <code>admin</code> or <code>uploader</code>. Other roles return 403.</td><td>Uploads, moderation, quiz authoring, analytics, people management, and PDF reporting.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="doc-section">
+          <h2>Bearer token flow</h2>
+          <div class="flow-list">
+            <div class="flow-step"><span class="flow-number">1</span><div><h3>Issue</h3><p>Login, registration, or Google OAuth returns a signed JWT together with the user profile.</p></div></div>
+            <div class="flow-step"><span class="flow-number">2</span><div><h3>Send</h3><p>The client places the token in <code>Authorization: Bearer &lt;jwt-token&gt;</code> on protected requests.</p></div></div>
+            <div class="flow-step"><span class="flow-number">3</span><div><h3>Verify</h3><p><code>jsonwebtoken</code> verifies the signature with <code>JWT_SECRET</code> and attaches the payload to <code>req.user</code>.</p></div></div>
+            <div class="flow-step"><span class="flow-number">4</span><div><h3>Authorize</h3><p>Role middleware and ownership helpers decide whether the authenticated subject can access the requested resource.</p></div></div>
+          </div>
+        </div>
+
+        <div class="doc-section">
+          <h2>Security controls</h2>
+          <div class="doc-grid">
+            <div class="doc-card"><h3>Password handling</h3><p>Passwords are hashed before storage. Reset request, verification, and reset endpoints use dedicated rate limiters.</p></div>
+            <div class="doc-card"><h3>Ownership checks</h3><p>Video analytics verifies that the current uploader owns the video. Quiz and comment mutations similarly validate creator or user ownership.</p></div>
+            <div class="doc-card"><h3>Upload validation</h3><p>Multer-based upload middleware limits accepted file types and sizes before images or subtitle files reach service logic.</p></div>
+            <div class="doc-card"><h3>Webhook trust</h3><p>Mux is not authenticated with JWT. Its raw request body is validated with the <code>Mux-Signature</code> HMAC before JSON is processed.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="media-pipeline" class="documentation-page view-hidden">
+        <div class="eyebrow">Documentation</div>
+        <h1>Media Pipeline</h1>
+        <p class="intro">The complete path from an admin initiating a video upload to ready playback and later moderation.</p>
+
+        <div class="doc-section">
+          <h2>Upload to playback</h2>
+          <p>Large media files travel directly from the client to Mux; the API coordinates metadata and lifecycle state.</p>
+          <div class="flow-list">
+            <div class="flow-step"><span class="flow-number">1</span><div><h3>Initiate upload</h3><p><code>POST /api/videos/upload/initiate</code> creates the video record and asks Mux for a direct upload URL. The request requires an admin or uploader token.</p></div></div>
+            <div class="flow-step"><span class="flow-number">2</span><div><h3>Direct client transfer</h3><p>The browser uploads the media to the returned Mux URL. Mux receives the database video ID through passthrough metadata and can generate the requested subtitle track.</p></div></div>
+            <div class="flow-step"><span class="flow-number">3</span><div><h3>Signed webhook</h3><p>Mux posts asset events to <code>/api/videos/webhook/mux</code>. The backend keeps the body raw until its HMAC signature is verified.</p></div></div>
+            <div class="flow-step"><span class="flow-number">4</span><div><h3>Asset synchronization</h3><p>A ready event stores duration, asset ID, playback ID, status, and a default thumbnail URL. Error and deletion events update or remove the matching record.</p></div></div>
+            <div class="flow-step"><span class="flow-number">5</span><div><h3>Playback delivery</h3><p>Public ready videos expose Mux playback metadata to discovery and detail endpoints. Private videos remain limited to their uploader.</p></div></div>
+            <div class="flow-step"><span class="flow-number">6</span><div><h3>Post-upload moderation</h3><p>Admins can update metadata, upload a thumbnail, replace or generate subtitles, generate chapters, preview generated details, and request asset deletion.</p></div></div>
+          </div>
+        </div>
+
+        <div class="doc-section">
+          <h2>Supporting services</h2>
+          <div class="doc-grid">
+            <div class="doc-card"><h3>Mux Video</h3><p>Direct uploads, adaptive playback, asset state, generated subtitles, text tracks, and default video thumbnails.</p></div>
+            <div class="doc-card"><h3>Mux AI</h3><p><code>@mux/ai</code> generates chapters from an existing Mux asset and a requested language, using the configured OpenAI provider.</p></div>
+            <div class="doc-card"><h3>Cloudflare R2</h3><p>An S3-compatible client stores uploaded profile, person, video, and playlist imagery outside PostgreSQL.</p></div>
+            <div class="doc-card"><h3>n8n workflows</h3><p>Automation webhooks support password-reset delivery and AI-assisted subtitle or metadata generation workflows.</p></div>
+          </div>
+        </div>
+
+        <div class="doc-callout">
+          <svg class="ui-icon" aria-hidden="true"><use href="#icon-security"></use></svg>
+          <div><strong>Webhook parsing is intentionally different</strong><p>The Mux endpoint receives <code>application/json</code> as raw bytes, while regular JSON routes use the normal Express JSON parser. This preserves the exact payload needed for signature verification.</p></div>
+        </div>
+      </section>
+
+      <section id="analytics-tracking" class="documentation-page view-hidden">
+        <div class="eyebrow">Documentation</div>
+        <h1>Analytics &amp; Tracking</h1>
+        <p class="intro">How view sessions, watch time, audience dimensions, engagement, and reports are derived.</p>
+
+        <div class="doc-section">
+          <h2>Playback tracking flow</h2>
+          <div class="flow-list">
+            <div class="flow-step"><span class="flow-number">1</span><div><h3>Start or reuse a view</h3><p>Opening a video creates a <code>video_views</code> session or reuses a matching session created within the previous two hours, avoiding duplicate view-count increments.</p></div></div>
+            <div class="flow-step"><span class="flow-number">2</span><div><h3>Identify the viewer</h3><p>Authenticated sessions use the user ID. Anonymous sessions use an HMAC-hashed IP plus user agent; raw IP is used only for the location lookup before hashing.</p></div></div>
+            <div class="flow-step"><span class="flow-number">3</span><div><h3>Enrich dimensions</h3><p>Country, ISO country code, city, and user agent are stored with the view so geographic, device, and operating-system breakdowns can be calculated.</p></div></div>
+            <div class="flow-step"><span class="flow-number">4</span><div><h3>Accumulate watch time</h3><p><code>POST /api/videos/heartbeat</code> accepts sequential heartbeat numbers and only counts playing time. Each delta is capped to protect totals from delayed or duplicated requests.</p></div></div>
+            <div class="flow-step"><span class="flow-number">5</span><div><h3>Update user progress</h3><p>For authenticated viewers, counted heartbeat time is also accumulated in <code>watch_progress</code> for history, continue watching, recommendations, and quiz requirements.</p></div></div>
+          </div>
+        </div>
+
+        <div class="doc-section">
+          <h2>Available metrics</h2>
+          <div class="doc-grid">
+            <div class="doc-card"><h3>Performance</h3><p>Total and first-time views, total watch time, average watch time per viewer, likes, dislikes, and comments.</p></div>
+            <div class="doc-card"><h3>Audience</h3><p>Device split, operating-system split, and a country/city geographic breakdown derived from captured view dimensions.</p></div>
+            <div class="doc-card"><h3>Retention</h3><p>Completion buckets group viewers below 25%, through intermediate ranges, and above 95% completion.</p></div>
+            <div class="doc-card"><h3>Engagement</h3><p>Video engagement compares accumulated watch time with video duration. Channel analytics also returns average engagement per uploaded video.</p></div>
+          </div>
+        </div>
+
+        <div class="doc-section">
+          <h2>Query model</h2>
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead><tr><th>Scope</th><th>Identity</th><th>Filters</th><th>Authorization</th></tr></thead>
+              <tbody>
+                <tr><td>Video analytics</td><td><code>:videoId</code> path parameter</td><td><code>fromDate</code>, <code>toDate</code>; time-series routes also accept <code>groupBy=day|week|month</code>.</td><td>Admin/uploader plus video ownership.</td></tr>
+                <tr><td>Channel analytics</td><td>Uploader ID from the JWT</td><td>The same optional date range and time grouping.</td><td>Admin/uploader; includes all videos uploaded by that user.</td></tr>
+                <tr><td>PDF report</td><td>Platform report scope</td><td><code>range</code>, <code>from</code>, <code>to</code>, <code>groupBy</code>, visibility, and timezone controls.</td><td>Admin/uploader.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="doc-callout">
+          <svg class="ui-icon" aria-hidden="true"><use href="#icon-reports"></use></svg>
+          <div><strong>Operational metrics and export share the same source</strong><p>Interactive analytics handlers and Puppeteer-generated PDF reports both aggregate PostgreSQL view, reaction, comment, user, and video data, while serving different presentation needs.</p></div>
         </div>
       </section>
 

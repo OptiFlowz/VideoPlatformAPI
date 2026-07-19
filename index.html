@@ -35,18 +35,40 @@
     if (window.__initialHashTarget) {
       window.history.replaceState(null, "", window.location.href.replace(window.location.hash, ""));
     }
+
+    try {
+      const savedTheme = window.localStorage.getItem("optiflowz-theme");
+      const supportedThemes = ["optiflowz", "catppuccin", "github", "linear", "ayu", "everforest"];
+      document.documentElement.dataset.theme = supportedThemes.includes(savedTheme) ? savedTheme : "optiflowz";
+    } catch (_error) {
+      document.documentElement.dataset.theme = "optiflowz";
+    }
   </script>
   <style>
     :root {
       --bg: #000;
+      --surface: #070707;
+      --surface-subtle: #030303;
+      --surface-raised: #111;
+      --surface-hover: #181818;
+      --surface-code: #030303;
       --panel: rgba(16, 16, 16, 0.76);
       --panel-strong: rgba(18, 18, 18, 0.94);
+      --header-bg: rgba(0, 0, 0, 0.92);
+      --sticky-bg: rgba(0, 0, 0, 0.82);
       --text: #f8fafc;
       --muted: #b7c2d6;
+      --muted-soft: #8b98ad;
+      --muted-strong: #c9d4e8;
       --border: rgba(255, 255, 255, 0.12);
+      --border-strong: rgba(255, 255, 255, 0.24);
       --code: #f8fafc;
       --blue: #4095ff;
       --blue-strong: #0b67db;
+      --accent: #4095ff;
+      --accent-text: #8bc3ff;
+      --accent-soft: rgba(64, 149, 255, 0.10);
+      --accent-border: rgba(64, 149, 255, 0.38);
       --get: #16a34a;
       --post: #0ea5e9;
       --patch: #f59e0b;
@@ -55,6 +77,136 @@
       --public: #64748b;
       --auth: #2563eb;
       --admin: #dc2626;
+    }
+
+    :root[data-theme="catppuccin"] {
+      --bg: #1e1e2e;
+      --surface: #252538;
+      --surface-subtle: #181825;
+      --surface-raised: #313244;
+      --surface-hover: #3b3d52;
+      --surface-code: #181825;
+      --panel: rgba(37, 37, 56, 0.82);
+      --panel-strong: rgba(49, 50, 68, 0.96);
+      --header-bg: rgba(30, 30, 46, 0.94);
+      --sticky-bg: rgba(30, 30, 46, 0.88);
+      --text: #cdd6f4;
+      --muted: #bac2de;
+      --muted-soft: #9399b2;
+      --muted-strong: #cdd6f4;
+      --border: rgba(205, 214, 244, 0.14);
+      --border-strong: rgba(205, 214, 244, 0.28);
+      --code: #f5e0dc;
+      --blue: #cba6f7;
+      --blue-strong: #b4befe;
+      --accent: #cba6f7;
+      --accent-text: #cba6f7;
+      --accent-soft: rgba(203, 166, 247, 0.12);
+      --accent-border: rgba(203, 166, 247, 0.42);
+    }
+
+    :root[data-theme="github"] {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface-subtle: #0d1117;
+      --surface-raised: #21262d;
+      --surface-hover: #30363d;
+      --surface-code: #010409;
+      --panel: rgba(22, 27, 34, 0.84);
+      --panel-strong: rgba(33, 38, 45, 0.96);
+      --header-bg: rgba(13, 17, 23, 0.95);
+      --sticky-bg: rgba(13, 17, 23, 0.88);
+      --text: #f0f6fc;
+      --muted: #b1bac4;
+      --muted-soft: #8b949e;
+      --muted-strong: #c9d1d9;
+      --border: rgba(240, 246, 252, 0.14);
+      --border-strong: rgba(240, 246, 252, 0.28);
+      --code: #e6edf3;
+      --blue: #58a6ff;
+      --blue-strong: #1f6feb;
+      --accent: #58a6ff;
+      --accent-text: #79c0ff;
+      --accent-soft: rgba(88, 166, 255, 0.12);
+      --accent-border: rgba(88, 166, 255, 0.42);
+    }
+
+    :root[data-theme="linear"] {
+      --bg: #0e0e10;
+      --surface: #17171a;
+      --surface-subtle: #111113;
+      --surface-raised: #222226;
+      --surface-hover: #2c2c32;
+      --surface-code: #09090b;
+      --panel: rgba(23, 23, 26, 0.84);
+      --panel-strong: rgba(34, 34, 38, 0.96);
+      --header-bg: rgba(14, 14, 16, 0.95);
+      --sticky-bg: rgba(14, 14, 16, 0.88);
+      --text: #f7f7f8;
+      --muted: #b4b4bd;
+      --muted-soft: #868690;
+      --muted-strong: #d0d0d6;
+      --border: rgba(247, 247, 248, 0.13);
+      --border-strong: rgba(247, 247, 248, 0.26);
+      --code: #f7f7f8;
+      --blue: #8b7cf6;
+      --blue-strong: #6c5ce7;
+      --accent: #8b7cf6;
+      --accent-text: #a99df8;
+      --accent-soft: rgba(139, 124, 246, 0.12);
+      --accent-border: rgba(139, 124, 246, 0.42);
+    }
+
+    :root[data-theme="ayu"] {
+      --bg: #0b0e14;
+      --surface: #131721;
+      --surface-subtle: #0f131a;
+      --surface-raised: #1c222d;
+      --surface-hover: #252d3a;
+      --surface-code: #080b10;
+      --panel: rgba(19, 23, 33, 0.84);
+      --panel-strong: rgba(28, 34, 45, 0.96);
+      --header-bg: rgba(11, 14, 20, 0.95);
+      --sticky-bg: rgba(11, 14, 20, 0.88);
+      --text: #bfbdb6;
+      --muted: #a6a29a;
+      --muted-soft: #737a85;
+      --muted-strong: #d9d7ce;
+      --border: rgba(191, 189, 182, 0.14);
+      --border-strong: rgba(191, 189, 182, 0.28);
+      --code: #e6e1cf;
+      --blue: #e6b450;
+      --blue-strong: #d99a2b;
+      --accent: #e6b450;
+      --accent-text: #ffcc66;
+      --accent-soft: rgba(230, 180, 80, 0.11);
+      --accent-border: rgba(230, 180, 80, 0.40);
+    }
+
+    :root[data-theme="everforest"] {
+      --bg: #2d353b;
+      --surface: #343f44;
+      --surface-subtle: #293136;
+      --surface-raised: #3d484d;
+      --surface-hover: #475258;
+      --surface-code: #252c30;
+      --panel: rgba(52, 63, 68, 0.86);
+      --panel-strong: rgba(61, 72, 77, 0.96);
+      --header-bg: rgba(45, 53, 59, 0.95);
+      --sticky-bg: rgba(45, 53, 59, 0.88);
+      --text: #d3c6aa;
+      --muted: #b9b29f;
+      --muted-soft: #9da9a0;
+      --muted-strong: #e5dfc9;
+      --border: rgba(211, 198, 170, 0.15);
+      --border-strong: rgba(211, 198, 170, 0.30);
+      --code: #e6e2cc;
+      --blue: #a7c080;
+      --blue-strong: #83a866;
+      --accent: #a7c080;
+      --accent-text: #b7d49b;
+      --accent-soft: rgba(167, 192, 128, 0.12);
+      --accent-border: rgba(167, 192, 128, 0.42);
     }
 
     * {
@@ -124,10 +276,10 @@
       right: 0;
       left: 0;
       z-index: 40;
-      background: rgba(0, 0, 0, 0.92);
-      color: #fff;
+      background: var(--header-bg);
+      color: var(--text);
       padding: 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+      border-bottom: 1px solid var(--border);
       backdrop-filter: blur(12px);
     }
 
@@ -136,6 +288,7 @@
     }
 
     header .wrap {
+      position: relative;
       max-width: none;
       margin: 0 auto;
       display: flex;
@@ -150,7 +303,7 @@
       align-items: center;
       gap: 14px;
       min-width: 0;
-      color: #fff;
+      color: var(--text);
       text-decoration: none;
     }
 
@@ -160,8 +313,8 @@
       height: 40px;
       border: 0;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.08);
-      color: #fff;
+      background: var(--surface-raised);
+      color: var(--text);
       cursor: pointer;
       align-items: center;
       justify-content: center;
@@ -211,7 +364,7 @@
 
     .brand-copy span {
       display: block;
-      color: #8b98ad;
+      color: var(--muted-soft);
       font-size: 11px;
       margin-top: 1px;
     }
@@ -220,7 +373,8 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      color: #a1a1aa;
+      margin-left: auto;
+      color: var(--muted);
       font-size: 14px;
       font-weight: 650;
     }
@@ -237,8 +391,8 @@
 
     .top-links a:hover,
     .top-links a.active {
-      background: rgba(255, 255, 255, 0.10);
-      color: #fff;
+      background: var(--surface-raised);
+      color: var(--text);
     }
 
     .mobile-sidebar-switch {
@@ -246,10 +400,12 @@
     }
 
     .header-search {
-      position: relative;
-      flex: 0 1 240px;
-      max-width: 240px;
-      margin-left: auto;
+      position: absolute;
+      left: 50%;
+      width: clamp(210px, 25vw, 320px);
+      max-width: 320px;
+      margin: 0;
+      transform: translateX(-50%);
     }
 
     body.documentation-mode .header-search {
@@ -260,47 +416,282 @@
     .sidebar-search input {
       width: 100%;
       min-height: 38px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      border: 1px solid var(--border);
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.07);
+      background: var(--surface);
       color: var(--text);
-      padding: 0 14px 0 36px;
+      padding: 0 14px 0 40px;
       font: inherit;
       font-size: 14px;
       outline: none;
-      transition: border-color 160ms ease, background 160ms ease;
+      transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
     }
 
     .header-search input:focus,
     .sidebar-search input:focus {
-      border-color: rgba(255, 255, 255, 0.28);
-      background: rgba(18, 18, 18, 0.92);
+      border-color: var(--border-strong);
+      background: var(--surface-raised);
+      box-shadow: 0 0 0 3px var(--accent-soft);
     }
 
-    .header-search::before,
-    .sidebar-search::before {
-      content: "";
+    .search-icon {
       position: absolute;
       left: 14px;
       top: 50%;
-      width: 12px;
-      height: 12px;
-      border: 2px solid #9ca3af;
-      border-radius: 50%;
+      z-index: 1;
+      width: 16px;
+      height: 16px;
+      color: var(--muted-soft);
+      pointer-events: none;
       transform: translateY(-50%);
+      transition: color 160ms ease, transform 160ms ease;
     }
 
-    .header-search::after,
-    .sidebar-search::after {
+    .header-search:focus-within .search-icon,
+    .sidebar-search:focus-within .search-icon {
+      color: var(--accent-text);
+      transform: translateY(-50%) scale(1.04);
+    }
+
+    .settings-menu {
+      position: relative;
+      flex: 0 0 auto;
+    }
+
+    .settings-trigger {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: color 140ms ease, background 140ms ease, border-color 140ms ease;
+    }
+
+    .settings-trigger:hover,
+    .settings-trigger[aria-expanded="true"] {
+      border-color: var(--border);
+      background: var(--surface-raised);
+      color: var(--text);
+    }
+
+    .settings-trigger:focus-visible,
+    .theme-toggle:focus-visible,
+    .theme-option:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .settings-trigger .ui-icon {
+      width: 18px;
+      height: 18px;
+      transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .settings-trigger[aria-expanded="true"] .ui-icon {
+      transform: rotate(35deg);
+    }
+
+    .settings-popover {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      width: 300px;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--bg);
+      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.48), 0 1px 0 color-mix(in srgb, var(--text) 4%, transparent) inset;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(-8px) scale(0.985);
+      transform-origin: top right;
+      transition: opacity 170ms ease, transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0s linear 220ms;
+    }
+
+    .settings-popover.is-open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0) scale(1);
+      transition-delay: 0s;
+    }
+
+    .settings-heading {
+      padding: 7px 10px 10px;
+      color: var(--muted-soft);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      min-height: 44px;
+      padding: 0 10px;
+      border: 0;
+      border-radius: 9px;
+      background: transparent;
+      color: var(--text);
+      font: inherit;
+      font-size: 14px;
+      font-weight: 650;
+      cursor: pointer;
+      transition: background 150ms ease;
+    }
+
+    .theme-toggle:hover,
+    .theme-toggle[aria-expanded="true"] {
+      background: var(--surface-raised);
+    }
+
+    .theme-toggle-value {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .theme-toggle-value::after {
+      content: "\203A";
+      color: var(--muted-soft);
+      font-size: 18px;
+      line-height: 1;
+      transition: transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .theme-toggle[aria-expanded="true"] .theme-toggle-value::after {
+      transform: rotate(90deg);
+    }
+
+    .theme-options {
+      display: grid;
+      gap: 3px;
+      max-height: 0;
+      margin-top: 0;
+      padding-top: 0;
+      overflow: hidden;
+      border-top: 1px solid transparent;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-5px);
+      transition: max-height 260ms cubic-bezier(0.2, 0.8, 0.2, 1), margin-top 220ms ease, padding-top 220ms ease, border-color 180ms ease, opacity 150ms ease, transform 220ms ease, visibility 0s linear 260ms;
+    }
+
+    .theme-options.is-open {
+      max-height: 310px;
+      margin-top: 6px;
+      padding-top: 7px;
+      border-top-color: var(--border);
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+      transition-delay: 0s;
+    }
+
+    .theme-option {
+      position: relative;
+      display: grid;
+      grid-template-columns: 30px 1fr 18px;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      min-height: 42px;
+      padding: 5px 9px;
+      border: 0;
+      border-radius: 9px;
+      background: transparent;
+      color: var(--muted);
+      font: inherit;
+      font-size: 14px;
+      text-align: left;
+      cursor: pointer;
+      transition: color 140ms ease, background 140ms ease, transform 140ms ease;
+    }
+
+    .theme-option:hover,
+    .theme-option.is-selected {
+      background: var(--surface-raised);
+      color: var(--text);
+    }
+
+    .theme-option:hover {
+      transform: translateX(2px);
+    }
+
+    .theme-preview {
+      position: relative;
+      display: block;
+      width: 28px;
+      height: 28px;
+      border: 1px solid color-mix(in srgb, var(--preview-text) 26%, transparent);
+      border-radius: 8px;
+      background: var(--preview-bg);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
+      overflow: hidden;
+    }
+
+    .theme-preview::before {
       content: "";
       position: absolute;
-      left: 25px;
-      top: 24px;
-      width: 6px;
-      height: 2px;
+      top: 6px;
+      left: 6px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--preview-accent);
+      box-shadow: 9px 0 0 color-mix(in srgb, var(--preview-text) 82%, transparent);
+    }
+
+    .theme-preview::after {
+      content: "";
+      position: absolute;
+      right: 6px;
+      bottom: 6px;
+      left: 6px;
+      height: 3px;
       border-radius: 999px;
-      background: #9ca3af;
-      transform: rotate(45deg);
+      background: linear-gradient(90deg, var(--preview-accent) 0 58%, color-mix(in srgb, var(--preview-text) 72%, transparent) 58% 100%);
+    }
+
+    .theme-option-check {
+      color: var(--accent-text);
+      font-size: 15px;
+      opacity: 0;
+      transform: scale(0.7);
+      transition: opacity 140ms ease, transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .theme-option.is-selected .theme-option-check {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .settings-popover,
+      .theme-options,
+      .settings-trigger .ui-icon,
+      .theme-toggle-value::after,
+      .theme-option,
+      .theme-option-check,
+      .search-icon {
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    .mobile-settings {
+      display: none;
     }
 
     h1,
@@ -1182,6 +1573,216 @@
       border-color: rgba(255, 255, 255, 0.28);
     }
 
+    /* Shared semantic colors keep every palette consistent across the reference UI. */
+    body,
+    .sidebar {
+      background: var(--bg);
+    }
+
+    .sidebar {
+      border-color: var(--border);
+    }
+
+    .intro,
+    .overview-copy,
+    .endpoint-card p,
+    .doc-overview-item p,
+    .doc-section > p,
+    .doc-card p,
+    .doc-card li,
+    .flow-step p,
+    .doc-table td,
+    .filter-meta,
+    .filter-hint,
+    .no-results,
+    .copy-route,
+    .site-footer {
+      color: var(--muted);
+    }
+
+    .side-label,
+    .doc-card h3,
+    .doc-table th,
+    .erd-toolbar button,
+    .erd-zoom-label,
+    pre {
+      color: var(--text);
+    }
+
+    .sidebar a {
+      color: var(--muted-soft);
+    }
+
+    .sidebar a:hover,
+    .sidebar a.active,
+    .mobile-sidebar-switch a.active,
+    .mobile-sidebar-switch a:hover,
+    .copy-route:hover,
+    .copy-route:focus-visible,
+    .site-footer a:hover {
+      color: var(--text);
+    }
+
+    .sidebar a:hover,
+    .sidebar a.active,
+    .mobile-sidebar-switch a.active,
+    .mobile-sidebar-switch a:hover {
+      background: var(--surface-raised);
+    }
+
+    .nav-icon,
+    .sidebar a:hover .nav-icon,
+    .sidebar a.active .nav-icon,
+    .doc-overview-icon,
+    .flow-number,
+    .doc-callout .ui-icon {
+      color: var(--accent-text);
+    }
+
+    .endpoint-card,
+    .doc-overview-item {
+      border-color: var(--border);
+      background: var(--surface-subtle);
+    }
+
+    .endpoint-card:hover,
+    a.doc-overview-item:hover {
+      border-color: var(--border-strong);
+      background: var(--surface-raised);
+    }
+
+    .card-icon,
+    .doc-overview-icon,
+    .site-footer,
+    .doc-card,
+    .flow-list,
+    .module-tree,
+    .doc-table-wrap,
+    .doc-panel,
+    .no-results,
+    .notes,
+    .section,
+    .box,
+    .copy-route,
+    .toast,
+    .back-to-top,
+    .toolbar input,
+    .toolbar select {
+      border-color: var(--border);
+    }
+
+    .card-icon {
+      color: var(--muted-strong);
+    }
+
+    .divider,
+    .flow-step,
+    .doc-table th,
+    .doc-table td,
+    .doc-panel-head,
+    .erd-toolbar {
+      border-color: var(--border);
+    }
+
+    .doc-card,
+    .flow-list,
+    .doc-table,
+    .no-results,
+    .notes,
+    .section {
+      background: var(--surface);
+    }
+
+    .module-tree,
+    pre {
+      background: var(--surface-code);
+    }
+
+    .module-tree {
+      color: var(--muted-strong);
+    }
+
+    .flow-number,
+    .doc-callout {
+      border-color: var(--accent-border);
+      background: var(--accent-soft);
+    }
+
+    .doc-callout p {
+      color: var(--muted);
+    }
+
+    .doc-table th,
+    .toolbar input,
+    .toolbar select,
+    .erd-toolbar button,
+    .toast,
+    .back-to-top {
+      background: var(--surface-raised);
+    }
+
+    .doc-table code,
+    .doc-pill,
+    .site-footer a {
+      color: var(--accent-text);
+    }
+
+    .doc-panel {
+      background: var(--surface);
+    }
+
+    .erd-toolbar {
+      background: var(--header-bg);
+    }
+
+    .erd-toolbar button:hover {
+      border-color: var(--border-strong);
+      background: var(--surface-hover);
+      color: var(--text);
+    }
+
+    .toolbar {
+      background: var(--sticky-bg);
+    }
+
+    .toolbar input::placeholder {
+      color: var(--muted-soft);
+    }
+
+    .box {
+      background: var(--panel);
+    }
+
+    .box h3 {
+      color: var(--muted-strong);
+    }
+
+    .toast,
+    .back-to-top {
+      color: var(--text);
+    }
+
+    .copy-route:hover,
+    .copy-route:focus-visible,
+    .back-to-top:hover {
+      border-color: var(--border-strong);
+    }
+
+    @media (min-width: 861px) and (max-width: 1020px) {
+      header .wrap {
+        gap: 16px;
+        padding: 0 20px;
+      }
+
+      .header-search {
+        width: clamp(180px, 22vw, 224px);
+      }
+
+      .top-links a {
+        padding: 0 10px;
+      }
+    }
+
     @media (max-width: 860px) {
       header .wrap {
         gap: 12px;
@@ -1218,7 +1819,7 @@
         gap: 8px;
         margin-bottom: 18px;
         padding-bottom: 18px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+        border-bottom: 1px solid var(--border);
       }
 
       .mobile-sidebar-switch a {
@@ -1228,7 +1829,7 @@
         min-height: 38px;
         border-radius: 8px;
         padding: 0 10px;
-        color: #9ca3af;
+        color: var(--muted-soft);
         font-size: 14px;
         font-weight: 700;
         text-decoration: none;
@@ -1236,8 +1837,8 @@
 
       .mobile-sidebar-switch a.active,
       .mobile-sidebar-switch a:hover {
-        background: rgba(255, 255, 255, 0.10);
-        color: #fff;
+        background: var(--surface-raised);
+        color: var(--text);
       }
 
       .docs-layout {
@@ -1256,7 +1857,7 @@
         max-height: none;
         display: block;
         padding: 22px 18px 36px;
-        border-right: 1px solid rgba(255, 255, 255, 0.12);
+        border-right: 1px solid var(--border);
         margin-bottom: 0;
         transform: translateX(-102%);
         transition: transform 220ms ease;
@@ -1269,6 +1870,26 @@
 
       body.menu-open .sidebar {
         transform: translateX(0);
+      }
+
+      .mobile-settings {
+        display: block;
+        margin-bottom: 24px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .mobile-settings .settings-heading {
+        padding-left: 10px;
+      }
+
+      .mobile-settings .theme-toggle {
+        min-height: 40px;
+        color: var(--text);
+      }
+
+      .mobile-settings .theme-options {
+        margin-top: 4px;
       }
 
       .drawer-scrim {
@@ -1361,6 +1982,8 @@
     <symbol id="icon-media" viewBox="0 0 24 24"><path d="M7 18H5a3 3 0 0 1-.4-6A7 7 0 0 1 18 10.5a4 4 0 0 1 1 7.5h-2"/><path d="M12 20V10M8.5 13.5 12 10l3.5 3.5"/></symbol>
     <symbol id="icon-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></symbol>
     <symbol id="icon-api" viewBox="0 0 24 24"><path d="m8 5-6 7 6 7M16 5l6 7-6 7M14 3l-4 18"/></symbol>
+    <symbol id="icon-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></symbol>
+    <symbol id="icon-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1A1.7 1.7 0 0 0 9 4.6 1.7 1.7 0 0 0 10 3V2.8h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/></symbol>
   </svg>
   <a class="skip-link" href="#main-content">Skip to content</a>
   <header>
@@ -1376,11 +1999,34 @@
         </span>
       </a>
       <label class="header-search" aria-label="Search all endpoints">
+        <svg class="ui-icon search-icon" aria-hidden="true"><use href="#icon-search"></use></svg>
         <input id="globalSearch" type="search" placeholder="Search..." autocomplete="off" />
       </label>
       <div class="top-links" aria-label="Top navigation">
         <a href="#documentation-overview" data-top-tab="documentation">Documentation</a>
         <a href="#overview" class="active" data-top-tab="api">API Reference</a>
+        <div class="settings-menu">
+          <button class="settings-trigger" type="button" aria-label="Open settings" aria-expanded="false" aria-controls="settingsPopover">
+            <svg class="ui-icon" aria-hidden="true"><use href="#icon-settings"></use></svg>
+          </button>
+          <div class="settings-popover" id="settingsPopover" aria-hidden="true" inert>
+            <div class="settings-heading">Settings</div>
+            <div class="theme-control">
+              <button class="theme-toggle" type="button" data-theme-toggle aria-expanded="false" aria-controls="desktopThemeOptions">
+                <span>Theme</span>
+                <span class="theme-toggle-value" data-theme-label>OptiFlowz</span>
+              </button>
+              <div class="theme-options" id="desktopThemeOptions" role="listbox" aria-label="Choose theme" aria-hidden="true" inert>
+                <button class="theme-option" type="button" role="option" data-theme-choice="optiflowz" aria-selected="true"><span class="theme-preview" aria-hidden="true" style="--preview-bg:#000;--preview-accent:#4095ff;--preview-text:#f8fafc"></span><span>OptiFlowz</span><span class="theme-option-check" aria-hidden="true">✓</span></button>
+                <button class="theme-option" type="button" role="option" data-theme-choice="catppuccin" aria-selected="false"><span class="theme-preview" aria-hidden="true" style="--preview-bg:#1e1e2e;--preview-accent:#cba6f7;--preview-text:#cdd6f4"></span><span>Catppuccin</span><span class="theme-option-check" aria-hidden="true">✓</span></button>
+                <button class="theme-option" type="button" role="option" data-theme-choice="github" aria-selected="false"><span class="theme-preview" aria-hidden="true" style="--preview-bg:#0d1117;--preview-accent:#58a6ff;--preview-text:#f0f6fc"></span><span>GitHub</span><span class="theme-option-check" aria-hidden="true">✓</span></button>
+                <button class="theme-option" type="button" role="option" data-theme-choice="linear" aria-selected="false"><span class="theme-preview" aria-hidden="true" style="--preview-bg:#0e0e10;--preview-accent:#8b7cf6;--preview-text:#f7f7f8"></span><span>Linear</span><span class="theme-option-check" aria-hidden="true">✓</span></button>
+                <button class="theme-option" type="button" role="option" data-theme-choice="ayu" aria-selected="false"><span class="theme-preview" aria-hidden="true" style="--preview-bg:#0b0e14;--preview-accent:#e6b450;--preview-text:#bfbdb6"></span><span>Ayu</span><span class="theme-option-check" aria-hidden="true">✓</span></button>
+                <button class="theme-option" type="button" role="option" data-theme-choice="everforest" aria-selected="false"><span class="theme-preview" aria-hidden="true" style="--preview-bg:#2d353b;--preview-accent:#a7c080;--preview-text:#d3c6aa"></span><span>Everforest</span><span class="theme-option-check" aria-hidden="true">✓</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </header>
@@ -1392,7 +2038,25 @@
         <a href="#overview" class="active" data-top-tab="api"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-api"></use></svg><span>API Reference</span></a>
         <a href="#documentation-overview" data-top-tab="documentation"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-book"></use></svg><span>Documentation</span></a>
       </nav>
+      <div class="mobile-settings">
+        <div class="settings-heading">Settings</div>
+        <div class="theme-control">
+          <button class="theme-toggle" type="button" data-theme-toggle aria-expanded="false" aria-controls="mobileThemeOptions">
+            <span>Theme</span>
+            <span class="theme-toggle-value" data-theme-label>OptiFlowz</span>
+          </button>
+          <div class="theme-options" id="mobileThemeOptions" role="listbox" aria-label="Choose theme" aria-hidden="true" inert>
+            <button class="theme-option" type="button" role="option" data-theme-choice="optiflowz" aria-selected="true"><span class="theme-preview" aria-hidden="true" style="--preview-bg:#000;--preview-accent:#4095ff;--preview-text:#f8fafc"></span><span>OptiFlowz</span><span class="theme-option-check" aria-hidden="true">✓</span></button>
+            <button class="theme-option" type="button" role="option" data-theme-choice="catppuccin" aria-selected="false"><span class="theme-preview" aria-hidden="true" style="--preview-bg:#1e1e2e;--preview-accent:#cba6f7;--preview-text:#cdd6f4"></span><span>Catppuccin</span><span class="theme-option-check" aria-hidden="true">✓</span></button>
+            <button class="theme-option" type="button" role="option" data-theme-choice="github" aria-selected="false"><span class="theme-preview" aria-hidden="true" style="--preview-bg:#0d1117;--preview-accent:#58a6ff;--preview-text:#f0f6fc"></span><span>GitHub</span><span class="theme-option-check" aria-hidden="true">✓</span></button>
+            <button class="theme-option" type="button" role="option" data-theme-choice="linear" aria-selected="false"><span class="theme-preview" aria-hidden="true" style="--preview-bg:#0e0e10;--preview-accent:#8b7cf6;--preview-text:#f7f7f8"></span><span>Linear</span><span class="theme-option-check" aria-hidden="true">✓</span></button>
+            <button class="theme-option" type="button" role="option" data-theme-choice="ayu" aria-selected="false"><span class="theme-preview" aria-hidden="true" style="--preview-bg:#0b0e14;--preview-accent:#e6b450;--preview-text:#bfbdb6"></span><span>Ayu</span><span class="theme-option-check" aria-hidden="true">✓</span></button>
+            <button class="theme-option" type="button" role="option" data-theme-choice="everforest" aria-selected="false"><span class="theme-preview" aria-hidden="true" style="--preview-bg:#2d353b;--preview-accent:#a7c080;--preview-text:#d3c6aa"></span><span>Everforest</span><span class="theme-option-check" aria-hidden="true">✓</span></button>
+          </div>
+        </div>
+      </div>
       <label class="sidebar-search api-sidebar" aria-label="Search all endpoints from navigation">
+        <svg class="ui-icon search-icon" aria-hidden="true"><use href="#icon-search"></use></svg>
         <input id="sidebarSearch" type="search" placeholder="Search..." autocomplete="off" />
       </label>
       <div class="sidebar-mode api-sidebar">
@@ -2255,6 +2919,13 @@
     const documentationPages = Array.from(document.querySelectorAll(".documentation-page"));
     const menuToggle = document.querySelector(".menu-toggle");
     const drawerScrim = document.querySelector(".drawer-scrim");
+    const settingsMenu = document.querySelector(".settings-menu");
+    const settingsTrigger = document.querySelector(".settings-trigger");
+    const settingsPopover = document.getElementById("settingsPopover");
+    const themeToggles = Array.from(document.querySelectorAll("[data-theme-toggle]"));
+    const themeOptions = Array.from(document.querySelectorAll("[data-theme-choice]"));
+    const themeLabels = Array.from(document.querySelectorAll("[data-theme-label]"));
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
     const erdViewer = document.querySelector(".erd-viewer");
     const erdCanvas = document.querySelector(".erd-canvas");
     const erdImage = document.querySelector(".erd-canvas img");
@@ -2270,9 +2941,75 @@
     const ERD_MIN_ZOOM = 0.18;
     const ERD_MAX_ZOOM = 2.5;
     const ERD_DEFAULT_ZOOM = 0.5;
+    const THEME_STORAGE_KEY = "optiflowz-theme";
+    const THEMES = {
+      optiflowz: { label: "OptiFlowz", chrome: "#000000" },
+      catppuccin: { label: "Catppuccin", chrome: "#1e1e2e" },
+      github: { label: "GitHub", chrome: "#0d1117" },
+      linear: { label: "Linear", chrome: "#0e0e10" },
+      ayu: { label: "Ayu", chrome: "#0b0e14" },
+      everforest: { label: "Everforest", chrome: "#2d353b" },
+    };
     if (currentYear) {
       currentYear.textContent = String(new Date().getFullYear());
     }
+
+    function collapseThemePickers() {
+      themeToggles.forEach((toggle) => {
+        toggle.setAttribute("aria-expanded", "false");
+        const options = document.getElementById(toggle.getAttribute("aria-controls"));
+        if (options) {
+          options.classList.remove("is-open");
+          options.setAttribute("aria-hidden", "true");
+          options.inert = true;
+        }
+      });
+    }
+
+    function applyTheme(theme, persist = true) {
+      const normalized = THEMES[theme] ? theme : "optiflowz";
+      const themeDetails = THEMES[normalized];
+      document.documentElement.dataset.theme = normalized;
+      themeColorMeta?.setAttribute("content", themeDetails.chrome);
+      themeLabels.forEach((label) => {
+        label.textContent = themeDetails.label;
+      });
+      themeOptions.forEach((option) => {
+        const isSelected = option.dataset.themeChoice === normalized;
+        option.classList.toggle("is-selected", isSelected);
+        option.setAttribute("aria-selected", String(isSelected));
+      });
+
+      if (persist) {
+        try {
+          window.localStorage.setItem(THEME_STORAGE_KEY, normalized);
+        } catch (_error) {
+          // Theme selection still works for this page when storage is unavailable.
+        }
+      }
+    }
+
+    function closeSettings() {
+      if (settingsPopover) {
+        settingsPopover.classList.remove("is-open");
+        settingsPopover.setAttribute("aria-hidden", "true");
+        settingsPopover.inert = true;
+      }
+      settingsTrigger?.setAttribute("aria-expanded", "false");
+      collapseThemePickers();
+    }
+
+    function toggleSettings() {
+      if (!settingsPopover) return;
+      const isOpen = !settingsPopover.classList.contains("is-open");
+      settingsPopover.classList.toggle("is-open", isOpen);
+      settingsPopover.setAttribute("aria-hidden", String(!isOpen));
+      settingsPopover.inert = !isOpen;
+      settingsTrigger?.setAttribute("aria-expanded", String(isOpen));
+      if (!isOpen) collapseThemePickers();
+    }
+
+    applyTheme(document.documentElement.dataset.theme, false);
     const responseExamples = {
       "/api/auth/user-update": `{
   "id": "user_uuid",
@@ -3157,11 +3894,13 @@ Content-Disposition: attachment; filename="certificate.pdf"
     function closeMenu() {
       document.body.classList.remove("menu-open");
       menuToggle?.setAttribute("aria-expanded", "false");
+      closeSettings();
     }
 
     function toggleMenu() {
       const isOpen = document.body.classList.toggle("menu-open");
       menuToggle?.setAttribute("aria-expanded", String(isOpen));
+      if (!isOpen) closeSettings();
     }
 
     function getSearchTerm() {
@@ -3351,6 +4090,34 @@ Content-Disposition: attachment; filename="certificate.pdf"
     methodSelect.addEventListener("change", applyFilters);
     menuToggle?.addEventListener("click", toggleMenu);
     drawerScrim?.addEventListener("click", closeMenu);
+    settingsTrigger?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      toggleSettings();
+    });
+    settingsMenu?.addEventListener("click", (event) => event.stopPropagation());
+    document.addEventListener("click", (event) => {
+      if (event.target.closest?.(".settings-menu, .mobile-settings")) return;
+      closeSettings();
+    });
+    themeToggles.forEach((toggle) => {
+      toggle.addEventListener("click", () => {
+        const options = document.getElementById(toggle.getAttribute("aria-controls"));
+        if (!options) return;
+        const willOpen = !options.classList.contains("is-open");
+        collapseThemePickers();
+        options.classList.toggle("is-open", willOpen);
+        options.setAttribute("aria-hidden", String(!willOpen));
+        options.inert = !willOpen;
+        toggle.setAttribute("aria-expanded", String(willOpen));
+      });
+    });
+    themeOptions.forEach((option) => {
+      option.addEventListener("click", () => {
+        applyTheme(option.dataset.themeChoice);
+        collapseThemePickers();
+        showToast(`${THEMES[option.dataset.themeChoice].label} theme applied`);
+      });
+    });
     backToTop?.addEventListener("click", stabilizePageTopScroll);
     window.addEventListener("scroll", updateBackToTop, { passive: true });
 
@@ -3437,6 +4204,7 @@ Content-Disposition: attachment; filename="certificate.pdf"
           clearSearchFields();
           applyFilters();
         }
+        closeSettings();
         closeMenu();
       }
     });

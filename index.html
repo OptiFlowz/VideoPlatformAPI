@@ -1124,6 +1124,7 @@
           <a href="#playlist-moderation" data-target="playlist-moderation">Playlist Moderation</a>
           <a href="#channels" data-target="channels">Channels</a>
           <a href="#quizzes" data-target="quizzes">Quizzes</a>
+          <a href="#analytics" data-target="analytics">Analytics</a>
           <a href="#reports" data-target="reports">Reports</a>
         </div>
       </div>
@@ -1140,7 +1141,7 @@
       <section id="overview" class="overview-home">
         <div class="eyebrow">API Reference</div>
         <h1>OptiFlowz API Reference</h1>
-        <p class="intro">Complete Express API reference for authentication, video delivery, playlists, quizzes, moderation, reports, and user-facing platform features.</p>
+        <p class="intro">Complete Express API reference for authentication, video delivery, playlists, quizzes, moderation, analytics, reports, and user-facing platform features.</p>
 
         <div class="overview-copy">
           <p>The OptiFlowz backend exposes REST endpoints for a video platform built around users, video assets, watch progress, playlists, comments, people, quiz attempts, certificates, and analytics.</p>
@@ -1190,6 +1191,11 @@
             <span class="card-icon">H</span>
             <h2>Channels</h2>
             <p>Channel details, published videos, and public playlist collections.</p>
+          </a>
+          <a class="endpoint-card" href="#analytics" data-target="analytics">
+            <span class="card-icon">N</span>
+            <h2>Analytics</h2>
+            <p>Video and channel performance, audience, geography, engagement, and time-series metrics.</p>
           </a>
           <a class="endpoint-card" href="#reports" data-target="reports">
             <span class="card-icon">R</span>
@@ -1486,6 +1492,152 @@
       <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/channels/:id/playlists</code><span class="auth optional">Optional</span></div><p class="desc">Returns playlists from one channel.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>page</code>, <code>limit</code>, <code>sort</code>, <code>order</code></p></div><div class="box"><h3>Path</h3><p><code>id</code></p></div><div class="box"><h3>Response</h3><p>Playlists and pagination.</p></div></div></article>
     </section>
 
+    <section class="section" id="analytics" data-section>
+      <h2>Analytics <span class="base">/api/analytics</span></h2>
+
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/:videoId/overview</code><span class="auth admin">Admin</span></div><p class="desc">Returns the main performance totals for a video owned by the authenticated admin/uploader.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional date/time values)</p></div><div class="box"><h3>Path</h3><p><code>videoId</code> - owned video UUID.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "overview": {
+    "totalViews": 842,
+    "firstTimeViews": 611,
+    "totalWatchTime": 92840,
+    "totalLikes": 126,
+    "totalDislikes": 4,
+    "totalComments": 38,
+    "avgWatchTimePerViewer": 152
+  }
+}</pre></div></div></article>
+
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/:videoId/device-split</code><span class="auth admin">Admin</span></div><p class="desc">Groups views for an owned video into desktop, phone, tablet, and other devices.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional)</p></div><div class="box"><h3>Path</h3><p><code>videoId</code> - owned video UUID.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "deviceSplit": {
+    "totalViews": 842,
+    "desktop": 410,
+    "phone": 352,
+    "tablet": 64,
+    "other": 16
+  }
+}</pre></div></div></article>
+
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/:videoId/operating-system-split</code><span class="auth admin">Admin</span></div><p class="desc">Groups views for an owned video by operating system.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional)</p></div><div class="box"><h3>Path</h3><p><code>videoId</code> - owned video UUID.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "operatingSystemSplit": {
+    "totalViews": 842,
+    "windows": 280,
+    "macOS": 152,
+    "android": 220,
+    "iOS": 154,
+    "linux": 24,
+    "other": 12
+  }
+}</pre></div></div></article>
+
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/:videoId/geographic-breakdown</code><span class="auth admin">Admin</span></div><p class="desc">Returns view totals grouped by country and city for an owned video.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional)</p></div><div class="box"><h3>Path</h3><p><code>videoId</code> - owned video UUID.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "geographicBreakdown": {
+    "RS": {
+      "name": "Serbia",
+      "totalViews": 245,
+      "cities": { "Belgrade": 180, "Novi Sad": 65 }
+    }
+  }
+}</pre></div></div></article>
+
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/:videoId/views-over-time</code><span class="auth admin">Admin</span></div><p class="desc">Returns a gap-filled view-count series for an owned video.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>groupBy=day|week|month</code> (default <code>day</code>), <code>fromDate</code>, <code>toDate</code></p></div><div class="box"><h3>Path</h3><p><code>videoId</code> - owned video UUID.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "viewsOverTime": [
+    { "periodStart": "2026-07-01T00:00:00.000Z", "views": 42 }
+  ]
+}</pre></div></div></article>
+
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/:videoId/watch-time-over-time</code><span class="auth admin">Admin</span></div><p class="desc">Returns a gap-filled watch-time series for an owned video.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>groupBy=day|week|month</code> (default <code>day</code>), <code>fromDate</code>, <code>toDate</code></p></div><div class="box"><h3>Path</h3><p><code>videoId</code> - owned video UUID.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "watchTimeOverTime": [
+    { "periodStart": "2026-07-01T00:00:00.000Z", "watchTime": 6280 }
+  ]
+}</pre></div></div></article>
+
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/:videoId/completion-buckets</code><span class="auth admin">Admin</span></div><p class="desc">Groups viewers of an owned video by the percentage of the video they completed.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional)</p></div><div class="box"><h3>Path</h3><p><code>videoId</code> - owned video UUID.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "completionBuckets": {
+    "&lt;25%": 80,
+    "25-50%": 42,
+    "50-75%": 31,
+    "75-95%": 18,
+    ">95%": 96
+  }
+}</pre></div></div></article>
+
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/:videoId/engagement</code><span class="auth admin">Admin</span></div><p class="desc">Returns the watch-time-to-duration engagement ratio for an owned video.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional)</p></div><div class="box"><h3>Path</h3><p><code>videoId</code> - owned video UUID.</p></div><div class="box"><h3>Response</h3><pre>{ "success": true, "engagement": 0.73 }</pre></div></div></article>
+
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/channel/overview</code><span class="auth admin">Admin</span></div><p class="desc">Returns aggregate performance totals across videos uploaded by the authenticated admin/uploader.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional date/time values)</p></div><div class="box"><h3>Scope</h3><p>The channel is inferred from the JWT user ID.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "channelOverview": {
+    "totalViews": 12840,
+    "firstTimeViews": 7611,
+    "totalWatchTime": 1428840,
+    "totalLikes": 1626,
+    "totalDislikes": 48,
+    "totalComments": 438,
+    "avgWatchTimePerViewer": 188
+  }
+}</pre></div></div></article>
+
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/channel/device-split</code><span class="auth admin">Admin</span></div><p class="desc">Groups all channel views into desktop, phone, tablet, and other devices.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional)</p></div><div class="box"><h3>Scope</h3><p>All videos uploaded by the JWT user.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "channelDeviceSplit": {
+    "totalViews": 12840,
+    "desktop": 6410,
+    "phone": 5220,
+    "tablet": 930,
+    "other": 280
+  }
+}</pre></div></div></article>
+
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/channel/operating-system-split</code><span class="auth admin">Admin</span></div><p class="desc">Groups all channel views by operating system.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional)</p></div><div class="box"><h3>Scope</h3><p>All videos uploaded by the JWT user.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "channelOperatingSystemSplit": {
+    "totalViews": 12840,
+    "windows": 4210,
+    "macOS": 2240,
+    "android": 3360,
+    "iOS": 2450,
+    "linux": 390,
+    "other": 190
+  }
+}</pre></div></div></article>
+
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/channel/geographic-breakdown</code><span class="auth admin">Admin</span></div><p class="desc">Returns channel view totals grouped by country and city.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional)</p></div><div class="box"><h3>Scope</h3><p>All videos uploaded by the JWT user.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "channelGeographicBreakdown": {
+    "RS": {
+      "name": "Serbia",
+      "totalViews": 3245,
+      "cities": { "Belgrade": 2180, "Novi Sad": 1065 }
+    }
+  }
+}</pre></div></div></article>
+
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/channel/views-over-time</code><span class="auth admin">Admin</span></div><p class="desc">Returns a gap-filled view-count series across all videos in the channel.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>groupBy=day|week|month</code> (default <code>day</code>), <code>fromDate</code>, <code>toDate</code></p></div><div class="box"><h3>Scope</h3><p>All videos uploaded by the JWT user.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "channelViewsOverTime": [
+    { "periodStart": "2026-07-01T00:00:00.000Z", "views": 642 }
+  ]
+}</pre></div></div></article>
+
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/channel/watch-time-over-time</code><span class="auth admin">Admin</span></div><p class="desc">Returns a gap-filled watch-time series across all videos in the channel.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>groupBy=day|week|month</code> (default <code>day</code>), <code>fromDate</code>, <code>toDate</code></p></div><div class="box"><h3>Scope</h3><p>All videos uploaded by the JWT user.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "channelWatchTimeOverTime": [
+    { "periodStart": "2026-07-01T00:00:00.000Z", "watchTime": 96280 }
+  ]
+}</pre></div></div></article>
+
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/channel/average-engagement-per-video</code><span class="auth admin">Admin</span></div><p class="desc">Returns the average engagement ratio per uploaded video across the channel.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional)</p></div><div class="box"><h3>Scope</h3><p>All videos uploaded by the JWT user.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "averageEngagementPerVideo": 0.68
+}</pre></div></div></article>
+    </section>
+
     <section class="section" id="reports" data-section>
       <h2>Reports <span class="base">/api/reports</span></h2>
       <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/reports/video-analytics.pdf</code><span class="auth admin">Admin</span></div><p class="desc">Generates a PDF analytics report for the video platform.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>range</code>, <code>from</code>, <code>to</code>, <code>groupBy</code>, <code>includePrivate</code>, <code>timezone</code></p></div><div class="box"><h3>Response</h3><p><code>application/pdf</code>, attachment filename.</p></div><div class="box"><h3>Integration</h3><p>Puppeteer generates the PDF from an HTML report.</p></div></div></article>
@@ -1538,7 +1690,7 @@
 
         <div class="overview-copy">
           <p>The backend is organized as a modular Express API. The application configures CORS, request parsing, Mux webhook parsing, route registration, not-found handling, and centralized error handling before exposing the platform under <code>/api</code>.</p>
-          <p>Core modules cover authentication, video discovery and playback, video and playlist moderation, people profiles, comments, channels, quizzes, certificates, and PDF analytics reports. Most public browsing endpoints accept optional authentication, while user actions and moderation workflows rely on JWT authentication and role checks.</p>
+          <p>Core modules cover authentication, video discovery and playback, video and playlist moderation, people profiles, comments, channels, quizzes, certificates, video and channel analytics, and PDF reports. Most public browsing endpoints accept optional authentication, while user actions, analytics, and moderation workflows rely on JWT authentication and role checks.</p>
         </div>
 
         <div class="divider"></div>

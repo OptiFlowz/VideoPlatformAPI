@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>OptiFlowz API Reference | Video Platform Documentation</title>
-  <meta name="description" content="Complete OptiFlowz Video Platform API documentation for authentication, videos, playlists, moderation, people, comments, quizzes, reports, and database structure." />
+  <meta name="description" content="Complete OptiFlowz Video Platform API documentation for authentication, videos, playlists, moderation, people, comments, quizzes, analytics, users, roles, reports, and database structure." />
   <meta name="application-name" content="OptiFlowz API Reference" />
   <meta name="author" content="OptiFlowz" />
   <meta name="robots" content="index, follow" />
@@ -76,7 +76,7 @@
       --delete: #ef4444;
       --public: #64748b;
       --auth: #2563eb;
-      --admin: #dc2626;
+      --permission: #dc2626;
     }
 
     :root[data-theme="catppuccin"] {
@@ -1421,7 +1421,7 @@
     .auth.public { background: var(--public); }
     .auth.optional { background: #52525b; }
     .auth.auth { background: var(--auth); }
-    .auth.admin { background: var(--admin); }
+    .auth.permission { background: var(--permission); }
 
     .copy-route {
       display: inline-flex;
@@ -2068,6 +2068,8 @@
         <div class="side-group">
           <div class="side-label">Core API</div>
           <a href="#auth" data-target="auth"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-auth"></use></svg><span>Auth</span></a>
+          <a href="#users" data-target="users"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-people"></use></svg><span>Users</span></a>
+          <a href="#roles" data-target="roles"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-security"></use></svg><span>Roles</span></a>
           <a href="#videos" data-target="videos"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-videos"></use></svg><span>Videos</span></a>
           <a href="#video-moderation" data-target="video-moderation"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-video-moderation"></use></svg><span>Video Moderation</span></a>
           <a href="#people" data-target="people"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-people"></use></svg><span>People</span></a>
@@ -2104,7 +2106,7 @@
 
         <div class="overview-copy">
           <p>The OptiFlowz backend exposes REST endpoints for a video platform built around users, video assets, watch progress, playlists, comments, people, quiz attempts, certificates, and analytics.</p>
-          <p>Use the cards below to open a focused route group. Endpoints marked as protected require a Bearer JWT token, while moderation endpoints require an admin or uploader role.</p>
+          <p>Use the cards below to open a focused route group. Protected endpoints require a Bearer JWT token. Permission badges identify additional permission and ownership requirements.</p>
         </div>
 
         <div class="divider"></div>
@@ -2115,6 +2117,16 @@
             <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-auth"></use></svg></span>
             <h2>Auth</h2>
             <p>Register, login, OAuth, profile updates, password reset, and profile images.</p>
+          </a>
+          <a class="endpoint-card" href="#users" data-target="users">
+            <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-people"></use></svg></span>
+            <h2>Users</h2>
+            <p>Search users, inspect permissions, assign roles, and delete your account.</p>
+          </a>
+          <a class="endpoint-card" href="#roles" data-target="roles">
+            <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-security"></use></svg></span>
+            <h2>Roles</h2>
+            <p>Manage role hierarchy and explicit permission grants.</p>
           </a>
           <a class="endpoint-card" href="#videos" data-target="videos">
             <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-videos"></use></svg></span>
@@ -2139,7 +2151,7 @@
           <a class="endpoint-card" href="#people" data-target="people">
             <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-people"></use></svg></span>
             <h2>People</h2>
-            <p>Speaker and chair profiles, search, sorting, profile images, and admin maintenance.</p>
+            <p>Speaker and chair profiles, search, sorting, profile images, and permission-controlled maintenance.</p>
           </a>
           <a class="endpoint-card" href="#comments" data-target="comments">
             <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-comments"></use></svg></span>
@@ -2154,7 +2166,7 @@
           <a class="endpoint-card" href="#analytics" data-target="analytics">
             <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-analytics"></use></svg></span>
             <h2>Analytics</h2>
-            <p>Video and channel performance, audience, geography, engagement, and time-series metrics.</p>
+            <p>Video, channel, and platform performance, audience, engagement, and time-series metrics.</p>
           </a>
           <a class="endpoint-card" href="#reports" data-target="reports">
             <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-reports"></use></svg></span>
@@ -2188,8 +2200,8 @@
         <li>The local backend base URL is <code>http://localhost:4000</code>.</li>
         <li>JSON routes use the header <code>Content-Type: application/json</code>.</li>
         <li>Protected routes use the header <code>Authorization: Bearer &lt;jwt-token&gt;</code>.</li>
-        <li>Routes marked as Admin require a user with the role <code>admin</code> or <code>uploader</code>.</li>
-        <li>Routes marked as Optional also work without a token, but return personalized data when a token is provided.</li>
+        <li>Routes marked as Permission require the permission listed in their Access box. Own permissions also require resource ownership; any permissions allow access across owners. The Owner role bypasses permission gates.</li>
+        <li>Optional routes accept requests without an Authorization header. A supplied token must be valid and belong to an active account; malformed, expired, or stale tokens return 401.</li>
         <li>Upload routes use <code>multipart/form-data</code>, usually the field <code>file</code>.</li>
       </ul>
     </section>
@@ -2226,10 +2238,16 @@
   "description": "",
   "eaes_member": false
 }</pre></div>
-          <div class="box"><h3>Validation</h3><p>Email must be valid, password must be at least 8 characters, and full name is required.</p></div>
+          <div class="box"><h3>Validation</h3><p>email, password (at least 8 characters), full_name (1–120 characters), and description (up to 150 characters, may be empty) are required. eaes_member defaults to false. The configured default role is assigned at registration.</p></div>
           <div class="box"><h3>Response</h3><pre>{
-  "user": { "email": "...", "role": "user" },
-  "token": "jwt"
+  "user": {
+    "email": "user@example.com",
+    "full_name": "Example User",
+    "image_url": null,
+    "description": "Profile description",
+    "eaes_member": false
+  },
+  "token": "jwt-token"
 }</pre></div>
         </div>
       </article>
@@ -2244,8 +2262,14 @@
 }</pre></div>
           <div class="box"><h3>Note</h3><p>The password is verified against a bcrypt hash.</p></div>
           <div class="box"><h3>Response</h3><pre>{
-  "user": { "email": "...", "role": "user" },
-  "token": "jwt"
+  "user": {
+    "email": "user@example.com",
+    "full_name": "Example User",
+    "image_url": null,
+    "description": "Profile description",
+    "eaes_member": false
+  },
+  "token": "jwt-token"
 }</pre></div>
         </div>
       </article>
@@ -2291,14 +2315,24 @@
 
       <article class="route" data-method="GET">
         <div class="route-head"><span class="method get">GET</span><code class="path">/api/auth/me</code><span class="auth auth">Auth</span></div>
-        <p class="desc">Returns the currently authenticated user.</p>
+        <p class="desc">Returns the authenticated profile and active roles ordered by hierarchy.</p>
         <div class="grid">
           <div class="box"><h3>Headers</h3><p><code>Authorization: Bearer token</code></p></div>
           <div class="box"><h3>Body</h3><p>None.</p></div>
           <div class="box"><h3>Response</h3><pre>{
-  "email": "...",
-  "full_name": "...",
-  "role": "user"
+  "user": {
+    "email": "user@example.com",
+    "full_name": "Example User",
+    "image_url": null,
+    "description": null,
+    "eaes_member": false,
+    "roles": [
+      {
+        "id": 4,
+        "name": "Editor"
+      }
+    ]
+  }
 }</pre></div>
         </div>
       </article>
@@ -2312,8 +2346,16 @@
   "description": "Profile description",
   "eaes_member": true
 }</pre></div>
-          <div class="box"><h3>Note</h3><p>All fields are optional, but at least one field must be sent.</p></div>
-          <div class="box"><h3>Response</h3><p>Updated user profile.</p></div>
+          <div class="box"><h3>Note</h3><p>At least one supported field is required. full_name is 1–120 characters; description accepts up to 2000 characters or null (null preserves the existing value). Unknown fields are rejected.</p></div>
+          <div class="box"><h3>Response</h3><pre>{
+  "user": {
+    "email": "user@example.com",
+    "full_name": "Example User",
+    "image_url": null,
+    "description": "Profile description",
+    "eaes_member": false
+  }
+}</pre></div>
         </div>
       </article>
 
@@ -2333,19 +2375,285 @@
         <div class="grid">
           <div class="box"><h3>Path</h3><p><code>provider=google</code></p></div>
           <div class="box"><h3>Body</h3><pre>{ "code": "google-oauth-code" }</pre></div>
-          <div class="box"><h3>Response</h3><p>User profile and JWT token.</p></div>
+          <div class="box"><h3>Response</h3><pre>{
+  "user": {
+    "email": "user@example.com",
+    "full_name": "Example User",
+    "image_url": null,
+    "description": "Profile description",
+    "eaes_member": false
+  },
+  "token": "jwt-token"
+}</pre></div>
         </div>
+      </article>
+    </section>
+
+    <section class="section" id="users" data-section>
+      <h2>Users <span class="base">/api/users</span></h2>
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/users/me/permissions</code><span class="auth auth">Auth</span></div>
+        <p class="desc">Returns the current user’s effective permission keys. Deny overrides allow; the Owner receives the full catalog.</p>
+        <div class="grid"><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "permissions": [
+    "videos.create",
+    "videos.library.read"
+  ]
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="DELETE">
+        <div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/users/me</code><span class="auth auth">Auth</span></div>
+        <p class="desc">Permanently deletes the authenticated account and applies database cascading cleanup.</p>
+        <div class="grid"><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Errors</h3><p>404 if the account is missing; 409 if linked records prevent deletion. Deleted accounts cannot authenticate.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "deleted": true
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/users/search</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Searches users by name, email, or description, with an optional active-role filter.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>users.search</code>.</p></div><div class="box"><h3>Query</h3><p><code>q</code> (default empty), <code>role</code> (positive role ID), <code>sortBy=id|full_name|email|created_at|updated_at</code> (default full_name), <code>sortOrder=asc|desc</code> (default asc), <code>page</code> (default 1), <code>limit</code> (1–100, default 20).</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "users": [
+    {
+      "id": "11111111-1111-4111-8111-111111111111",
+      "email": "user@example.com",
+      "full_name": "Example User",
+      "created_at": "2026-09-13T10:00:00.000Z",
+      "image_url": null,
+      "roles": [
+        {
+          "id": 4,
+          "name": "Editor"
+        }
+      ]
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 1,
+    "totalPages": 1,
+    "hasNextPage": false,
+    "hasPreviousPage": false
+  },
+  "sorting": {
+    "sortBy": "full_name",
+    "sortOrder": "asc"
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/users/assign-role</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Assigns a role to a user. Reassigning it refreshes the assignment and clears its expiry.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>users.assign_roles</code>.</p></div><div class="box"><h3>Body</h3><pre>{
+  "user_id": "11111111-1111-4111-8111-111111111111",
+  "role_id": "4"
+}</pre></div><div class="box"><h3>Validation</h3><p>User ID must be a UUID; role ID must be a positive 64-bit integer string or safe integer. Unknown body fields are rejected. The Owner’s assignments are protected. Non-owners cannot change peers or higher-ranked users, or assign/remove roles at or above their own rank. Changes invalidate the target user’s authorization version.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "assignment": {
+    "user_id": "11111111-1111-4111-8111-111111111111",
+    "role_id": "4",
+    "assigned_by": "22222222-2222-4222-8222-222222222222",
+    "assigned_at": "2026-09-13T10:00:00.000Z",
+    "expires_at": null
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="DELETE">
+        <div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/users/remove-role</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Removes a role assignment from a user.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>users.assign_roles</code>.</p></div><div class="box"><h3>Body</h3><pre>{
+  "user_id": "11111111-1111-4111-8111-111111111111",
+  "role_id": "4"
+}</pre></div><div class="box"><h3>Validation</h3><p>User ID must be a UUID; role ID must be a positive 64-bit integer string or safe integer. Unknown body fields are rejected. The Owner’s assignments are protected. Non-owners cannot change peers or higher-ranked users, or assign/remove roles at or above their own rank. Changes invalidate the target user’s authorization version.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "assignment": {
+    "user_id": "11111111-1111-4111-8111-111111111111",
+    "role_id": "4",
+    "assigned_by": "22222222-2222-4222-8222-222222222222",
+    "assigned_at": "2026-09-13T10:00:00.000Z",
+    "expires_at": null
+  }
+}</pre></div></div>
+      </article>
+    </section>
+
+    <section class="section" id="roles" data-section>
+      <h2>Roles <span class="base">/api/roles</span></h2>
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/roles/permissions</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Lists the permission catalog grouped by name.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>roles.manage</code>.</p></div><div class="box"><h3>Query</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "groups": [
+    {
+      "name": "Videos",
+      "permissions": [
+        {
+          "id": "1",
+          "key": "videos.create",
+          "description": "Create videos",
+          "group_name": "Videos",
+          "resource_type": "video",
+          "risk_level": "medium"
+        }
+      ]
+    }
+  ]
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/roles</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Lists roles in hierarchy order, with permissions, member counts, and whether the caller may update or delete each role.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>roles.manage</code>.</p></div><div class="box"><h3>Query</h3><p>None; returns all roles.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "roles": [
+    {
+      "id": "4",
+      "name": "Editor",
+      "description": "Video editors",
+      "color": "#5865F2",
+      "position": 10,
+      "is_system": false,
+      "is_default": false,
+      "is_owner": false,
+      "member_count": 0,
+      "permissions": [
+        {
+          "id": "1",
+          "key": "videos.create",
+          "effect": "allow",
+          "group_name": "Videos",
+          "resource_type": "video",
+          "risk_level": "medium"
+        }
+      ],
+      "can_update": true,
+      "can_delete": true
+    }
+  ]
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/roles</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Creates a role with explicit allow/deny permission assignments.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>roles.manage</code>.</p></div><div class="box"><h3>Body</h3><pre>{
+  "name": "Editor",
+  "description": "Video editors",
+  "color": "#5865F2",
+  "position": 10,
+  "permissions": [
+    {
+      "id": "1",
+      "effect": "allow"
+    }
+  ]
+}</pre></div><div class="box"><h3>Validation</h3><p>Names are unique ignoring case (1–80 characters). Position is 1–1,000,000; a larger number ranks lower. Non-owners can manage only roles below their highest role and can grant or deny only permissions they hold. Permission IDs come from <code>GET /api/roles/permissions</code>. Optional description is at most 500 characters; color is a six-digit hex string or null. Unknown fields and duplicate permission IDs are rejected.</p></div><div class="box"><h3>Response</h3><p>201 Created.</p><pre>{
+  "success": true,
+  "role": {
+    "id": "4",
+    "name": "Editor",
+    "description": "Video editors",
+    "color": "#5865F2",
+    "position": 10,
+    "is_system": false,
+    "is_default": false,
+    "is_owner": false,
+    "member_count": 0,
+    "permissions": [
+      {
+        "id": "1",
+        "key": "videos.create",
+        "effect": "allow",
+        "group_name": "Videos",
+        "resource_type": "video",
+        "risk_level": "medium"
+      }
+    ]
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="PATCH">
+        <div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/roles/:roleId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Partially updates a role. Sending permissions replaces the entire permission list; an empty list clears it.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>roles.manage</code>.</p></div><div class="box"><h3>Path</h3><p><code>roleId</code>: positive integer ID.</p></div><div class="box"><h3>Body</h3><pre>{
+  "name": "Senior editor",
+  "permissions": [
+    {
+      "id": "1",
+      "effect": "allow"
+    }
+  ]
+}</pre></div><div class="box"><h3>Validation</h3><p>Names are unique ignoring case (1–80 characters). Position is 1–1,000,000; a larger number ranks lower. Non-owners can manage only roles below their highest role and can grant or deny only permissions they hold. Permission IDs come from <code>GET /api/roles/permissions</code>. At least one field is required. Only the Owner may send <code>is_default: true</code>; false is rejected. The Owner role cannot be modified. Changes invalidate members’ authorization versions.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "role": {
+    "id": "4",
+    "name": "Senior editor",
+    "description": "Video editors",
+    "color": "#5865F2",
+    "position": 10,
+    "is_system": false,
+    "is_default": false,
+    "is_owner": false,
+    "member_count": 0,
+    "permissions": [
+      {
+        "id": "1",
+        "key": "videos.create",
+        "effect": "allow",
+        "group_name": "Videos",
+        "resource_type": "video",
+        "risk_level": "medium"
+      }
+    ]
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="DELETE">
+        <div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/roles/:roleId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Deletes an unassigned role that the caller can manage.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>roles.manage</code>.</p></div><div class="box"><h3>Path</h3><p><code>roleId</code>: positive integer ID. No body.</p></div><div class="box"><h3>Errors</h3><p>403 for protected Owner, system, or default roles, or a hierarchy violation. 404 if the role is missing. 409 <code>ROLE_HAS_MEMBERS</code> until all assignments are removed.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "deleted": true,
+  "roleId": "4"
+}</pre></div></div>
       </article>
     </section>
 
     <section class="section" id="videos" data-section>
       <h2>Videos <span class="base">/api/videos</span></h2>
+      <p class="section-intro">Video cards include <code>thumbnail_url</code> (custom upload), <code>mux_thumbnail_url</code>, <code>preview_url</code>, and <code>media_expires_at</code>. Signed media URLs expire after one hour; the expiry is Unix seconds, or null for public playback. Discovery and playback responses use <code>Cache-Control: private, no-store</code>. Vector results include only eligible indexed videos.</p>
 
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/videos/upload/initiate</code><span class="auth admin">Admin</span></div><p class="desc">Creates the video database record and a Mux direct upload URL.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "title": "Video title", "language_code": "en", "language_name": "English" }</pre></div><div class="box"><h3>Integration</h3><p>Mux API direct upload.</p></div><div class="box"><h3>Response</h3><pre>{ "video_id": "uuid", "upload": { "upload_id": "...", "upload_url": "..." } }</pre></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/videos/upload/initiate</code><span class="auth permission">Permission</span></div><p class="desc">Creates the video database record and a Mux direct upload URL.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>videos.create</code>.</p></div><div class="box"><h3>Body</h3><pre>{
+  "title": "Video title",
+  "language_code": "auto",
+  "language_name": "Auto-generated captions",
+  "playback_policy": "signed"
+}</pre></div><div class="box"><h3>Integration</h3><p>Mux direct upload. Title is required. language_code defaults to en; auto enables language detection. playback_policy accepts public or signed and defaults to signed.</p></div><div class="box"><h3>Response</h3><pre>{
+  "video_id": "11111111-1111-4111-8111-111111111111",
+  "playback_policy": "signed",
+  "upload": {
+    "upload_id": "\u2026",
+    "upload_url": "https://\u2026"
+  }
+}</pre></div></div></article>
 
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/videos/heartbeat</code><span class="auth optional">Optional</span></div><p class="desc">Records playback heartbeat and client information.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "view_id": "uuid", "seq": 1, "is_playing": true }</pre></div><div class="box"><h3>Headers</h3><p>Uses the IP, user-agent, origin, and referer from the request.</p></div><div class="box"><h3>Response</h3><p>JSON processing status.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/videos/heartbeat</code><span class="auth optional">Optional</span></div><p class="desc">Records playback heartbeat and client information.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "view_id": "uuid", "seq": 1, "is_playing": true }</pre></div><div class="box"><h3>Headers</h3><p>Uses the IP, user-agent, origin, and referer from the request.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "message": "OK"
+}</pre></div></div></article>
 
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/videos/generate-chapters</code><span class="auth admin">Admin</span></div><p class="desc">Generates video chapters through the Mux AI workflow.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "videoId": "uuid", "languageCode": "en" }</pre></div><div class="box"><h3>Integration</h3><p><code>@mux/ai/workflows</code></p></div><div class="box"><h3>Response</h3><p>Generated chapter data result.</p></div></div></article>
+
 
       <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/videos/webhook/mux</code><span class="auth public">Webhook</span></div><p class="desc">Receives Mux webhook events and updates video status.</p><div class="grid"><div class="box"><h3>Headers</h3><p><code>Mux-Signature</code> is required.</p></div><div class="box"><h3>Body</h3><p>Raw JSON payload from Mux.</p></div><div class="box"><h3>Security</h3><p>The signature is verified with <code>MUX_WEBHOOK_SECRET</code>.</p></div></div></article>
 
@@ -2353,52 +2661,257 @@
 
       <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/trending</code><span class="auth optional">Optional</span></div><p class="desc">Returns trending videos by recent view count.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Trending video list.</p></div></div></article>
 
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/categories</code><span class="auth auth">Auth</span></div><p class="desc">Returns video categories.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Category list.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/categories</code><span class="auth permission">Permission</span></div><p class="desc">Returns video categories.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>videos.library.read</code>.</p></div><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Category list.</p></div></div></article>
 
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/user/history</code><span class="auth auth">Auth</span></div><p class="desc">Returns the authenticated user's watch history.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code></p></div><div class="box"><h3>Auth</h3><p>Uses the user ID from the JWT token.</p></div><div class="box"><h3>Response</h3><p>Videos sorted by most recent watch time.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/user/history</code><span class="auth permission">Permission</span></div><p class="desc">Returns the authenticated user's watch history.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>videos.library.read</code>.</p></div><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code></p></div><div class="box"><h3>Auth</h3><p>Uses the user ID from the JWT token.</p></div><div class="box"><h3>Response</h3><p>Videos sorted by most recent watch time.</p></div></div></article>
 
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/user/continue</code><span class="auth auth">Auth</span></div><p class="desc">Returns videos the user has not finished.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code></p></div><div class="box"><h3>Logic</h3><p>Uses watch progress from the database.</p></div><div class="box"><h3>Response</h3><p>Continue-watching list.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/user/continue</code><span class="auth permission">Permission</span></div><p class="desc">Returns videos the user has not finished.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>videos.library.read</code>.</p></div><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code></p></div><div class="box"><h3>Logic</h3><p>Uses watch progress from the database.</p></div><div class="box"><h3>Response</h3><p>Continue-watching list.</p></div></div></article>
 
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/user/liked</code><span class="auth auth">Auth</span></div><p class="desc">Returns videos liked by the user.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Liked video list.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/user/liked</code><span class="auth permission">Permission</span></div><p class="desc">Returns videos liked by the user.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>videos.library.read</code>.</p></div><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Liked video list.</p></div></div></article>
 
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/user/recommended</code><span class="auth auth">Auth</span></div><p class="desc">Personalized recommendations based on watch history, categories, and tags.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Recommended video list.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/user/recommended</code><span class="auth permission">Permission</span></div><p class="desc">Personalized recommendations based on watch history, categories, and tags.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>videos.library.read</code>.</p></div><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Recommended video list.</p></div></div></article>
 
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/videos/:id/progress</code><span class="auth auth">Auth</span></div><p class="desc">Updates the user's progress for a specific video.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>id</code> - video ID</p></div><div class="box"><h3>Body</h3><pre>{ "progressSeconds": 120 }</pre></div><div class="box"><h3>Response</h3><p>Updated watch progress.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/videos/:id/progress</code><span class="auth permission">Permission</span></div><p class="desc">Updates the user's progress for a specific video.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>videos.progress.update</code>.</p></div><div class="box"><h3>Path</h3><p><code>id</code> - video ID</p></div><div class="box"><h3>Body</h3><pre>{ "progressSeconds": 120 }</pre></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "message": "Progress updated"
+}</pre></div></div></article>
 
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/videos/:id/like</code><span class="auth auth">Auth</span></div><p class="desc">Sets or changes the user video reaction to <code>like</code>.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>id</code> - video ID</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Reaction state and reaction counts.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/videos/:id/like</code><span class="auth permission">Permission</span></div><p class="desc">Toggles the like reaction. Repeating the same reaction removes it; the opposite reaction switches it.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>videos.react</code>.</p></div><div class="box"><h3>Path</h3><p><code>id</code> - video ID</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "status": "liked"
+}</pre></div></div></article>
 
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/videos/:id/dislike</code><span class="auth auth">Auth</span></div><p class="desc">Sets or changes the user video reaction to <code>dislike</code>.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>id</code> - video ID</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Reaction state and reaction counts.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/videos/:id/dislike</code><span class="auth permission">Permission</span></div><p class="desc">Toggles the dislike reaction. Repeating the same reaction removes it; the opposite reaction switches it.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>videos.react</code>.</p></div><div class="box"><h3>Path</h3><p><code>id</code> - video ID</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "status": "disliked"
+}</pre></div></div></article>
 
       <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/:id/similar</code><span class="auth optional">Optional</span></div><p class="desc">Returns similar videos by categories and tags.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>id</code> - video ID</p></div><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code></p></div><div class="box"><h3>Response</h3><p>Similar video list.</p></div></div></article>
 
       <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/:id/comments</code><span class="auth optional">Optional</span></div><p class="desc">Returns video comments with pagination and sorting.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>id</code> - video ID</p></div><div class="box"><h3>Query</h3><p><code>page</code>, <code>limit</code>, <code>sort=new|top</code></p></div><div class="box"><h3>Response</h3><p>Comments and pagination metadata.</p></div></div></article>
 
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/:id</code><span class="auth optional">Optional</span></div><p class="desc">Returns one video's details and records a view.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>id</code> - video ID</p></div><div class="box"><h3>Effect</h3><p>May increase the view count and return the user's progress when authenticated.</p></div><div class="box"><h3>Response</h3><p>Video details, categories, people, and playlists.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/:id</code><span class="auth optional">Optional</span></div><p class="desc">Returns a ready video’s details and records a view. Private videos are accessible only to their uploader.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>id</code> - video ID</p></div><div class="box"><h3>Effect</h3><p>May increase the view count and return the user's progress when authenticated.</p></div><div class="box"><h3>Response</h3><p>The video is returned directly. Fetch stream credentials separately with POST /api/videos/:id/playback. Signed image URLs expire after one hour; media_expires_at is Unix seconds (null for public playback).</p><pre>{
+  "id": "11111111-1111-4111-8111-111111111111",
+  "title": "Video title",
+  "thumbnail_url": null,
+  "mux_thumbnail_url": "https://image.mux.com/playback-id/thumbnail.webp?token=\u2026",
+  "preview_url": "https://image.mux.com/playback-id/animated.webp?token=\u2026",
+  "media_expires_at": 1789300800,
+  "duration_seconds": 420,
+  "view_count": 12,
+  "created_at": "2026-09-13T10:00:00.000Z",
+  "uploader_name": "Example User",
+  "people": [],
+  "mux_playback_id": "playback-id",
+  "mux_status": "ready",
+  "playback_policy": "signed",
+  "mux_thumbnail_time": 12.5,
+  "description": "Full description",
+  "tags": [
+    "education"
+  ],
+  "like_count": 4,
+  "dislike_count": 0,
+  "visibility": "public",
+  "chapters": [
+    {
+      "title": "Introduction",
+      "startTime": 0,
+      "thumbnail_url": "https://image.mux.com/playback-id/thumbnail.webp?token=\u2026"
+    }
+  ],
+  "categories": [],
+  "playlists": [],
+  "comment_count": 0,
+  "view": {
+    "view_id": "11111111-1111-4111-8111-111111111111",
+    "last_seq": 0,
+    "counted": true
+  }
+}</pre></div></div></article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/search/vector</code><span class="auth optional">Optional</span></div>
+        <p class="desc">Searches indexed video overviews and transcripts by semantic relevance. An empty or missing q falls back to ordinary video search.</p>
+        <div class="grid"><div class="box"><h3>Query</h3><p><code>q</code> (up to 6000 UTF-8 bytes), <code>category</code> (category ID), <code>tags</code> (comma-separated), <code>person</code> (person ID), <code>sort=relevance|date|views|likes</code> (default relevance). <code>page</code> and <code>limit</code> must be positive integers (defaults 1 and 20). Limit is capped at 100; an unsafe offset returns 400. Each query parameter must be a single string.</p></div><div class="box"><h3>Errors</h3><p>400 for invalid parameters, 503 when vector search is not configured, 502 if query embedding fails. Only public ready videos with current indexed documents are ranked.</p></div><div class="box"><h3>Response</h3><pre>{
+  "videos": [
+    {
+      "id": "11111111-1111-4111-8111-111111111111",
+      "title": "Video title",
+      "thumbnail_url": null,
+      "mux_thumbnail_url": "https://image.mux.com/playback-id/thumbnail.webp?token=\u2026",
+      "preview_url": "https://image.mux.com/playback-id/animated.webp?token=\u2026",
+      "media_expires_at": 1789300800,
+      "duration_seconds": 420,
+      "view_count": 12,
+      "created_at": "2026-09-13T10:00:00.000Z",
+      "uploader_name": "Example User",
+      "people": [],
+      "relevance": 0.82
+    }
+  ],
+  "pagination": {
+    "total": 1,
+    "page": 1,
+    "limit": 20,
+    "totalPages": 1
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/:id/similar/vector</code><span class="auth optional">Optional</span></div>
+        <p class="desc">Ranks other public ready videos using the source video’s indexed overview or transcript embeddings.</p>
+        <div class="grid"><div class="box"><h3>Path</h3><p><code>id</code>: video UUID. A private source is available only to its uploader.</p></div><div class="box"><h3>Query</h3><p><code>page</code> and <code>limit</code> must be positive integers (defaults 1 and 20). Limit is capped at 100; an unsafe offset returns 400.</p></div><div class="box"><h3>Behavior</h3><p>404 for an unavailable source; an unindexed source returns an empty list. Results exclude the source video.</p></div><div class="box"><h3>Response</h3><pre>{
+  "videos": [
+    {
+      "id": "11111111-1111-4111-8111-111111111111",
+      "title": "Video title",
+      "thumbnail_url": null,
+      "mux_thumbnail_url": "https://image.mux.com/playback-id/thumbnail.webp?token=\u2026",
+      "preview_url": "https://image.mux.com/playback-id/animated.webp?token=\u2026",
+      "media_expires_at": 1789300800,
+      "duration_seconds": 420,
+      "view_count": 12,
+      "created_at": "2026-09-13T10:00:00.000Z",
+      "uploader_name": "Example User",
+      "people": [],
+      "similarity_score": 0.82
+    }
+  ],
+  "pagination": {
+    "total": 1,
+    "page": 1,
+    "limit": 20,
+    "totalPages": 1
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/user/recommended/vector</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Ranks public ready videos from a profile of the user’s 10 most recent likes and 20 most recent watched videos. Likes receive twice the weight of watches.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>videos.library.read</code>.</p></div><div class="box"><h3>Query</h3><p><code>page</code> and <code>limit</code> must be positive integers (defaults 1 and 20). Limit is capped at 100; an unsafe offset returns 400.</p></div><div class="box"><h3>Behavior</h3><p>Excludes seed videos, liked/disliked videos, and videos watched beyond 30%. Returns an empty list when no usable indexed profile exists.</p></div><div class="box"><h3>Response</h3><pre>{
+  "videos": [
+    {
+      "id": "11111111-1111-4111-8111-111111111111",
+      "title": "Video title",
+      "thumbnail_url": null,
+      "mux_thumbnail_url": "https://image.mux.com/playback-id/thumbnail.webp?token=\u2026",
+      "preview_url": "https://image.mux.com/playback-id/animated.webp?token=\u2026",
+      "media_expires_at": 1789300800,
+      "duration_seconds": 420,
+      "view_count": 12,
+      "created_at": "2026-09-13T10:00:00.000Z",
+      "uploader_name": "Example User",
+      "people": [],
+      "personal_score": 0.82
+    }
+  ],
+  "pagination": {
+    "total": 1,
+    "page": 1,
+    "limit": 20,
+    "totalPages": 1
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/videos/:id/playback</code><span class="auth optional">Optional</span></div>
+        <p class="desc">Prepares a stream URL and, for signed playback, playback, thumbnail, and storyboard tokens.</p>
+        <div class="grid"><div class="box"><h3>Path</h3><p><code>id</code>: video UUID. No body. Public videos allow anonymous playback; private videos require their uploader’s token. Visibility and playback policy are separate settings.</p></div><div class="box"><h3>Response</h3><pre>{
+  "video_id": "11111111-1111-4111-8111-111111111111",
+  "mux_playback_id": "playback-id",
+  "playback_policy": "signed",
+  "stream_url": "https://stream.mux.com/playback-id.m3u8?token=\u2026",
+  "tokens": {
+    "playback": "\u2026",
+    "thumbnail": "\u2026",
+    "storyboard": "\u2026"
+  },
+  "expires_at": 1789300800
+}</pre></div><div class="box"><h3>Behavior</h3><p>Public playback policy returns empty <code>tokens</code> and null <code>expires_at</code>. Signed tokens last at least one hour or video duration plus 30 minutes. Expiry is Unix seconds; fetch again before expiry. Responses use <code>Cache-Control: private, no-store</code>.</p></div><div class="box"><h3>Errors</h3><p>400 invalid ID; 404 unavailable or inaccessible video; 409 video not ready; 503 missing playback policy or signing configuration.</p></div></div>
+      </article>
     </section>
 
     <section class="section" id="video-moderation" data-section>
       <h2>Video Moderation <span class="base">/api/video-moderation</span></h2>
 
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/video-moderation/subtitle/:videoId</code><span class="auth admin">Admin</span></div><p class="desc">Fetches the video subtitle from the Mux text track.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>lang</code> - language code.</p></div><div class="box"><h3>Path</h3><p><code>videoId</code></p></div><div class="box"><h3>Response</h3><p>WEBVTT text.</p></div></div></article>
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/video-moderation/subtitle/replace/:videoId</code><span class="auth admin">Admin</span></div><p class="desc">Uploads a VTT file and replaces the subtitle on the Mux asset.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>lang</code>, <code>name</code></p></div><div class="box"><h3>Body</h3><p><code>multipart/form-data</code>, field <code>file</code>.</p></div><div class="box"><h3>Response</h3><p>Created track information.</p></div></div></article>
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/video-moderation/subtitle/replacev2/:videoId</code><span class="auth admin">Admin</span></div><p class="desc">Replaces the subtitle by sending VTT content through JSON.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>lang</code>, <code>name</code></p></div><div class="box"><h3>Body</h3><pre>{ "vtt": "WEBVTT\n\n..." }</pre></div><div class="box"><h3>Response</h3><p>Created track information.</p></div></div></article>
-      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/video-moderation/subtitle/:videoId</code><span class="auth admin">Admin</span></div><p class="desc">Deletes the subtitle for the selected language from the Mux asset.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>lang</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Deletion status.</p></div></div></article>
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/video-moderation/subtitle/autogenerate/:videoId</code><span class="auth admin">Admin</span></div><p class="desc">Automatically translates/generates a subtitle and attaches it to Mux.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>lang</code>, <code>name</code></p></div><div class="box"><h3>Integration</h3><p>n8n webhook i Mux text tracks.</p></div><div class="box"><h3>Response</h3><p>Subtitle creation result.</p></div></div></article>
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/video-moderation/subtitle/autogenerate/:videoId</code><span class="auth admin">Admin</span></div><p class="desc">Returns a preview of the auto-generated subtitle without replacing the existing one.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>lang</code>, <code>name</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>VTT preview or JSON result.</p></div></div></article>
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/video-moderation/details/autogenerate/:videoId</code><span class="auth admin">Admin</span></div><p class="desc">Generates a suggested set of video details from the transcript/subtitle.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>type</code></p></div><div class="box"><h3>Integration</h3><p>n8n webhook for detail generation.</p></div><div class="box"><h3>Response</h3><p>Suggested title/description/tags.</p></div></div></article>
-      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/video-moderation/video-details/:videoId</code><span class="auth admin">Admin</span></div><p class="desc">Updates video metadata.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/video-moderation/subtitle/:videoId</code><span class="auth permission">Permission</span></div><p class="desc">Fetches the video subtitle from the Mux text track.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>videos.update_own</code> for a resource you own, or <code>videos.update_any</code> for any resource.</p></div><div class="box"><h3>Query</h3><p><code>lang</code> is required, for example en.</p></div><div class="box"><h3>Path</h3><p><code>videoId</code></p></div><div class="box"><h3>Response</h3><p>200 <code>text/vtt</code> with WEBVTT content. 202 JSON while the asset or captions are processing (<code>ASSET_PROCESSING</code>, <code>CAPTIONS_PROCESSING</code>, or <code>CAPTIONS_NOT_READY</code>); retry later. 404 <code>NO_CAPTIONS</code> if no matching track exists; 502 <code>CAPTIONS_ERRORED</code> if generation failed.</p><pre>WEBVTT
+
+00:00:00.000 --&gt; 00:00:04.000
+Subtitle text...</pre></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/video-moderation/subtitle/replace/:videoId</code><span class="auth permission">Permission</span></div><p class="desc">Uploads a VTT file and replaces the subtitle on the Mux asset.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>videos.update_own</code> for a resource you own, or <code>videos.update_any</code> for any resource.</p></div><div class="box"><h3>Query</h3><p><code>lang</code>, <code>name</code></p></div><div class="box"><h3>Body</h3><p><code>multipart/form-data</code>, field <code>file</code>.</p></div><div class="box"><h3>Response</h3><p>Created track information.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/video-moderation/subtitle/replacev2/:videoId</code><span class="auth permission">Permission</span></div><p class="desc">Replaces the subtitle by sending VTT content through JSON.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>videos.update_own</code> for a resource you own, or <code>videos.update_any</code> for any resource.</p></div><div class="box"><h3>Query</h3><p><code>lang</code>, <code>name</code></p></div><div class="box"><h3>Body</h3><pre>{ "vtt": "WEBVTT\n\n..." }</pre></div><div class="box"><h3>Response</h3><p>Created track information.</p></div></div></article>
+      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/video-moderation/subtitle/:videoId</code><span class="auth permission">Permission</span></div><p class="desc">Deletes the subtitle for the selected language from the Mux asset.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>videos.update_own</code> for a resource you own, or <code>videos.update_any</code> for any resource.</p></div><div class="box"><h3>Query</h3><p><code>lang</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Deletion status.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/video-moderation/subtitle/autogenerate/:videoId</code><span class="auth permission">Permission</span></div><p class="desc">Automatically translates/generates a subtitle and attaches it to Mux.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>videos.update_own</code> for a resource you own, or <code>videos.update_any</code> for any resource.</p></div><div class="box"><h3>Query</h3><p><code>lang</code>, <code>name</code></p></div><div class="box"><h3>Integration</h3><p>n8n webhook and Mux text tracks.</p></div><div class="box"><h3>Response</h3><p>Subtitle creation result.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/video-moderation/subtitle/autogenerate/:videoId</code><span class="auth permission">Permission</span></div><p class="desc">Returns a preview of the auto-generated subtitle without replacing the existing one.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>videos.update_own</code> for a resource you own, or <code>videos.update_any</code> for any resource.</p></div><div class="box"><h3>Query</h3><p><code>lang</code>, <code>name</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>VTT preview or JSON result.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/video-moderation/details/autogenerate/:videoId</code><span class="auth permission">Permission</span></div><p class="desc">Generates a suggested set of video details from the transcript/subtitle.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>videos.update_own</code> for a resource you own, or <code>videos.update_any</code> for any resource.</p></div><div class="box"><h3>Query</h3><p><code>type</code></p></div><div class="box"><h3>Integration</h3><p>n8n webhook for detail generation.</p></div><div class="box"><h3>Response</h3><p>Suggested title/description/tags.</p></div></div></article>
+      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/video-moderation/video-details/:videoId</code><span class="auth permission">Permission</span></div><p class="desc">Partially updates video metadata, thumbnail time, chapters, and people associations.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>videos.update_own</code> for a resource you own, or <code>videos.update_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><pre>{
   "title": "Title",
   "description": "Description",
-  "category": "Education",
-  "tags": ["tag"],
-  "published_at": "2026-01-01T10:00:00Z",
+  "time": 12.5,
+  "tags": [
+    "education"
+  ],
+  "chapters": [
+    {
+      "title": "Introduction",
+      "startTime": 0
+    }
+  ],
   "visibility": "public",
-  "chair_ids": ["uuid"],
-  "speaker_ids": ["uuid"]
-}</pre></div><div class="box"><h3>Effect</h3><p>Updates the video, categories/people, and related records.</p></div><div class="box"><h3>Response</h3><p>Updated video.</p></div></div></article>
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/video-moderation/:videoId/thumbnail</code><span class="auth admin">Admin</span></div><p class="desc">Uploads a thumbnail for the video.</p><div class="grid"><div class="box"><h3>Body</h3><p><code>multipart/form-data</code>, field <code>file</code>, jpeg/png/webp.</p></div><div class="box"><h3>Storage</h3><p>The image is optimized and stored on R2/S3.</p></div><div class="box"><h3>Response</h3><pre>{ "thumbnail_url": "https://..." }</pre></div></div></article>
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/video-moderation/my/videos</code><span class="auth auth">Auth</span></div><p class="desc">Returns videos uploaded by the user or videos the user can administer.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>page</code>, <code>limit</code>, <code>sort_by</code>, <code>sort_dir</code></p></div><div class="box"><h3>Sort</h3><p>Sort columns are allowlisted.</p></div><div class="box"><h3>Response</h3><p>Video list and pagination.</p></div></div></article>
-      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/video-moderation/video/:videoId</code><span class="auth admin">Admin</span></div><p class="desc">Requests video deletion, including the Mux asset.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>videoId</code></p></div><div class="box"><h3>Effect</h3><p>Deletes the asset on Mux, while the database is cleaned through the matching flow.</p></div><div class="box"><h3>Response</h3><p>Deletion request status.</p></div></div></article>
+  "chairs": [
+    {
+      "person_id": "11111111-1111-4111-8111-111111111111"
+    }
+  ],
+  "speakers": []
+}</pre></div><div class="box"><h3>Effect</h3><p>Omitted fields stay unchanged. time is a finite non-negative number of seconds or null (reset to 0). Chapters use title and startTime. chairs/speakers accept IDs or objects with person_id; empty arrays or null clear assignments. thumbnail_settings and thumbnail_url return 400. Metadata changes queue overview reindexing. Use the dedicated playback-policy route to change playback policy.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true
+}</pre></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/video-moderation/:videoId/thumbnail</code><span class="auth permission">Permission</span></div><p class="desc">Uploads or removes the custom video thumbnail.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>videos.update_own</code> for a resource you own, or <code>videos.update_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><p><code>multipart/form-data</code>, field <code>file</code>, jpeg/png/webp up to 5 MB. Omitting the file removes the custom thumbnail.</p></div><div class="box"><h3>Storage</h3><p>The image is optimized and stored on R2/S3.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "video": {
+    "id": "11111111-1111-4111-8111-111111111111",
+    "thumbnail_url": "https://\u2026"
+  }
+}</pre></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/video-moderation/my/videos</code><span class="auth permission">Permission</span></div><p class="desc">Returns only videos uploaded by the current user, including private or processing videos.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>videos.update_own</code>.</p></div><div class="box"><h3>Query</h3><p><code>page</code> (default 1), <code>limit</code> (1–100, default 20), <code>sort_by=created_at|date|view_count|views|like_count|likes|visibility</code> (default created_at), <code>sort_dir=asc|desc</code> (default desc).</p></div><div class="box"><h3>Sort</h3><p>Sort columns are allowlisted.</p></div><div class="box"><h3>Response</h3><pre>{
+  "page": 1,
+  "limit": 20,
+  "total": 0,
+  "total_pages": 0,
+  "sort_by": "created_at",
+  "sort_dir": "desc",
+  "videos": []
+}</pre></div></div></article>
+      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/video-moderation/video/:videoId</code><span class="auth permission">Permission</span></div><p class="desc">Requests video deletion, including the Mux asset.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>videos.delete_own</code> for a resource you own, or <code>videos.delete_any</code> for any resource.</p></div><div class="box"><h3>Path</h3><p><code>videoId</code></p></div><div class="box"><h3>Effect</h3><p>Deletes the asset on Mux, while the database is cleaned through the matching flow.</p></div><div class="box"><h3>Response</h3><p>Deletion request status.</p></div></div></article>
+
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/video-moderation/generate-chapters</code><span class="auth permission">Permission</span></div><p class="desc">Generates suggested chapters through the Mux AI workflow. Save them with the video-details PATCH endpoint.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>videos.update_own</code> for a resource you own, or <code>videos.update_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><pre>{ "videoId": "uuid", "languageCode": "en" }</pre></div><div class="box"><h3>Integration</h3><p><code>@mux/ai/workflows</code></p></div><div class="box"><h3>Response</h3><pre>{
+  "chapters": [
+    {
+      "title": "Introduction",
+      "startTime": 0
+    }
+  ],
+  "success": true,
+  "message": "OK"
+}</pre></div></div></article>
+
+      <article class="route" data-method="PATCH">
+        <div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/video-moderation/:videoId/playback-policy</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Changes the Mux playback policy, creates a replacement playback ID, and revokes the previous ID.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>videos.update_own</code> for a resource you own, or <code>videos.update_any</code> for any resource.</p></div><div class="box"><h3>Path</h3><p><code>videoId</code>: video UUID.</p></div><div class="box"><h3>Body</h3><pre>{
+  "playback_policy": "signed"
+}</pre></div><div class="box"><h3>Validation</h3><p><code>playback_policy</code> must be public or signed. Repeating the existing policy returns <code>changed: false</code>. Refresh playback data after a change.</p></div><div class="box"><h3>Response</h3><pre>{
+  "id": "11111111-1111-4111-8111-111111111111",
+  "playback_policy": "signed",
+  "mux_playback_id": "new-playback-id",
+  "changed": true
+}</pre></div><div class="box"><h3>Errors</h3><p>409 if no Mux asset exists. 502 on Mux failure; <code>PLAYBACK_CLEANUP_PENDING</code> means the policy was saved but the old ID could not be deleted. Retry the same request to finish cleanup.</p></div></div>
+      </article>
     </section>
 
     <section class="section" id="people" data-section>
@@ -2406,42 +2919,51 @@
       <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/people/search</code><span class="auth optional">Optional</span></div><p class="desc">Searches people/speakers.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>q</code>, <code>limit</code>, <code>page</code></p></div><div class="box"><h3>Response</h3><p>Results and pagination.</p></div><div class="box"><h3>Note</h3><p>Uses full-text search and related video counts.</p></div></div></article>
       <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/people</code><span class="auth optional">Optional</span></div><p class="desc">Returns all people with pagination and sorting.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code>, <code>sortBy=name|total_video_count</code>, <code>sortOrder=asc|desc</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>People list and pagination/sorting metadata.</p></div></div></article>
       <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/people/:personId</code><span class="auth optional">Optional</span></div><p class="desc">Fetches one person's details.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>personId</code> UUID.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Person details.</p></div></div></article>
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/people/create</code><span class="auth admin">Admin</span></div><p class="desc">Creates a new person/speaker.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "name": "Person name", "description": "Description" }</pre></div><div class="box"><h3>Validation</h3><p>Name is required.</p></div><div class="box"><h3>Response</h3><p>Created person.</p></div></div></article>
-      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/people/:personId</code><span class="auth admin">Admin</span></div><p class="desc">Updates person details.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "name": "New name", "description": "New description" }</pre></div><div class="box"><h3>Path</h3><p><code>personId</code></p></div><div class="box"><h3>Response</h3><p>Updated person.</p></div></div></article>
-      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/people/:personId/image</code><span class="auth admin">Admin</span></div><p class="desc">Uploads the person image.</p><div class="grid"><div class="box"><h3>Body</h3><p><code>multipart/form-data</code>, field <code>file</code>, jpeg/png/webp.</p></div><div class="box"><h3>Storage</h3><p>The image is stored on R2/S3.</p></div><div class="box"><h3>Response</h3><p>Updated person with <code>image_url</code>.</p></div></div></article>
-      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/people/:personId</code><span class="auth admin">Admin</span></div><p class="desc">Deletes the person and their image if it exists.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>personId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "deleted": true }</pre></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/people/create</code><span class="auth permission">Permission</span></div><p class="desc">Creates a new person/speaker.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>people.manage</code>.</p></div><div class="box"><h3>Body</h3><pre>{ "name": "Person name", "description": "Description" }</pre></div><div class="box"><h3>Validation</h3><p>Name is required.</p></div><div class="box"><h3>Response</h3><p>Created person.</p></div></div></article>
+      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/people/:personId</code><span class="auth permission">Permission</span></div><p class="desc">Updates person details.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>people.manage</code>.</p></div><div class="box"><h3>Body</h3><pre>{ "name": "New name", "description": "New description" }</pre></div><div class="box"><h3>Path</h3><p><code>personId</code></p></div><div class="box"><h3>Response</h3><p>Updated person.</p></div></div></article>
+      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/people/:personId/image</code><span class="auth permission">Permission</span></div><p class="desc">Uploads the person image.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>people.manage</code>.</p></div><div class="box"><h3>Body</h3><p><code>multipart/form-data</code>, field <code>file</code>, jpeg/png/webp.</p></div><div class="box"><h3>Storage</h3><p>The image is stored on R2/S3.</p></div><div class="box"><h3>Response</h3><p>Updated person with <code>image_url</code>.</p></div></div></article>
+      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/people/:personId</code><span class="auth permission">Permission</span></div><p class="desc">Deletes the person and their image if it exists.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>people.manage</code>.</p></div><div class="box"><h3>Path</h3><p><code>personId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "deleted": true }</pre></div></div></article>
     </section>
 
     <section class="section" id="playlists" data-section>
       <h2>Playlists <span class="base">/api/playlists</span></h2>
       <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/playlists/search</code><span class="auth optional">Optional</span></div><p class="desc">Searches playlists by tags, sorting, and pagination.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>q</code>, <code>tags</code>, <code>sort</code>, <code>limit</code>, <code>page</code></p></div><div class="box"><h3>Sort</h3><p><code>relevance</code>, <code>date</code>, <code>views</code>, <code>videos</code></p></div><div class="box"><h3>Response</h3><p>Playlists and pagination metadata.</p></div></div></article>
       <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/playlists/featured</code><span class="auth optional">Optional</span></div><p class="desc">Returns featured playlists for the home page.</p><div class="grid"><div class="box"><h3>Query</h3><p>None.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Featured playlist list.</p></div></div></article>
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/playlists/:id/save</code><span class="auth auth">Auth</span></div><p class="desc">Toggles saving the playlist for the user.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>id</code> - playlist ID.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "saved": true, "save_count": 12 }</pre></div></div></article>
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/playlists/user/saved</code><span class="auth auth">Auth</span></div><p class="desc">Returns playlists saved by the user.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>limit</code>, <code>offset</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Saved playlist list.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/playlists/:id/save</code><span class="auth permission">Permission</span></div><p class="desc">Toggles saving the playlist for the user.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>playlists.save</code>.</p></div><div class="box"><h3>Path</h3><p><code>id</code> - playlist ID.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "saved": true, "save_count": 12 }</pre></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/playlists/user/saved</code><span class="auth permission">Permission</span></div><p class="desc">Returns playlists saved by the user.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>playlists.library.read</code>.</p></div><div class="box"><h3>Query</h3><p><code>limit</code>, <code>offset</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Saved playlist list.</p></div></div></article>
       <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/playlists/:id/videos</code><span class="auth optional">Optional</span></div><p class="desc">Returns videos that belong to the playlist.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code>, <code>sort</code>, <code>order</code></p></div><div class="box"><h3>Path</h3><p><code>id</code> - playlist ID.</p></div><div class="box"><h3>Response</h3><p>Videos and pagination.</p></div></div></article>
       <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/playlists/:id</code><span class="auth optional">Optional</span></div><p class="desc">Returns one playlist's details.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>id</code> - playlist ID.</p></div><div class="box"><h3>Effect</h3><p>May return whether the user has saved the playlist.</p></div><div class="box"><h3>Response</h3><p>Playlist details.</p></div></div></article>
     </section>
 
     <section class="section" id="playlist-moderation" data-section>
       <h2>Playlist Moderation <span class="base">/api/playlists-moderation</span></h2>
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/playlists-moderation/my/playlists</code><span class="auth admin">Admin</span></div><p class="desc">Lists playlists the user can administer.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>page</code>, <code>limit</code>, <code>sort</code>, <code>order</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Playlists and pagination.</p></div></div></article>
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/playlists-moderation/playlist/create</code><span class="auth admin">Admin</span></div><p class="desc">Creates a new playlist.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "title": "Playlist title" }</pre></div><div class="box"><h3>Note</h3><p>The playlist is created by the currently authenticated user.</p></div><div class="box"><h3>Response</h3><p>Created playlist.</p></div></div></article>
-      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/playlists-moderation/playlist-details/:playlistId</code><span class="auth admin">Admin</span></div><p class="desc">Updates playlist details.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "title": "Title", "description": "Description", "category": "Education", "tags": ["tag"], "status": "published", "featured": true }</pre></div><div class="box"><h3>Path</h3><p><code>playlistId</code></p></div><div class="box"><h3>Response</h3><p>Updated playlist.</p></div></div></article>
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/playlists-moderation/:playlistId/thumbnail</code><span class="auth admin">Admin</span></div><p class="desc">Uploads a playlist thumbnail.</p><div class="grid"><div class="box"><h3>Body</h3><p><code>multipart/form-data</code>, field <code>file</code>.</p></div><div class="box"><h3>Path</h3><p><code>playlistId</code></p></div><div class="box"><h3>Response</h3><pre>{ "thumbnail_url": "https://..." }</pre></div></div></article>
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/playlists-moderation/:playlistId/items</code><span class="auth admin">Admin</span></div><p class="desc">Adds a video to the playlist.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "video_id": "uuid", "position": 1 }</pre></div><div class="box"><h3>Path</h3><p><code>playlistId</code></p></div><div class="box"><h3>Response</h3><p>Added playlist item.</p></div></div></article>
-      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/playlists-moderation/:playlistId/items/:videoId</code><span class="auth admin">Admin</span></div><p class="desc">Removes a video from the playlist.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>playlistId</code>, <code>videoId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Removal status.</p></div></div></article>
-      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/playlists-moderation/:playlistId/items/move</code><span class="auth admin">Admin</span></div><p class="desc">Moves a video to a new position in the playlist.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "video_id": "uuid", "to_position": 3 }</pre></div><div class="box"><h3>Path</h3><p><code>playlistId</code></p></div><div class="box"><h3>Response</h3><p>Updated order.</p></div></div></article>
-      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/playlists-moderation/playlist/:playlistId</code><span class="auth admin">Admin</span></div><p class="desc">Deletes the playlist.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>playlistId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "deleted": true }</pre></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/playlists-moderation/my/playlists</code><span class="auth permission">Permission</span></div><p class="desc">Returns only playlists created by the current user.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>playlists.update_own</code>.</p></div><div class="box"><h3>Query</h3><p><code>page</code>, <code>limit</code>, <code>sort</code>, <code>order</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "page": 1,
+  "limit": 20,
+  "total": 0,
+  "total_pages": 0,
+  "sort": "created_at",
+  "order": "desc",
+  "playlists": []
+}</pre></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/playlists-moderation/playlist/create</code><span class="auth permission">Permission</span></div><p class="desc">Creates a new playlist.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>playlists.create</code>.</p></div><div class="box"><h3>Body</h3><pre>{ "title": "Playlist title" }</pre></div><div class="box"><h3>Note</h3><p>The playlist is created by the currently authenticated user.</p></div><div class="box"><h3>Response</h3><p>Created playlist.</p></div></div></article>
+      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/playlists-moderation/playlist-details/:playlistId</code><span class="auth permission">Permission</span></div><p class="desc">Updates playlist details.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>playlists.update_own</code> for a resource you own, or <code>playlists.update_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><pre>{ "title": "Title", "description": "Description", "category": "Education", "tags": ["tag"], "status": "published", "featured": true }</pre></div><div class="box"><h3>Path</h3><p><code>playlistId</code></p></div><div class="box"><h3>Response</h3><p>Updated playlist.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/playlists-moderation/:playlistId/thumbnail</code><span class="auth permission">Permission</span></div><p class="desc">Uploads a playlist thumbnail.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>playlists.update_own</code> for a resource you own, or <code>playlists.update_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><p><code>multipart/form-data</code>, field <code>file</code>.</p></div><div class="box"><h3>Path</h3><p><code>playlistId</code></p></div><div class="box"><h3>Response</h3><pre>{ "thumbnail_url": "https://..." }</pre></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/playlists-moderation/:playlistId/items</code><span class="auth permission">Permission</span></div><p class="desc">Adds a video to the playlist.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>playlists.update_own</code> for a resource you own, or <code>playlists.update_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><pre>{ "video_id": "uuid", "position": 1 }</pre></div><div class="box"><h3>Path</h3><p><code>playlistId</code></p></div><div class="box"><h3>Response</h3><p>Added playlist item.</p></div></div></article>
+      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/playlists-moderation/:playlistId/items/:videoId</code><span class="auth permission">Permission</span></div><p class="desc">Removes a video from the playlist.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>playlists.update_own</code> for a resource you own, or <code>playlists.update_any</code> for any resource.</p></div><div class="box"><h3>Path</h3><p><code>playlistId</code>, <code>videoId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Removal status.</p></div></div></article>
+      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/playlists-moderation/:playlistId/items/move</code><span class="auth permission">Permission</span></div><p class="desc">Moves a video to a new position in the playlist.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>playlists.update_own</code> for a resource you own, or <code>playlists.update_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><pre>{ "video_id": "uuid", "to_position": 3 }</pre></div><div class="box"><h3>Path</h3><p><code>playlistId</code></p></div><div class="box"><h3>Response</h3><p>Updated order.</p></div></div></article>
+      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/playlists-moderation/playlist/:playlistId</code><span class="auth permission">Permission</span></div><p class="desc">Deletes the playlist.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>playlists.delete_own</code> for a resource you own, or <code>playlists.delete_any</code> for any resource.</p></div><div class="box"><h3>Path</h3><p><code>playlistId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "deleted": true }</pre></div></div></article>
     </section>
 
     <section class="section" id="comments" data-section>
       <h2>Comments <span class="base">/api/comments</span></h2>
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/comments/post</code><span class="auth auth">Auth</span></div><p class="desc">Adds a comment or reply to a video.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "video_id": "uuid", "parent_id": null, "content": "Comment" }</pre></div><div class="box"><h3>Validation</h3><p>Content is required and passes through text moderation.</p></div><div class="box"><h3>Response</h3><p>Created comment.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/comments/post</code><span class="auth permission">Permission</span></div><p class="desc">Adds a comment or reply to a video.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>comments.create</code>.</p></div><div class="box"><h3>Body</h3><pre>{ "video_id": "uuid", "parent_id": null, "content": "Comment" }</pre></div><div class="box"><h3>Validation</h3><p>Content is required and passes through text moderation.</p></div><div class="box"><h3>Response</h3><p>Created comment.</p></div></div></article>
       <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/comments/:id/replies</code><span class="auth optional">Optional</span></div><p class="desc">Returns replies to a comment.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>page</code>, <code>limit</code>, <code>sort=new|top</code></p></div><div class="box"><h3>Path</h3><p><code>id</code> - parent comment ID.</p></div><div class="box"><h3>Response</h3><p>Replies and pagination.</p></div></div></article>
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/comments/:id/like</code><span class="auth auth">Auth</span></div><p class="desc">Likes a comment or changes the reaction.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>id</code> - comment ID.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Reaction state and counts.</p></div></div></article>
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/comments/:id/dislike</code><span class="auth auth">Auth</span></div><p class="desc">Dislikes a comment or changes the reaction.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>id</code> - comment ID.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Reaction state and counts.</p></div></div></article>
-      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/comments/:id/edit</code><span class="auth auth">Auth</span></div><p class="desc">Updates a comment when the user owns it.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "content": "Updated comment" }</pre></div><div class="box"><h3>IDOR protection</h3><p>The backend verifies <code>user_id</code> of the comment.</p></div><div class="box"><h3>Response</h3><p>Updated comment.</p></div></div></article>
-      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/comments/:id/delete</code><span class="auth auth">Auth</span></div><p class="desc">Soft-deletes a comment. The owner can delete their comment, and an admin can delete any comment.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>id</code> - comment ID.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "deleted": true }</pre></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/comments/:id/like</code><span class="auth permission">Permission</span></div><p class="desc">Likes a comment or changes the reaction.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>comments.react</code>.</p></div><div class="box"><h3>Path</h3><p><code>id</code> - comment ID.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Reaction state and counts.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/comments/:id/dislike</code><span class="auth permission">Permission</span></div><p class="desc">Dislikes a comment or changes the reaction.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>comments.react</code>.</p></div><div class="box"><h3>Path</h3><p><code>id</code> - comment ID.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Reaction state and counts.</p></div></div></article>
+      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/comments/:id/edit</code><span class="auth permission">Permission</span></div><p class="desc">Updates a comment when the user owns it.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>comments.edit_own</code> for a resource you own.</p></div><div class="box"><h3>Body</h3><pre>{ "content": "Updated comment" }</pre></div><div class="box"><h3>IDOR protection</h3><p>The backend verifies <code>user_id</code> of the comment.</p></div><div class="box"><h3>Response</h3><p>Updated comment.</p></div></div></article>
+      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/comments/:id/delete</code><span class="auth permission">Permission</span></div><p class="desc">Soft-deletes a comment. The owner can delete their comment, and users with comments.moderate can delete any comment.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>comments.delete_own</code> for a resource you own, or <code>comments.moderate</code> for any resource.</p></div><div class="box"><h3>Path</h3><p><code>id</code> - comment ID.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "deleted": true }</pre></div></div></article>
     </section>
 
     <section class="section" id="channels" data-section>
@@ -2454,7 +2976,7 @@
     <section class="section" id="analytics" data-section>
       <h2>Analytics <span class="base">/api/analytics</span></h2>
 
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/:videoId/overview</code><span class="auth admin">Admin</span></div><p class="desc">Returns the main performance totals for a video owned by the authenticated admin/uploader.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional date/time values)</p></div><div class="box"><h3>Path</h3><p><code>videoId</code> - owned video UUID.</p></div><div class="box"><h3>Response</h3><pre>{
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/:videoId/overview</code><span class="auth permission">Permission</span></div><p class="desc">Returns the main performance totals for an authorized video.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>analytics.video_own.read</code> for a resource you own, or <code>analytics.video_any.read</code> for any resource.</p></div><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional date/time values)</p></div><div class="box"><h3>Path</h3><p><code>videoId</code> - video UUID.</p></div><div class="box"><h3>Response</h3><pre>{
   "success": true,
   "overview": {
     "totalViews": 842,
@@ -2467,7 +2989,7 @@
   }
 }</pre></div></div></article>
 
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/:videoId/device-split</code><span class="auth admin">Admin</span></div><p class="desc">Groups views for an owned video into desktop, phone, tablet, and other devices.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional)</p></div><div class="box"><h3>Path</h3><p><code>videoId</code> - owned video UUID.</p></div><div class="box"><h3>Response</h3><pre>{
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/:videoId/device-split</code><span class="auth permission">Permission</span></div><p class="desc">Groups views for an owned video into desktop, phone, tablet, and other devices.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>analytics.video_own.read</code> for a resource you own, or <code>analytics.video_any.read</code> for any resource.</p></div><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional)</p></div><div class="box"><h3>Path</h3><p><code>videoId</code> - video UUID.</p></div><div class="box"><h3>Response</h3><pre>{
   "success": true,
   "deviceSplit": {
     "totalViews": 842,
@@ -2478,7 +3000,7 @@
   }
 }</pre></div></div></article>
 
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/:videoId/operating-system-split</code><span class="auth admin">Admin</span></div><p class="desc">Groups views for an owned video by operating system.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional)</p></div><div class="box"><h3>Path</h3><p><code>videoId</code> - owned video UUID.</p></div><div class="box"><h3>Response</h3><pre>{
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/:videoId/operating-system-split</code><span class="auth permission">Permission</span></div><p class="desc">Groups views for an owned video by operating system.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>analytics.video_own.read</code> for a resource you own, or <code>analytics.video_any.read</code> for any resource.</p></div><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional)</p></div><div class="box"><h3>Path</h3><p><code>videoId</code> - video UUID.</p></div><div class="box"><h3>Response</h3><pre>{
   "success": true,
   "operatingSystemSplit": {
     "totalViews": 842,
@@ -2491,7 +3013,7 @@
   }
 }</pre></div></div></article>
 
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/:videoId/geographic-breakdown</code><span class="auth admin">Admin</span></div><p class="desc">Returns view totals grouped by country and city for an owned video.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional)</p></div><div class="box"><h3>Path</h3><p><code>videoId</code> - owned video UUID.</p></div><div class="box"><h3>Response</h3><pre>{
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/:videoId/geographic-breakdown</code><span class="auth permission">Permission</span></div><p class="desc">Returns view totals grouped by country and city for an authorized video.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>analytics.video_own.read</code> for a resource you own, or <code>analytics.video_any.read</code> for any resource.</p></div><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional)</p></div><div class="box"><h3>Path</h3><p><code>videoId</code> - video UUID.</p></div><div class="box"><h3>Response</h3><pre>{
   "success": true,
   "geographicBreakdown": {
     "RS": {
@@ -2502,21 +3024,21 @@
   }
 }</pre></div></div></article>
 
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/:videoId/views-over-time</code><span class="auth admin">Admin</span></div><p class="desc">Returns a gap-filled view-count series for an owned video.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>groupBy=day|week|month</code> (default <code>day</code>), <code>fromDate</code>, <code>toDate</code></p></div><div class="box"><h3>Path</h3><p><code>videoId</code> - owned video UUID.</p></div><div class="box"><h3>Response</h3><pre>{
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/:videoId/views-over-time</code><span class="auth permission">Permission</span></div><p class="desc">Returns a gap-filled view-count series for an authorized video.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>analytics.video_own.read</code> for a resource you own, or <code>analytics.video_any.read</code> for any resource.</p></div><div class="box"><h3>Query</h3><p><code>groupBy=day|week|month</code> (default <code>day</code>), <code>fromDate</code>, <code>toDate</code></p></div><div class="box"><h3>Path</h3><p><code>videoId</code> - video UUID.</p></div><div class="box"><h3>Response</h3><pre>{
   "success": true,
   "viewsOverTime": [
     { "periodStart": "2026-07-01T00:00:00.000Z", "views": 42 }
   ]
 }</pre></div></div></article>
 
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/:videoId/watch-time-over-time</code><span class="auth admin">Admin</span></div><p class="desc">Returns a gap-filled watch-time series for an owned video.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>groupBy=day|week|month</code> (default <code>day</code>), <code>fromDate</code>, <code>toDate</code></p></div><div class="box"><h3>Path</h3><p><code>videoId</code> - owned video UUID.</p></div><div class="box"><h3>Response</h3><pre>{
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/:videoId/watch-time-over-time</code><span class="auth permission">Permission</span></div><p class="desc">Returns a gap-filled watch-time series for an authorized video.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>analytics.video_own.read</code> for a resource you own, or <code>analytics.video_any.read</code> for any resource.</p></div><div class="box"><h3>Query</h3><p><code>groupBy=day|week|month</code> (default <code>day</code>), <code>fromDate</code>, <code>toDate</code></p></div><div class="box"><h3>Path</h3><p><code>videoId</code> - video UUID.</p></div><div class="box"><h3>Response</h3><pre>{
   "success": true,
   "watchTimeOverTime": [
     { "periodStart": "2026-07-01T00:00:00.000Z", "watchTime": 6280 }
   ]
 }</pre></div></div></article>
 
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/:videoId/completion-buckets</code><span class="auth admin">Admin</span></div><p class="desc">Groups viewers of an owned video by the percentage of the video they completed.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional)</p></div><div class="box"><h3>Path</h3><p><code>videoId</code> - owned video UUID.</p></div><div class="box"><h3>Response</h3><pre>{
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/:videoId/completion-buckets</code><span class="auth permission">Permission</span></div><p class="desc">Groups viewers of an owned video by the percentage of the video they completed.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>analytics.video_own.read</code> for a resource you own, or <code>analytics.video_any.read</code> for any resource.</p></div><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional)</p></div><div class="box"><h3>Path</h3><p><code>videoId</code> - video UUID.</p></div><div class="box"><h3>Response</h3><pre>{
   "success": true,
   "completionBuckets": {
     "&lt;25%": 80,
@@ -2527,9 +3049,9 @@
   }
 }</pre></div></div></article>
 
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/:videoId/engagement</code><span class="auth admin">Admin</span></div><p class="desc">Returns the watch-time-to-duration engagement ratio for an owned video.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional)</p></div><div class="box"><h3>Path</h3><p><code>videoId</code> - owned video UUID.</p></div><div class="box"><h3>Response</h3><pre>{ "success": true, "engagement": 0.73 }</pre></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/:videoId/engagement</code><span class="auth permission">Permission</span></div><p class="desc">Returns the watch-time-to-duration engagement ratio for an authorized video.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>analytics.video_own.read</code> for a resource you own, or <code>analytics.video_any.read</code> for any resource.</p></div><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional)</p></div><div class="box"><h3>Path</h3><p><code>videoId</code> - video UUID.</p></div><div class="box"><h3>Response</h3><pre>{ "success": true, "engagement": 0.73 }</pre></div></div></article>
 
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/channel/overview</code><span class="auth admin">Admin</span></div><p class="desc">Returns aggregate performance totals across videos uploaded by the authenticated admin/uploader.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional date/time values)</p></div><div class="box"><h3>Scope</h3><p>The channel is inferred from the JWT user ID.</p></div><div class="box"><h3>Response</h3><pre>{
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/channel/overview</code><span class="auth permission">Permission</span></div><p class="desc">Returns aggregate performance totals across videos uploaded by the authenticated user.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>analytics.channel_own.read</code>.</p></div><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional date/time values)</p></div><div class="box"><h3>Scope</h3><p>The channel is inferred from the JWT user ID.</p></div><div class="box"><h3>Response</h3><pre>{
   "success": true,
   "channelOverview": {
     "totalViews": 12840,
@@ -2542,7 +3064,7 @@
   }
 }</pre></div></div></article>
 
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/channel/device-split</code><span class="auth admin">Admin</span></div><p class="desc">Groups all channel views into desktop, phone, tablet, and other devices.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional)</p></div><div class="box"><h3>Scope</h3><p>All videos uploaded by the JWT user.</p></div><div class="box"><h3>Response</h3><pre>{
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/channel/device-split</code><span class="auth permission">Permission</span></div><p class="desc">Groups all channel views into desktop, phone, tablet, and other devices.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>analytics.channel_own.read</code>.</p></div><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional)</p></div><div class="box"><h3>Scope</h3><p>All videos uploaded by the JWT user.</p></div><div class="box"><h3>Response</h3><pre>{
   "success": true,
   "channelDeviceSplit": {
     "totalViews": 12840,
@@ -2553,7 +3075,7 @@
   }
 }</pre></div></div></article>
 
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/channel/operating-system-split</code><span class="auth admin">Admin</span></div><p class="desc">Groups all channel views by operating system.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional)</p></div><div class="box"><h3>Scope</h3><p>All videos uploaded by the JWT user.</p></div><div class="box"><h3>Response</h3><pre>{
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/channel/operating-system-split</code><span class="auth permission">Permission</span></div><p class="desc">Groups all channel views by operating system.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>analytics.channel_own.read</code>.</p></div><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional)</p></div><div class="box"><h3>Scope</h3><p>All videos uploaded by the JWT user.</p></div><div class="box"><h3>Response</h3><pre>{
   "success": true,
   "channelOperatingSystemSplit": {
     "totalViews": 12840,
@@ -2566,7 +3088,7 @@
   }
 }</pre></div></div></article>
 
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/channel/geographic-breakdown</code><span class="auth admin">Admin</span></div><p class="desc">Returns channel view totals grouped by country and city.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional)</p></div><div class="box"><h3>Scope</h3><p>All videos uploaded by the JWT user.</p></div><div class="box"><h3>Response</h3><pre>{
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/channel/geographic-breakdown</code><span class="auth permission">Permission</span></div><p class="desc">Returns channel view totals grouped by country and city.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>analytics.channel_own.read</code>.</p></div><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional)</p></div><div class="box"><h3>Scope</h3><p>All videos uploaded by the JWT user.</p></div><div class="box"><h3>Response</h3><pre>{
   "success": true,
   "channelGeographicBreakdown": {
     "RS": {
@@ -2577,45 +3099,226 @@
   }
 }</pre></div></div></article>
 
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/channel/views-over-time</code><span class="auth admin">Admin</span></div><p class="desc">Returns a gap-filled view-count series across all videos in the channel.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>groupBy=day|week|month</code> (default <code>day</code>), <code>fromDate</code>, <code>toDate</code></p></div><div class="box"><h3>Scope</h3><p>All videos uploaded by the JWT user.</p></div><div class="box"><h3>Response</h3><pre>{
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/channel/views-over-time</code><span class="auth permission">Permission</span></div><p class="desc">Returns a gap-filled view-count series across all videos in the channel.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>analytics.channel_own.read</code>.</p></div><div class="box"><h3>Query</h3><p><code>groupBy=day|week|month</code> (default <code>day</code>), <code>fromDate</code>, <code>toDate</code></p></div><div class="box"><h3>Scope</h3><p>All videos uploaded by the JWT user.</p></div><div class="box"><h3>Response</h3><pre>{
   "success": true,
   "channelViewsOverTime": [
     { "periodStart": "2026-07-01T00:00:00.000Z", "views": 642 }
   ]
 }</pre></div></div></article>
 
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/channel/watch-time-over-time</code><span class="auth admin">Admin</span></div><p class="desc">Returns a gap-filled watch-time series across all videos in the channel.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>groupBy=day|week|month</code> (default <code>day</code>), <code>fromDate</code>, <code>toDate</code></p></div><div class="box"><h3>Scope</h3><p>All videos uploaded by the JWT user.</p></div><div class="box"><h3>Response</h3><pre>{
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/channel/watch-time-over-time</code><span class="auth permission">Permission</span></div><p class="desc">Returns a gap-filled watch-time series across all videos in the channel.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>analytics.channel_own.read</code>.</p></div><div class="box"><h3>Query</h3><p><code>groupBy=day|week|month</code> (default <code>day</code>), <code>fromDate</code>, <code>toDate</code></p></div><div class="box"><h3>Scope</h3><p>All videos uploaded by the JWT user.</p></div><div class="box"><h3>Response</h3><pre>{
   "success": true,
   "channelWatchTimeOverTime": [
     { "periodStart": "2026-07-01T00:00:00.000Z", "watchTime": 96280 }
   ]
 }</pre></div></div></article>
 
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/channel/average-engagement-per-video</code><span class="auth admin">Admin</span></div><p class="desc">Returns the average engagement ratio per uploaded video across the channel.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional)</p></div><div class="box"><h3>Scope</h3><p>All videos uploaded by the JWT user.</p></div><div class="box"><h3>Response</h3><pre>{
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/channel/average-engagement-per-video</code><span class="auth permission">Permission</span></div><p class="desc">Returns the average engagement ratio per uploaded video across the channel.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>analytics.channel_own.read</code>.</p></div><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional)</p></div><div class="box"><h3>Scope</h3><p>All videos uploaded by the JWT user.</p></div><div class="box"><h3>Response</h3><pre>{
   "success": true,
   "averageEngagementPerVideo": 0.68
 }</pre></div></div></article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/platform/overview</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Summarizes platform users, videos, playlists, views, watch time, reactions, comments, and saves.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>analytics.platform.read</code>.</p></div><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional dates); fromDate must be before or equal to toDate.</p></div><div class="box"><h3>Scope</h3><p>Platform-wide. Caller identity comes from the JWT; no userId is required in the request.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "platformOverview": {
+    "totalUsers": 100,
+    "newUsers": 10,
+    "videoCount": 20,
+    "playlistCount": 4,
+    "videoViews": 500,
+    "watchTime": 18000,
+    "avgWatchTimePerViewer": 360,
+    "videoLikes": 40,
+    "videoDislikes": 2,
+    "videoComments": 12,
+    "playlistSaves": 15
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/platform/average-engagement-per-video</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Returns the mean engagement ratio across videos with positive duration, including zero-engagement videos.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>analytics.platform.read</code>.</p></div><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional dates); fromDate must be before or equal to toDate.</p></div><div class="box"><h3>Scope</h3><p>Platform-wide. Caller identity comes from the JWT; no userId is required in the request.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "averageEngagementPerVideo": 0.65
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/platform/top-viewed-videos</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Returns up to three public ready videos ordered by views in the selected period.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>analytics.platform.read</code>.</p></div><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional dates); fromDate must be before or equal to toDate.</p></div><div class="box"><h3>Scope</h3><p>Platform-wide. Caller identity comes from the JWT; no userId is required in the request.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "topViewedVideos": [
+    {
+      "id": "11111111-1111-4111-8111-111111111111",
+      "title": "Video title",
+      "thumbnail_url": null,
+      "mux_thumbnail_url": "https://image.mux.com/playback-id/thumbnail.webp?token=\u2026",
+      "preview_url": "https://image.mux.com/playback-id/animated.webp?token=\u2026",
+      "media_expires_at": 1789300800,
+      "duration_seconds": 420,
+      "view_count": 12,
+      "created_at": "2026-09-13T10:00:00.000Z",
+      "uploader_name": "Example User",
+      "people": [],
+      "description": "Video description",
+      "period_views": 12
+    }
+  ]
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/platform/top-viewed-playlists</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Returns up to three public playlists ordered by views in the selected period.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>analytics.platform.read</code>.</p></div><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional dates); fromDate must be before or equal to toDate.</p></div><div class="box"><h3>Scope</h3><p>Platform-wide. Caller identity comes from the JWT; no userId is required in the request.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "topViewedPlaylists": [
+    {
+      "id": "11111111-1111-4111-8111-111111111111",
+      "title": "Playlist",
+      "description": "Playlist description",
+      "thumbnail_url": null,
+      "view_count": 20,
+      "save_count": 5,
+      "video_count": 3,
+      "created_at": "2026-09-13T10:00:00.000Z",
+      "period_views": 10
+    }
+  ]
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/platform/device-split</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Counts platform video views by device type.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>analytics.platform.read</code>.</p></div><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional dates); fromDate must be before or equal to toDate.</p></div><div class="box"><h3>Scope</h3><p>Platform-wide. Caller identity comes from the JWT; no userId is required in the request.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "platformDeviceSplit": {
+    "totalViews": 100,
+    "desktop": 50,
+    "phone": 35,
+    "tablet": 10,
+    "other": 5
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/platform/operating-system-split</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Counts platform video views by operating system.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>analytics.platform.read</code>.</p></div><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional dates); fromDate must be before or equal to toDate.</p></div><div class="box"><h3>Scope</h3><p>Platform-wide. Caller identity comes from the JWT; no userId is required in the request.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "platformOperatingSystemSplit": {
+    "totalViews": 100,
+    "windows": 30,
+    "macOS": 20,
+    "android": 25,
+    "iOS": 15,
+    "linux": 5,
+    "other": 5
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/platform/geographic-breakdown</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Groups platform video views by country code and city.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>analytics.platform.read</code>.</p></div><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional dates); fromDate must be before or equal to toDate.</p></div><div class="box"><h3>Scope</h3><p>Platform-wide. Caller identity comes from the JWT; no userId is required in the request.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "platformGeographicBreakdown": {
+    "RS": {
+      "name": "Serbia",
+      "totalViews": 10,
+      "cities": {
+        "Belgrade": 10
+      }
+    }
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/platform/views-over-time</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Returns a gap-filled platform video view series.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>analytics.platform.read</code>.</p></div><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional dates); fromDate must be before or equal to toDate. <code>groupBy=day|week|month</code> (default day).</p></div><div class="box"><h3>Scope</h3><p>Platform-wide. Caller identity comes from the JWT; no userId is required in the request.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "platformViewsOverTime": [
+    {
+      "periodStart": "2026-09-13T00:00:00.000Z",
+      "views": 100
+    }
+  ]
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/platform/watch-time-over-time</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Returns a gap-filled platform watch-time series in seconds.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>analytics.platform.read</code>.</p></div><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional dates); fromDate must be before or equal to toDate. <code>groupBy=day|week|month</code> (default day).</p></div><div class="box"><h3>Scope</h3><p>Platform-wide. Caller identity comes from the JWT; no userId is required in the request.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "platformWatchTimeOverTime": [
+    {
+      "periodStart": "2026-09-13T00:00:00.000Z",
+      "watchTime": 3600
+    }
+  ]
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/platform/signups-over-time</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Returns a gap-filled series of new user registrations.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>analytics.platform.read</code>.</p></div><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional dates); fromDate must be before or equal to toDate. <code>groupBy=day|week|month</code> (default day).</p></div><div class="box"><h3>Scope</h3><p>Platform-wide. Caller identity comes from the JWT; no userId is required in the request.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "platformSignupsOverTime": [
+    {
+      "periodStart": "2026-09-13T00:00:00.000Z",
+      "signups": 10
+    }
+  ]
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/analytics/platform/active-users-over-time</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Counts distinct registered users per period across signups, authenticated video views, and authenticated playlist views. Empty periods are filled with zero.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>analytics.platform.read</code>.</p></div><div class="box"><h3>Query</h3><p><code>fromDate</code>, <code>toDate</code> (optional dates); fromDate must be before or equal to toDate. <code>groupBy=day|week|month</code> (default day).</p></div><div class="box"><h3>Scope</h3><p>Platform-wide. Caller identity comes from the JWT; no userId is required in the request.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "platformActiveUsersOverTime": [
+    {
+      "periodStart": "2026-09-13T00:00:00.000Z",
+      "activeUsers": 25
+    }
+  ]
+}</pre></div></div>
+      </article>
     </section>
 
     <section class="section" id="reports" data-section>
       <h2>Reports <span class="base">/api/reports</span></h2>
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/reports/video-analytics.pdf</code><span class="auth admin">Admin</span></div><p class="desc">Generates a PDF analytics report for the video platform.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>range</code>, <code>from</code>, <code>to</code>, <code>groupBy</code>, <code>includePrivate</code>, <code>timezone</code></p></div><div class="box"><h3>Response</h3><p><code>application/pdf</code>, attachment filename.</p></div><div class="box"><h3>Integration</h3><p>Puppeteer generates the PDF from an HTML report.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/reports/video-analytics.pdf</code><span class="auth permission">Permission</span></div><p class="desc">Generates a PDF analytics report for the video platform.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>reports.analytics.export</code>.</p></div><div class="box"><h3>Query</h3><p><code>range</code>, <code>from</code>, <code>to</code>, <code>groupBy</code>, <code>includePrivate</code>, <code>timezone</code></p></div><div class="box"><h3>Response</h3><p><code>application/pdf</code>, attachment filename.</p></div><div class="box"><h3>Integration</h3><p>Puppeteer generates the PDF from an HTML report.</p></div></div></article>
     </section>
 
     <section class="section" id="quizzes" data-section>
       <h2>Quizzes <span class="base">/api/quizzes</span></h2>
 
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/create</code><span class="auth admin">Admin</span></div><p class="desc">Creates a quiz.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "title": "Quiz", "description": "Description", "time_limit_seconds": 600, "max_attempts": 3, "passing_score_percentage": 70 }</pre></div><div class="box"><h3>Ownership</h3><p>The quiz is assigned to the creator from the JWT token.</p></div><div class="box"><h3>Response</h3><p>Created quiz.</p></div></div></article>
-      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/quizzes/:quizId</code><span class="auth admin">Admin</span></div><p class="desc">Updates basic quiz fields.</p><div class="grid"><div class="box"><h3>Body</h3><p>Partial update of quiz fields.</p></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Response</h3><p>Updated quiz.</p></div></div></article>
-      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/quizzes/:quizId</code><span class="auth admin">Admin</span></div><p class="desc">Deletes the quiz when the user created it or has administration rights.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "deleted": true }</pre></div></div></article>
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/user</code><span class="auth admin">Admin</span></div><p class="desc">Returns quizzes created by the current admin/uploader.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>page</code>, <code>limit</code>, <code>sort</code>, <code>order</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Quiz list.</p></div></div></article>
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/certificates</code><span class="auth auth">Auth</span></div><p class="desc">Returns the user's certificates.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code> if supported.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Certificate list.</p></div></div></article>
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/certificate/generate</code><span class="auth auth">Auth</span></div><p class="desc">Generates a PDF certificate for a passed quiz.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "quizId": "uuid", "attemptId": "uuid" }</pre></div><div class="box"><h3>Response</h3><p><code>application/pdf</code> attachment.</p></div><div class="box"><h3>Integration</h3><p>Puppeteer renders the certificate.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/create</code><span class="auth permission">Permission</span></div><p class="desc">Creates a quiz.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.create</code>.</p></div><div class="box"><h3>Body</h3><pre>{ "title": "Quiz", "description": "Description", "time_limit_seconds": 600, "max_attempts": 3, "passing_score_percentage": 70 }</pre></div><div class="box"><h3>Ownership</h3><p>The quiz is assigned to the creator from the JWT token.</p></div><div class="box"><h3>Response</h3><p>Created quiz.</p></div></div></article>
+      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/quizzes/:quizId</code><span class="auth permission">Permission</span></div><p class="desc">Updates basic quiz fields.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><p>Partial update of quiz fields.</p></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Response</h3><p>Updated quiz.</p></div></div></article>
+      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/quizzes/:quizId</code><span class="auth permission">Permission</span></div><p class="desc">Deletes the quiz when the user created it or has administration rights.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "deleted": true }</pre></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/user</code><span class="auth permission">Permission</span></div><p class="desc">Returns quizzes created by the current user.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.manage_own</code>.</p></div><div class="box"><h3>Query</h3><p><code>page</code>, <code>limit</code>, <code>sort</code>, <code>order</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Quiz list.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/certificates</code><span class="auth permission">Permission</span></div><p class="desc">Returns the user's certificates.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.certificates</code>.</p></div><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code> if supported.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Certificate list.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/certificate/generate</code><span class="auth permission">Permission</span></div><p class="desc">Generates a PDF certificate for a passed quiz.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.certificates</code>.</p></div><div class="box"><h3>Body</h3><pre>{ "quizId": "uuid", "attemptId": "uuid" }</pre></div><div class="box"><h3>Response</h3><p><code>application/pdf</code> attachment.</p></div><div class="box"><h3>Integration</h3><p>Puppeteer renders the certificate.</p></div></div></article>
       <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/details</code><span class="auth optional">Optional</span></div><p class="desc">Returns public quiz details for a video/playlist context.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Quiz details.</p></div></div></article>
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/requirements</code><span class="auth auth">Auth</span></div><p class="desc">Checks whether the user meets the requirements to start the quiz.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Logic</h3><p>Checks access rules and watch progress.</p></div><div class="box"><h3>Response</h3><pre>{ "hasMetRequirements": true }</pre></div></div></article>
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/requirements/videos</code><span class="auth auth">Auth</span></div><p class="desc">Returns videos the user must watch to access the quiz.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Required videos and progress list.</p></div></div></article>
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/questions</code><span class="auth admin">Admin</span></div><p class="desc">Returns all quiz questions for administration.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>page</code>, <code>limit</code>, <code>sortBy</code>, <code>sortOrder</code></p></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Response</h3><p>Questions, options, matching pairs, and pagination.</p></div></div></article>
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/:quizId/question/create</code><span class="auth admin">Admin</span></div><p class="desc">Adds a question to the quiz.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/requirements</code><span class="auth permission">Permission</span></div><p class="desc">Checks whether the user meets the requirements to start the quiz.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.participate</code>.</p></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Logic</h3><p>Checks access rules and watch progress.</p></div><div class="box"><h3>Response</h3><pre>{ "hasMetRequirements": true }</pre></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/requirements/videos</code><span class="auth permission">Permission</span></div><p class="desc">Returns videos the user must watch to access the quiz.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.participate</code>.</p></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Required videos and progress list.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/questions</code><span class="auth permission">Permission</span></div><p class="desc">Returns all quiz questions for administration.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Query</h3><p><code>page</code>, <code>limit</code>, <code>sortBy</code>, <code>sortOrder</code></p></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Response</h3><p>Questions, options, matching pairs, and pagination.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/:quizId/question/create</code><span class="auth permission">Permission</span></div><p class="desc">Adds a question to the quiz.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><pre>{
   "question_text": "Question?",
   "question_type": "single_choice",
   "explanation": "Explanation",
@@ -2624,21 +3327,21 @@
   "options": [{ "option_text": "A", "is_correct": true }],
   "pairs": []
 }</pre></div><div class="box"><h3>Types</h3><p>Multiple question types are supported, including options and matching pairs.</p></div><div class="box"><h3>Response</h3><p>Created question.</p></div></div></article>
-      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/quizzes/question/:questionId</code><span class="auth admin">Admin</span></div><p class="desc">Updates the question and related options/pairs.</p><div class="grid"><div class="box"><h3>Body</h3><p>Same structure as creation, with all supported fields.</p></div><div class="box"><h3>Path</h3><p><code>questionId</code></p></div><div class="box"><h3>Response</h3><p>Updated question.</p></div></div></article>
-      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/quizzes/question/:questionId</code><span class="auth admin">Admin</span></div><p class="desc">Deletes a question from the quiz.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>questionId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "deleted": true }</pre></div></div></article>
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/rules</code><span class="auth admin">Admin</span></div><p class="desc">Returns quiz access rules.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Access rule list.</p></div></div></article>
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/:quizId/rule/create</code><span class="auth admin">Admin</span></div><p class="desc">Adds an access rule to the quiz.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "video_id": "uuid", "playlist_id": null, "required_percentage": 80, "required_seconds": 300 }</pre></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Response</h3><p>Created rule.</p></div></div></article>
-      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/quizzes/rule/:ruleId</code><span class="auth admin">Admin</span></div><p class="desc">Updates a quiz access rule.</p><div class="grid"><div class="box"><h3>Body</h3><p>Access rule fields.</p></div><div class="box"><h3>Path</h3><p><code>ruleId</code></p></div><div class="box"><h3>Response</h3><p>Updated rule.</p></div></div></article>
-      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/quizzes/rule/:ruleId</code><span class="auth admin">Admin</span></div><p class="desc">Deletes a quiz access rule.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>ruleId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "deleted": true }</pre></div></div></article>
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/question-sources</code><span class="auth admin">Admin</span></div><p class="desc">Returns quiz question sources.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Question source list.</p></div></div></article>
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/:quizId/question-source/create</code><span class="auth admin">Admin</span></div><p class="desc">Adds a question source to the quiz.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "source_type": "video", "video_id": "uuid", "playlist_id": null, "question_count": 5 }</pre></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Response</h3><p>Created question source.</p></div></div></article>
-      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/quizzes/question-source/:sourceId</code><span class="auth admin">Admin</span></div><p class="desc">Updates a question source.</p><div class="grid"><div class="box"><h3>Body</h3><p>Question source fields.</p></div><div class="box"><h3>Path</h3><p><code>sourceId</code></p></div><div class="box"><h3>Response</h3><p>Updated source.</p></div></div></article>
-      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/quizzes/question-source/:sourceId</code><span class="auth admin">Admin</span></div><p class="desc">Deletes a question source.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>sourceId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "deleted": true }</pre></div></div></article>
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/:quizId/attempt/start</code><span class="auth auth">Auth</span></div><p class="desc">Starts a new quiz attempt for the user.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Logic</h3><p>Checks requirements, attempt count, and creates an attempt with questions.</p></div><div class="box"><h3>Response</h3><p>Attempt metadata.</p></div></div></article>
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/attempts</code><span class="auth auth">Auth</span></div><p class="desc">Returns the user's attempts for the quiz.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Attempt list.</p></div></div></article>
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/attempt/:attemptId/questions</code><span class="auth auth">Auth</span></div><p class="desc">Returns questions for the active quiz attempt.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>attemptId</code></p></div><div class="box"><h3>Security</h3><p>A user can only see their own attempt.</p></div><div class="box"><h3>Response</h3><p>Questions, options, and saved answers.</p></div></div></article>
-      <article class="route" data-method="PUT"><div class="route-head"><span class="method put">PUT</span><code class="path">/api/quizzes/attempt/:attemptId/question/:questionId/answer</code><span class="auth auth">Auth</span></div><p class="desc">Saves an answer during the attempt.</p><div class="grid"><div class="box"><h3>Body</h3><pre>{ "answer": "answer value or object" }</pre></div><div class="box"><h3>Path</h3><p><code>attemptId</code>, <code>questionId</code></p></div><div class="box"><h3>Response</h3><p>Saved answer and result when applicable.</p></div></div></article>
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/attempt/:attemptId/submit</code><span class="auth auth">Auth</span></div><p class="desc">Submits the attempt, grades the quiz, and finishes the attempt.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>attemptId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Quiz result, pass/fail, and score.</p></div></div></article>
+      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/quizzes/question/:questionId</code><span class="auth permission">Permission</span></div><p class="desc">Updates the question and related options/pairs.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><p>Same structure as creation, with all supported fields.</p></div><div class="box"><h3>Path</h3><p><code>questionId</code></p></div><div class="box"><h3>Response</h3><p>Updated question.</p></div></div></article>
+      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/quizzes/question/:questionId</code><span class="auth permission">Permission</span></div><p class="desc">Deletes a question from the quiz.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Path</h3><p><code>questionId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "deleted": true }</pre></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/rules</code><span class="auth permission">Permission</span></div><p class="desc">Returns quiz access rules.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Access rule list.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/:quizId/rule/create</code><span class="auth permission">Permission</span></div><p class="desc">Adds an access rule to the quiz.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><pre>{ "video_id": "uuid", "playlist_id": null, "required_percentage": 80, "required_seconds": 300 }</pre></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Response</h3><p>Created rule.</p></div></div></article>
+      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/quizzes/rule/:ruleId</code><span class="auth permission">Permission</span></div><p class="desc">Updates a quiz access rule.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><p>Access rule fields.</p></div><div class="box"><h3>Path</h3><p><code>ruleId</code></p></div><div class="box"><h3>Response</h3><p>Updated rule.</p></div></div></article>
+      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/quizzes/rule/:ruleId</code><span class="auth permission">Permission</span></div><p class="desc">Deletes a quiz access rule.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Path</h3><p><code>ruleId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "deleted": true }</pre></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/question-sources</code><span class="auth permission">Permission</span></div><p class="desc">Returns quiz question sources.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Question source list.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/:quizId/question-source/create</code><span class="auth permission">Permission</span></div><p class="desc">Adds a question source to the quiz.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><pre>{ "source_type": "video", "video_id": "uuid", "playlist_id": null, "question_count": 5 }</pre></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Response</h3><p>Created question source.</p></div></div></article>
+      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/quizzes/question-source/:sourceId</code><span class="auth permission">Permission</span></div><p class="desc">Updates a question source.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><p>Question source fields.</p></div><div class="box"><h3>Path</h3><p><code>sourceId</code></p></div><div class="box"><h3>Response</h3><p>Updated source.</p></div></div></article>
+      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/quizzes/question-source/:sourceId</code><span class="auth permission">Permission</span></div><p class="desc">Deletes a question source.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Path</h3><p><code>sourceId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "deleted": true }</pre></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/:quizId/attempt/start</code><span class="auth permission">Permission</span></div><p class="desc">Starts a new quiz attempt for the user.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.participate</code>.</p></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Logic</h3><p>Checks requirements, attempt count, and creates an attempt with questions.</p></div><div class="box"><h3>Response</h3><p>Attempt metadata.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/attempts</code><span class="auth permission">Permission</span></div><p class="desc">Returns the user's attempts for the quiz.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.participate</code>.</p></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Attempt list.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/attempt/:attemptId/questions</code><span class="auth permission">Permission</span></div><p class="desc">Returns questions for the active quiz attempt.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.participate</code>.</p></div><div class="box"><h3>Path</h3><p><code>attemptId</code></p></div><div class="box"><h3>Security</h3><p>A user can only see their own attempt.</p></div><div class="box"><h3>Response</h3><p>Questions, options, and saved answers.</p></div></div></article>
+      <article class="route" data-method="PUT"><div class="route-head"><span class="method put">PUT</span><code class="path">/api/quizzes/attempt/:attemptId/question/:questionId/answer</code><span class="auth permission">Permission</span></div><p class="desc">Saves an answer during the attempt.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.participate</code>.</p></div><div class="box"><h3>Body</h3><pre>{ "answer": "answer value or object" }</pre></div><div class="box"><h3>Path</h3><p><code>attemptId</code>, <code>questionId</code></p></div><div class="box"><h3>Response</h3><p>Saved answer and result when applicable.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/attempt/:attemptId/submit</code><span class="auth permission">Permission</span></div><p class="desc">Submits the attempt, grades the quiz, and finishes the attempt.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.participate</code>.</p></div><div class="box"><h3>Path</h3><p><code>attemptId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Quiz result, pass/fail, and score.</p></div></div></article>
     </section>
     </div>
 
@@ -2663,7 +3366,7 @@
           <a class="doc-overview-item" href="#authentication-roles" data-doc-target="authentication-roles">
             <span class="doc-overview-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-security"></use></svg></span>
             <h2>Authentication &amp; Roles</h2>
-            <p>Bearer JWT handling, public and optional access, protected routes, and admin/uploader permissions.</p>
+            <p>Bearer JWT handling, public and optional access, protected routes, and permission grants and resource ownership.</p>
           </a>
           <a class="doc-overview-item" href="#media-pipeline" data-doc-target="media-pipeline">
             <span class="doc-overview-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-media"></use></svg></span>
@@ -2700,7 +3403,7 @@
             <div class="flow-step"><span class="flow-number">1</span><div><h3>Application bootstrap</h3><p><code>src/server.js</code> loads the environment, creates the Express app, starts the HTTP server, and initializes database role logging.</p></div></div>
             <div class="flow-step"><span class="flow-number">2</span><div><h3>Global middleware</h3><p><code>src/app.js</code> enables trusted proxy headers, CORS, conditional JSON parsing, and a dedicated raw-body parser for the Mux webhook.</p></div></div>
             <div class="flow-step"><span class="flow-number">3</span><div><h3>Route registration</h3><p><code>src/routes/index.js</code> mounts every domain router below <code>/api</code> and exposes the root <code>/health</code> check.</p></div></div>
-            <div class="flow-step"><span class="flow-number">4</span><div><h3>Domain handling</h3><p>Route middleware applies authentication and roles before controllers, handlers, and services validate input, enforce ownership, query PostgreSQL, or call external integrations.</p></div></div>
+            <div class="flow-step"><span class="flow-number">4</span><div><h3>Domain handling</h3><p>Route middleware applies authentication and permissions before controllers, handlers, and services validate input, enforce ownership, query PostgreSQL, or call external integrations.</p></div></div>
             <div class="flow-step"><span class="flow-number">5</span><div><h3>Response and errors</h3><p>Handlers return JSON or binary output. Unmatched routes and unhandled errors fall through centralized 404 and 500 middleware.</p></div></div>
           </div>
         </div>
@@ -2709,7 +3412,7 @@
           <h2>Module boundaries</h2>
           <p>The backend is organized by domain, with shared infrastructure kept outside business modules.</p>
           <div class="doc-grid">
-            <div class="doc-card"><h3>Domain modules</h3><p><code>auth</code>, <code>videos</code>, <code>playlists</code>, <code>people</code>, <code>comments</code>, <code>channels</code>, <code>quizzes</code>, <code>analytics</code>, and <code>reports</code>.</p></div>
+            <div class="doc-card"><h3>Domain modules</h3><p><code>auth</code>, <code>videos</code>, <code>playlists</code>, <code>people</code>, <code>comments</code>, <code>channels</code>, <code>quizzes</code>, <code>analytics</code>, <code>reports</code>, <code>users</code>, <code>roles</code>, <code>authorization</code>, and <code>video-indexing</code>.</p></div>
             <div class="doc-card"><h3>Cross-cutting code</h3><p><code>config</code>, <code>database</code>, <code>middleware</code>, and <code>common</code> hold environment, DB pools, request processing, ownership checks, validation, logging, and response helpers.</p></div>
             <div class="doc-card"><h3>Read/write separation</h3><p>Queries use explicit <code>readPool</code> and <code>writePool</code> connections. Production reads can be routed to a regional replica while writes remain on the leader.</p></div>
             <div class="doc-card"><h3>Service integrations</h3><p>Mux handles video delivery, R2 stores uploaded images, n8n supports automation workflows, MaxMind resolves geography, and Puppeteer renders PDF reports and certificates.</p></div>
@@ -2724,11 +3427,14 @@
 ├── routes/index.js        Central route registry
 └── modules/
     ├── auth/              Identity and profiles
+    ├── authorization/     Permission and ownership checks
+    ├── roles/ users/      Role and user management
+    ├── video-indexing/    Semantic search indexing
     ├── videos/            Delivery and moderation
-    ├── playlists/         Public and admin collections
+    ├── playlists/         Browsing and collection moderation
     ├── people/ comments/ channels/
     ├── quizzes/           Learning and certificates
-    ├── analytics/         Video and channel metrics
+    ├── analytics/         Video, channel, and platform metrics
     ├── reports/           PDF analytics export
     └── storage/           Cloudflare R2 client</div>
         </div>
@@ -2742,7 +3448,7 @@
       <section id="authentication-roles" class="documentation-page view-hidden">
         <div class="eyebrow">Documentation</div>
         <h1>Authentication &amp; Roles</h1>
-        <p class="intro">JWT authentication, optional personalization, role gates, and resource ownership rules used throughout the API.</p>
+        <p class="intro">JWT authentication, optional personalization, permission gates, and resource ownership rules used throughout the API.</p>
 
         <div class="doc-section">
           <h2>Access levels</h2>
@@ -2752,9 +3458,9 @@
               <thead><tr><th>Level</th><th>Token behavior</th><th>Typical usage</th></tr></thead>
               <tbody>
                 <tr><td><span class="doc-pill">Public</span></td><td>No Bearer token is required.</td><td>Registration, login, password reset, OAuth, health, and the signed Mux webhook.</td></tr>
-                <tr><td><span class="doc-pill">Optional</span></td><td>A valid token populates <code>req.user</code>; a missing or invalid token is treated as anonymous.</td><td>Video search and details, playlists, people, comments, and channel browsing with optional personalization.</td></tr>
-                <tr><td><span class="doc-pill">Auth</span></td><td><code>requireAuth</code> verifies <code>Authorization: Bearer &lt;token&gt;</code>. Missing or invalid tokens return 401.</td><td>User profile, history, reactions, progress, saved playlists, quiz attempts, and certificates.</td></tr>
-                <tr><td><span class="doc-pill">Admin</span></td><td><code>requireAdmin</code> runs after authentication and accepts roles <code>admin</code> or <code>uploader</code>. Other roles return 403.</td><td>Uploads, moderation, quiz authoring, analytics, people management, and PDF reporting.</td></tr>
+                <tr><td><span class="doc-pill">Optional</span></td><td>A valid token populates <code>req.user</code>; a missing header is anonymous, while an invalid supplied token returns 401.</td><td>Video search and details, playlists, people, comments, and channel browsing with optional personalization.</td></tr>
+                <tr><td><span class="doc-pill">Auth</span></td><td><code>requireAuth</code> verifies <code>Authorization: Bearer &lt;token&gt;</code>. Missing or invalid tokens return 401.</td><td>User profile, effective permission lookup, and account deletion. Other protected routes also require their listed permissions.</td></tr>
+                <tr><td><span class="doc-pill">Permission</span></td><td><code>requirePermission</code> and resource access middleware evaluate database-backed grants. Deny overrides allow; the Owner bypasses permission checks. Missing grants return 403.</td><td>Uploads, moderation, libraries, reactions, quizzes, analytics, people, roles, user administration, and PDF reporting.</td></tr>
               </tbody>
             </table>
           </div>
@@ -2765,8 +3471,8 @@
           <div class="flow-list">
             <div class="flow-step"><span class="flow-number">1</span><div><h3>Issue</h3><p>Login, registration, or Google OAuth returns a signed JWT together with the user profile.</p></div></div>
             <div class="flow-step"><span class="flow-number">2</span><div><h3>Send</h3><p>The client places the token in <code>Authorization: Bearer &lt;jwt-token&gt;</code> on protected requests.</p></div></div>
-            <div class="flow-step"><span class="flow-number">3</span><div><h3>Verify</h3><p><code>jsonwebtoken</code> verifies the signature with <code>JWT_SECRET</code> and attaches the payload to <code>req.user</code>.</p></div></div>
-            <div class="flow-step"><span class="flow-number">4</span><div><h3>Authorize</h3><p>Role middleware and ownership helpers decide whether the authenticated subject can access the requested resource.</p></div></div>
+            <div class="flow-step"><span class="flow-number">3</span><div><h3>Verify</h3><p><code>jsonwebtoken</code> verifies the signature with <code>JWT_SECRET</code>. The backend checks that the account is active and that the token’s authzVersion matches the database, then sets req.user. Role changes may require signing in again.</p></div></div>
+            <div class="flow-step"><span class="flow-number">4</span><div><h3>Authorize</h3><p>Permission middleware and ownership helpers decide whether the authenticated subject can access the requested resource. Role names in the profile are descriptive; use GET /api/users/me/permissions for effective permission keys.</p></div></div>
           </div>
         </div>
 
@@ -2774,7 +3480,7 @@
           <h2>Security controls</h2>
           <div class="doc-grid">
             <div class="doc-card"><h3>Password handling</h3><p>Passwords are hashed before storage. Reset request, verification, and reset endpoints use dedicated rate limiters.</p></div>
-            <div class="doc-card"><h3>Ownership checks</h3><p>Video analytics verifies that the current uploader owns the video. Quiz and comment mutations similarly validate creator or user ownership.</p></div>
+            <div class="doc-card"><h3>Ownership checks</h3><p>Own permissions require resource ownership. Corresponding any permissions allow managing other users’ resources; comments.moderate allows deleting others’ comments. Role management additionally enforces hierarchy and protected roles.</p></div>
             <div class="doc-card"><h3>Upload validation</h3><p>Multer-based upload middleware limits accepted file types and sizes before images or subtitle files reach service logic.</p></div>
             <div class="doc-card"><h3>Webhook trust</h3><p>Mux is not authenticated with JWT. Its raw request body is validated with the <code>Mux-Signature</code> HMAC before JSON is processed.</p></div>
           </div>
@@ -2784,18 +3490,18 @@
       <section id="media-pipeline" class="documentation-page view-hidden">
         <div class="eyebrow">Documentation</div>
         <h1>Media Pipeline</h1>
-        <p class="intro">The complete path from an admin initiating a video upload to ready playback and later moderation.</p>
+        <p class="intro">The complete path from an authorized user initiating a video upload to ready playback and later moderation.</p>
 
         <div class="doc-section">
           <h2>Upload to playback</h2>
           <p>Large media files travel directly from the client to Mux; the API coordinates metadata and lifecycle state.</p>
           <div class="flow-list">
-            <div class="flow-step"><span class="flow-number">1</span><div><h3>Initiate upload</h3><p><code>POST /api/videos/upload/initiate</code> creates the video record and asks Mux for a direct upload URL. The request requires an admin or uploader token.</p></div></div>
+            <div class="flow-step"><span class="flow-number">1</span><div><h3>Initiate upload</h3><p><code>POST /api/videos/upload/initiate</code> creates the video record and asks Mux for a direct upload URL. The request requires videos.create. playback_policy defaults to signed.</p></div></div>
             <div class="flow-step"><span class="flow-number">2</span><div><h3>Direct client transfer</h3><p>The browser uploads the media to the returned Mux URL. Mux receives the database video ID through passthrough metadata and can generate the requested subtitle track.</p></div></div>
             <div class="flow-step"><span class="flow-number">3</span><div><h3>Signed webhook</h3><p>Mux posts asset events to <code>/api/videos/webhook/mux</code>. The backend keeps the body raw until its HMAC signature is verified.</p></div></div>
             <div class="flow-step"><span class="flow-number">4</span><div><h3>Asset synchronization</h3><p>A ready event stores duration, asset ID, playback ID, status, and a default thumbnail URL. Error and deletion events update or remove the matching record.</p></div></div>
-            <div class="flow-step"><span class="flow-number">5</span><div><h3>Playback delivery</h3><p>Public ready videos expose Mux playback metadata to discovery and detail endpoints. Private videos remain limited to their uploader.</p></div></div>
-            <div class="flow-step"><span class="flow-number">6</span><div><h3>Post-upload moderation</h3><p>Admins can update metadata, upload a thumbnail, replace or generate subtitles, generate chapters, preview generated details, and request asset deletion.</p></div></div>
+            <div class="flow-step"><span class="flow-number">5</span><div><h3>Playback delivery</h3><p>Discovery and detail responses include generated thumbnail and preview URLs. Call POST /api/videos/:id/playback for stream credentials. Private videos remain limited to their uploader; signed playback policy is independent of visibility.</p></div></div>
+            <div class="flow-step"><span class="flow-number">6</span><div><h3>Post-upload moderation</h3><p>Users with the corresponding update/delete permissions can edit metadata, change playback policy, upload thumbnails, manage subtitles, generate chapters, and delete videos.</p></div></div>
           </div>
         </div>
 
@@ -2847,9 +3553,10 @@
             <table class="doc-table">
               <thead><tr><th>Scope</th><th>Identity</th><th>Filters</th><th>Authorization</th></tr></thead>
               <tbody>
-                <tr><td>Video analytics</td><td><code>:videoId</code> path parameter</td><td><code>fromDate</code>, <code>toDate</code>; time-series routes also accept <code>groupBy=day|week|month</code>.</td><td>Admin/uploader plus video ownership.</td></tr>
-                <tr><td>Channel analytics</td><td>Uploader ID from the JWT</td><td>The same optional date range and time grouping.</td><td>Admin/uploader; includes all videos uploaded by that user.</td></tr>
-                <tr><td>PDF report</td><td>Platform report scope</td><td><code>range</code>, <code>from</code>, <code>to</code>, <code>groupBy</code>, visibility, and timezone controls.</td><td>Admin/uploader.</td></tr>
+                <tr><td>Video analytics</td><td><code>:videoId</code> path parameter</td><td><code>fromDate</code>, <code>toDate</code>; time-series routes also accept <code>groupBy=day|week|month</code>.</td><td>analytics.video_own.read for an owned video, or analytics.video_any.read.</td></tr>
+                <tr><td>Channel analytics</td><td>Uploader ID from the JWT</td><td>The same optional date range and time grouping.</td><td>analytics.channel_own.read; includes videos uploaded by the caller.</td></tr>
+                <tr><td>Platform analytics</td><td><code>/api/analytics/platform/*</code></td><td>Optional date range; time series also accept groupBy.</td><td>analytics.platform.read.</td></tr>
+                <tr><td>PDF report</td><td>Platform report scope</td><td><code>range</code>, <code>from</code>, <code>to</code>, <code>groupBy</code>, visibility, and timezone controls.</td><td>reports.analytics.export.</td></tr>
               </tbody>
             </table>
           </div>
@@ -3011,35 +3718,6 @@
 
     applyTheme(document.documentElement.dataset.theme, false);
     const responseExamples = {
-      "/api/auth/user-update": `{
-  "id": "user_uuid",
-  "email": "user@example.com",
-  "full_name": "New name",
-  "description": "Profile description",
-  "eaes_member": true,
-  "image_url": "https://..."
-}`,
-      "/api/auth/oauth/:provider": `{
-  "user": {
-    "id": "user_uuid",
-    "email": "user@example.com",
-    "full_name": "Full Name",
-    "role": "user"
-  },
-  "token": "jwt"
-}`,
-      "/api/videos/heartbeat": `{
-  "ok": true,
-  "view_id": "uuid",
-  "watch_seconds": 120,
-  "last_heartbeat_at": "2026-06-23T00:00:00.000Z"
-}`,
-      "/api/videos/generate-chapters": `{
-  "video_id": "uuid",
-  "chapters": [
-    { "start": 0, "end": 92, "title": "Introduction" }
-  ]
-}`,
       "/api/videos/search": `{
   "videos": [
     {
@@ -3126,23 +3804,6 @@
   ],
   "pagination": { "page": 1, "limit": 20 }
 }`,
-      "/api/videos/:id/progress": `{
-  "video_id": "uuid",
-  "user_id": "user_uuid",
-  "progress_seconds": 120,
-  "completed": false,
-  "updated_at": "2026-06-23T00:00:00.000Z"
-}`,
-      "/api/videos/:id/like": `{
-  "reaction": "like",
-  "like_count": 43,
-  "dislike_count": 2
-}`,
-      "/api/videos/:id/dislike": `{
-  "reaction": "dislike",
-  "like_count": 42,
-  "dislike_count": 3
-}`,
       "/api/videos/:id/similar": `{
   "videos": [
     {
@@ -3166,20 +3827,6 @@
     }
   ],
   "pagination": { "page": 1, "limit": 20, "total": 12 }
-}`,
-      "/api/videos/:id": `{
-  "video": {
-    "id": "video_uuid",
-    "title": "Video title",
-    "description": "Full description",
-    "playback_url": "https://stream.mux.com/...",
-    "thumbnail_url": "https://...",
-    "duration_seconds": 420,
-    "categories": ["Education"],
-    "people": [{ "id": "person_uuid", "name": "Speaker Name", "type": "speaker" }],
-    "playlists": [{ "id": "playlist_uuid", "title": "Playlist title" }],
-    "user_progress": { "progress_seconds": 120, "completed": false }
-  }
 }`,
       "/api/video-moderation/subtitle/:videoId": `WEBVTT
 
@@ -3210,27 +3857,6 @@ Subtitle text...`,
   "chapters": [
     { "start": 0, "title": "Introduction" }
   ]
-}`,
-      "/api/video-moderation/video-details/:videoId": `{
-  "id": "video_uuid",
-  "title": "Title",
-  "description": "Description",
-  "category": "Education",
-  "tags": ["tag"],
-  "visibility": "public",
-  "published_at": "2026-01-01T10:00:00.000Z"
-}`,
-      "/api/video-moderation/my/videos": `{
-  "videos": [
-    {
-      "id": "video_uuid",
-      "title": "My video",
-      "status": "ready",
-      "visibility": "public",
-      "view_count": 120
-    }
-  ],
-  "pagination": { "page": 1, "limit": 20, "total": 8 }
 }`,
       "/api/video-moderation/video/:videoId": `{
   "deleted": true,
@@ -3335,18 +3961,6 @@ Subtitle text...`,
   "video_count": 8,
   "saved": true,
   "created_by": { "id": "user_uuid", "full_name": "Creator Name" }
-}`,
-      "/api/playlists-moderation/my/playlists": `{
-  "playlists": [
-    {
-      "id": "playlist_uuid",
-      "title": "My playlist",
-      "status": "published",
-      "video_count": 8,
-      "featured": false
-    }
-  ],
-  "pagination": { "page": 1, "limit": 20, "total": 6 }
 }`,
       "/api/playlists-moderation/playlist/create": `{
   "id": "playlist_uuid",
@@ -3660,7 +4274,7 @@ Content-Disposition: attachment; filename="certificate.pdf"
   "submitted_at": "2026-06-23T00:00:00.000Z"
 }`
     };
-    responseExamples["GET /api/video-moderation/subtitle/:videoId"] = responseExamples["/api/video-moderation/subtitle/:videoId"];
+    responseExamples["GET /api/video-moderation/subtitle/:videoId"] = `WEBVTT\n\n00:00:00.000 --> 00:00:04.000\nSubtitle text...`;
     responseExamples["DELETE /api/video-moderation/subtitle/:videoId"] = `{
   "deleted": true,
   "video_id": "uuid",

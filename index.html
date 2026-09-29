@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>OptiFlowz API Reference | Video Platform Documentation</title>
-  <meta name="description" content="Complete OptiFlowz Video Platform API documentation for authentication, videos, playlists, moderation, people, comments, quizzes, analytics, users, roles, reports, and database structure." />
+  <meta name="description" content="Complete OptiFlowz Video Platform API documentation for authentication, videos, playlists, moderation, people, comments, notes, posts, livestreams, quizzes, analytics, users, roles, reports, and database structure." />
   <meta name="application-name" content="OptiFlowz API Reference" />
   <meta name="author" content="OptiFlowz" />
   <meta name="robots" content="index, follow" />
@@ -1375,6 +1375,15 @@
       font-size: 20px;
     }
 
+    .section-intro {
+      margin: 0;
+      padding: 16px 18px;
+      color: var(--muted-strong);
+      font-size: 14px;
+      border-bottom: 1px solid var(--border);
+      overflow-wrap: anywhere;
+    }
+
     .base {
       color: var(--muted);
       font-size: 13px;
@@ -2080,6 +2089,10 @@
           <a href="#playlists" data-target="playlists"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-playlists"></use></svg><span>Playlists</span></a>
           <a href="#playlist-moderation" data-target="playlist-moderation"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-playlist-moderation"></use></svg><span>Playlist Moderation</span></a>
           <a href="#channels" data-target="channels"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-channels"></use></svg><span>Channels</span></a>
+          <a href="#notes" data-target="notes"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-book"></use></svg><span>Notes</span></a>
+          <a href="#posts" data-target="posts"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-comments"></use></svg><span>Posts</span></a>
+          <a href="#post-comments" data-target="post-comments"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-comments"></use></svg><span>Post Comments</span></a>
+          <a href="#live-streams" data-target="live-streams"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-channels"></use></svg><span>Live Streams</span></a>
           <a href="#quizzes" data-target="quizzes"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-quizzes"></use></svg><span>Quizzes</span></a>
           <a href="#analytics" data-target="analytics"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-analytics"></use></svg><span>Analytics</span></a>
           <a href="#reports" data-target="reports"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-reports"></use></svg><span>Reports</span></a>
@@ -2105,7 +2118,7 @@
         <p class="intro">Complete Express API reference for authentication, video delivery, playlists, quizzes, moderation, analytics, reports, and user-facing platform features.</p>
 
         <div class="overview-copy">
-          <p>The OptiFlowz backend exposes REST endpoints for a video platform built around users, video assets, watch progress, playlists, comments, people, quiz attempts, certificates, and analytics.</p>
+          <p>The OptiFlowz backend exposes REST endpoints for a video platform built around users, video assets, watch progress, playlists, comments, people, quiz attempts, certificates, livestreams, posts, personal notes, and analytics.</p>
           <p>Use the cards below to open a focused route group. Protected endpoints require a Bearer JWT token. Permission badges identify additional permission and ownership requirements.</p>
         </div>
 
@@ -2116,7 +2129,7 @@
           <a class="endpoint-card" href="#auth" data-target="auth">
             <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-auth"></use></svg></span>
             <h2>Auth</h2>
-            <p>Register, login, OAuth, profile updates, password reset, and profile images.</p>
+            <p>Register, login, OAuth, two-factor authentication, profiles, and password reset.</p>
           </a>
           <a class="endpoint-card" href="#users" data-target="users">
             <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-people"></use></svg></span>
@@ -2142,6 +2155,26 @@
             <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-playlists"></use></svg></span>
             <h2>Playlists</h2>
             <p>Playlist search, featured lists, saved playlists, and playlist video browsing.</p>
+          </a>
+          <a class="endpoint-card" href="#notes" data-target="notes">
+            <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-book"></use></svg></span>
+            <h2>Notes</h2>
+            <p>Private timestamped video notes, colors, and personal annotations.</p>
+          </a>
+          <a class="endpoint-card" href="#posts" data-target="posts">
+            <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-comments"></use></svg></span>
+            <h2>Posts</h2>
+            <p>Community posts, content blocks, polls, questioners, and reactions.</p>
+          </a>
+          <a class="endpoint-card" href="#post-comments" data-target="post-comments">
+            <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-comments"></use></svg></span>
+            <h2>Post Comments</h2>
+            <p>Post discussions, replies, editing, moderation, and reactions.</p>
+          </a>
+          <a class="endpoint-card" href="#live-streams" data-target="live-streams">
+            <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-channels"></use></svg></span>
+            <h2>Live Streams</h2>
+            <p>Schedule broadcasts, manage encoder access, watch live or DVR, and browse recordings.</p>
           </a>
           <a class="endpoint-card" href="#quizzes" data-target="quizzes">
             <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-quizzes"></use></svg></span>
@@ -2200,7 +2233,7 @@
         <li>The local backend base URL is <code>http://localhost:4000</code>.</li>
         <li>JSON routes use the header <code>Content-Type: application/json</code>.</li>
         <li>Protected routes use the header <code>Authorization: Bearer &lt;jwt-token&gt;</code>.</li>
-        <li>Routes marked as Permission require the permission listed in their Access box. Own permissions also require resource ownership; any permissions allow access across owners. The Owner role bypasses permission gates.</li>
+        <li>Routes marked as Permission require the permission listed in their Access box. Own permissions also require resource ownership; any permissions allow access across owners. The Owner role bypasses permission gates, but personal notes remain restricted to their actual author.</li>
         <li>Optional routes accept requests without an Authorization header. A supplied token must be valid and belong to an active account; malformed, expired, or stale tokens return 401.</li>
         <li>Upload routes use <code>multipart/form-data</code>, usually the field <code>file</code>.</li>
       </ul>
@@ -2255,21 +2288,26 @@
       <article class="route" data-method="POST">
         <div class="route-head"><span class="method post">POST</span><code class="path">/api/auth/login</code><span class="auth public">Public</span></div>
         <p class="desc">Logs a user in with email and password.</p>
-        <div class="grid">
+        <div class="grid"><div class="box"><h3>Login flow</h3><p>The temporary JWT expires after five minutes and is accepted only in the 2FA login body, never as a Bearer access token. Only completed logins update last_login_at. Responses use Cache-Control: no-store.</p></div>
           <div class="box"><h3>Body</h3><pre>{
   "email": "user@example.com",
   "password": "password123"
 }</pre></div>
           <div class="box"><h3>Note</h3><p>The password is verified against a bcrypt hash.</p></div>
-          <div class="box"><h3>Response</h3><pre>{
+          <div class="box"><h3>Response</h3><p>Completed login: HTTP 201.</p><pre>{
+  "success": true,
   "user": {
     "email": "user@example.com",
     "full_name": "Example User",
     "image_url": null,
-    "description": "Profile description",
+    "description": null,
     "eaes_member": false
   },
-  "token": "jwt-token"
+  "token": "access-jwt"
+}</pre><p>When 2FA is enabled: HTTP 200, with no access token or profile. Complete login through POST /api/auth/2fa/login.</p><pre>{
+  "success": false,
+  "requires2fa": true,
+  "twoFactorToken": "temporary-jwt"
 }</pre></div>
         </div>
       </article>
@@ -2320,12 +2358,18 @@
           <div class="box"><h3>Headers</h3><p><code>Authorization: Bearer token</code></p></div>
           <div class="box"><h3>Body</h3><p>None.</p></div>
           <div class="box"><h3>Response</h3><pre>{
+  "success": true,
   "user": {
     "email": "user@example.com",
     "full_name": "Example User",
     "image_url": null,
     "description": null,
     "eaes_member": false,
+    "is_2fa_enabled": false,
+    "login_methods": {
+      "password": true,
+      "google": false
+    },
     "roles": [
       {
         "id": 4,
@@ -2372,20 +2416,87 @@
       <article class="route" data-method="POST">
         <div class="route-head"><span class="method post">POST</span><code class="path">/api/auth/oauth/:provider</code><span class="auth public">Public</span></div>
         <p class="desc">OAuth login. The currently supported provider is <code>google</code>.</p>
-        <div class="grid">
+        <div class="grid"><div class="box"><h3>Login flow</h3><p>The temporary JWT expires after five minutes and is accepted only in the 2FA login body, never as a Bearer access token. Only completed logins update last_login_at. Responses use Cache-Control: no-store.</p></div>
           <div class="box"><h3>Path</h3><p><code>provider=google</code></p></div>
           <div class="box"><h3>Body</h3><pre>{ "code": "google-oauth-code" }</pre></div>
-          <div class="box"><h3>Response</h3><pre>{
+          <div class="box"><h3>Response</h3><p>Completed login: HTTP 200.</p><pre>{
+  "provider": "google",
+  "is_new_user": false,
+  "linked_existing_account": false,
+  "success": true,
   "user": {
     "email": "user@example.com",
     "full_name": "Example User",
     "image_url": null,
-    "description": "Profile description",
+    "description": null,
     "eaes_member": false
   },
-  "token": "jwt-token"
+  "token": "access-jwt"
+}</pre><p>When 2FA is enabled: HTTP 200, with no access token or profile. Complete login through POST /api/auth/2fa/login.</p><pre>{
+  "success": false,
+  "requires2fa": true,
+  "twoFactorToken": "temporary-jwt"
 }</pre></div>
         </div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/auth/2fa/setup</code><span class="auth auth">Auth</span></div>
+        <p class="desc">Prepares authenticator enrollment without enabling 2FA until verification succeeds.</p>
+        <div class="grid"><div class="box"><h3>Body</h3><pre>{
+  "password": "current password"
+}</pre><p>Alternatively:</p><pre>{
+  "googleCode": "fresh Google authorization code"
+}</pre></div><div class="box"><h3>Validation</h3><p>Send exactly one of <code>password</code> or <code>googleCode</code>. Google reauthentication requires a fresh single-use authorization code for the Google identity already linked to this account; matching email alone is insufficient. Repeating setup replaces an unconfirmed secret. Already-enabled accounts return 409. Accounts without a password must use linked Google reauthentication.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "qr": "data:image/png;base64,\u2026",
+  "manual": {
+    "codeName": "OptiFlowz:user@example.com",
+    "yourKey": "BASE32-SECRET"
+  }
+}</pre><p>qr and manual contain the enrollment secret; do not log or cache them.</p></div><div class="box"><h3>Rate limit</h3><p>Five requests per account per ten minutes per process; exceeding this returns 429. Responses use Cache-Control: no-store. Errors include success: false and message.</p></div></div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/auth/2fa/verify</code><span class="auth auth">Auth</span></div>
+        <p class="desc">Confirms enrollment using an unused six-digit authenticator code.</p>
+        <div class="grid"><div class="box"><h3>Body</h3><pre>{
+  "token": "123456"
+}</pre></div><div class="box"><h3>Validation</h3><p>Keep token as a string to preserve leading zeros. Codes use 30-second steps with one step of tolerance on either side. 400 if setup is missing, 401 for invalid/reused codes, 409 if already enabled or the account changed.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "message": "2FA enabled"
+}</pre></div><div class="box"><h3>Rate limit</h3><p>Five requests per account per ten minutes per process; exceeding this returns 429. Responses use Cache-Control: no-store. Errors include success: false and message.</p></div></div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/auth/2fa/disable</code><span class="auth auth">Auth</span></div>
+        <p class="desc">Disables 2FA or cancels an unconfirmed enrollment.</p>
+        <div class="grid"><div class="box"><h3>Body</h3><pre>{
+  "password": "current password",
+  "token": "123456"
+}</pre><p>Or replace password with googleCode.</p></div><div class="box"><h3>Validation</h3><p>Send exactly one of <code>password</code> or <code>googleCode</code>. Google reauthentication requires a fresh single-use authorization code for the Google identity already linked to this account; matching email alone is insufficient. Active 2FA also requires an unused authenticator token; a missing, invalid, or reused token returns 401. When already disabled, first-factor verification alone clears pending setup. Concurrent changes return 409.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "message": "2FA disabled"
+}</pre></div><div class="box"><h3>Rate limit</h3><p>Five requests per account per ten minutes per process; exceeding this returns 429. Responses use Cache-Control: no-store. Errors include success: false and message.</p></div></div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/auth/2fa/login</code><span class="auth auth">2FA challenge</span></div>
+        <p class="desc">Completes password or Google login after the first-factor response requests 2FA.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Requires the temporary twoFactorToken in the JSON body; no Bearer access token is required.</p></div><div class="box"><h3>Body</h3><pre>{
+  "twoFactorToken": "temporary-jwt",
+  "otp": "123456"
+}</pre></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "user": {
+    "email": "user@example.com",
+    "full_name": "Example User",
+    "image_url": null,
+    "description": null,
+    "eaes_member": false
+  },
+  "token": "access-jwt"
+}</pre><p>HTTP 200. Google completions also include provider, is_new_user, and linked_existing_account.</p></div><div class="box"><h3>Validation</h3><p>otp is a six-digit string. Successful use consumes the code and invalidates all pending login tokens for this account. Password, secret, or authorization changes also invalidate pending tokens.</p></div><div class="box"><h3>Rate limit</h3><p>Five requests per account per ten minutes per process; exceeding this returns 429. Responses use Cache-Control: no-store. Errors include success: false and message.</p></div></div>
       </article>
     </section>
 
@@ -2632,6 +2743,7 @@
 
     <section class="section" id="videos" data-section>
       <h2>Videos <span class="base">/api/videos</span></h2>
+      <p class="section-intro">Public discovery excludes unready videos and videos with null or future published_at. Authenticated uploaders can preview their own ready videos through detail/playback routes. Video cards include uploader_id. Existing signed URLs remain usable until expiry after rescheduling; Mux public URLs operate independently of backend visibility.</p>
       <p class="section-intro">Video cards include <code>thumbnail_url</code> (custom upload), <code>mux_thumbnail_url</code>, <code>preview_url</code>, and <code>media_expires_at</code>. Signed media URLs expire after one hour; the expiry is Unix seconds, or null for public playback. Discovery and playback responses use <code>Cache-Control: private, no-store</code>. Vector results include only eligible indexed videos.</p>
 
       <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/videos/upload/initiate</code><span class="auth permission">Permission</span></div><p class="desc">Creates the video database record and a Mux direct upload URL.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>videos.create</code>.</p></div><div class="box"><h3>Body</h3><pre>{
@@ -2655,7 +2767,9 @@
 
 
 
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/videos/webhook/mux</code><span class="auth public">Webhook</span></div><p class="desc">Receives Mux webhook events and updates video status.</p><div class="grid"><div class="box"><h3>Headers</h3><p><code>Mux-Signature</code> is required.</p></div><div class="box"><h3>Body</h3><p>Raw JSON payload from Mux.</p></div><div class="box"><h3>Security</h3><p>The signature is verified with <code>MUX_WEBHOOK_SECRET</code>.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/videos/webhook/mux</code><span class="auth public">Webhook</span></div><p class="desc">Receives signed Mux video, text-track, livestream lifecycle, and recording events.</p><div class="grid"><div class="box"><h3>Response</h3><pre>{
+  "received": true
+}</pre></div><div class="box"><h3>Behavior</h3><p>Validates Mux-Signature before parsing JSON. Invalid signatures return 401; invalid JSON/envelopes return 400. Livestream asset webhooks create one recording per Mux asset, update lifecycle state, reconcile indexing, and publish completed ready recordings unless a publication date is already set. Future publication dates are preserved.</p></div><div class="box"><h3>Headers</h3><p><code>Mux-Signature</code> is required.</p></div><div class="box"><h3>Body</h3><p>Raw JSON payload from Mux.</p></div><div class="box"><h3>Security</h3><p>The signature is verified with <code>MUX_WEBHOOK_SECRET</code>.</p></div></div></article>
 
       <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/search</code><span class="auth optional">Optional</span></div><p class="desc">Searches video content with filters, sorting, and pagination.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>q</code>, <code>category</code>, <code>tags</code>, <code>person</code>, <code>sort</code>, <code>limit</code>, <code>page</code></p></div><div class="box"><h3>Sort</h3><p><code>relevance</code>, <code>date</code>, <code>views</code>, <code>likes</code></p></div><div class="box"><h3>Response</h3><p>Video list and pagination.</p></div></div></article>
 
@@ -2678,19 +2792,25 @@
 
       <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/videos/:id/like</code><span class="auth permission">Permission</span></div><p class="desc">Toggles the like reaction. Repeating the same reaction removes it; the opposite reaction switches it.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>videos.react</code>.</p></div><div class="box"><h3>Path</h3><p><code>id</code> - video ID</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{
   "success": true,
-  "status": "liked"
-}</pre></div></div></article>
+  "status": 1
+}</pre><p>status is 1 for like, -1 for dislike, or 0 after removing a reaction.</p></div></div></article>
 
       <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/videos/:id/dislike</code><span class="auth permission">Permission</span></div><p class="desc">Toggles the dislike reaction. Repeating the same reaction removes it; the opposite reaction switches it.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>videos.react</code>.</p></div><div class="box"><h3>Path</h3><p><code>id</code> - video ID</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{
   "success": true,
-  "status": "disliked"
+  "status": -1
+}</pre><p>status is 1 for like, -1 for dislike, or 0 after removing a reaction.</p></div></div></article>
+
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/:id/similar</code><span class="auth auth">Auth</span></div><p class="desc">Returns similar videos by categories and tags.</p><div class="grid"><div class="box"><h3>Visibility</h3><p>The source must be ready and published/public or uploaded by the caller. The current unfinished recording of a live/disconnected stream also qualifies under the stream’s visibility. Returned candidates are public, ready, and published. Inaccessible sources return an empty list.</p></div><div class="box"><h3>Access</h3><p>Bearer access JWT required, including for public videos. Video visibility and publication rules still apply.</p></div><div class="box"><h3>Path</h3><p><code>id</code> - video ID</p></div><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code></p></div><div class="box"><h3>Response</h3><p>Similar video list.</p></div></div></article>
+
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/:id/comments</code><span class="auth auth">Auth</span></div><p class="desc">Returns video comments with pagination and sorting.</p><div class="grid"><div class="box"><h3>Visibility</h3><p>Requires Bearer authentication. Published/public videos and the uploader’s ready previews are accessible. Comments also support the active unfinished recording of a live/disconnected public or unlisted stream, or a private stream owned by the caller.</p></div><div class="box"><h3>Access</h3><p>Bearer access JWT required, including for public videos. Video visibility and publication rules still apply.</p></div><div class="box"><h3>Path</h3><p><code>id</code> - video ID</p></div><div class="box"><h3>Query</h3><p><code>page</code>, <code>limit</code>, <code>sort=new|top</code></p></div><div class="box"><h3>Response</h3><pre>{
+  "comments": [],
+  "page": 1,
+  "limit": 20,
+  "total": 0,
+  "total_pages": 0
 }</pre></div></div></article>
 
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/:id/similar</code><span class="auth optional">Optional</span></div><p class="desc">Returns similar videos by categories and tags.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>id</code> - video ID</p></div><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code></p></div><div class="box"><h3>Response</h3><p>Similar video list.</p></div></div></article>
-
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/:id/comments</code><span class="auth optional">Optional</span></div><p class="desc">Returns video comments with pagination and sorting.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>id</code> - video ID</p></div><div class="box"><h3>Query</h3><p><code>page</code>, <code>limit</code>, <code>sort=new|top</code></p></div><div class="box"><h3>Response</h3><p>Comments and pagination metadata.</p></div></div></article>
-
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/:id</code><span class="auth optional">Optional</span></div><p class="desc">Returns a ready video’s details and records a view. Private videos are accessible only to their uploader.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>id</code> - video ID</p></div><div class="box"><h3>Effect</h3><p>May increase the view count and return the user's progress when authenticated.</p></div><div class="box"><h3>Response</h3><p>The video is returned directly. Fetch stream credentials separately with POST /api/videos/:id/playback. Signed image URLs expire after one hour; media_expires_at is Unix seconds (null for public playback).</p><pre>{
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/:id</code><span class="auth auth">Auth</span></div><p class="desc">Returns a ready, published public video or the uploader’s own ready private/draft/scheduled video, and records a view.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer access JWT required, including for public videos. Video visibility and publication rules still apply.</p></div><div class="box"><h3>Path</h3><p><code>id</code> - video ID</p></div><div class="box"><h3>Effect</h3><p>Returns progress_seconds, percentage_watched, user_reaction, and view tracking data. Includes at most five public playlists, ordered by featured status then views; counts exclude unpublished videos. Playlist thumbnail responses may include media_expires_at.</p></div><div class="box"><h3>Response</h3><p>The video is returned directly. Fetch stream credentials separately with POST /api/videos/:id/playback. Signed image URLs expire after one hour; media_expires_at is Unix seconds (null for public playback).</p><pre>{
   "id": "11111111-1111-4111-8111-111111111111",
   "title": "Video title",
   "thumbnail_url": null,
@@ -2704,6 +2824,10 @@
   "people": [],
   "mux_playback_id": "playback-id",
   "mux_status": "ready",
+  "published_at": "2026-09-29T10:00:00.000Z",
+  "progress_seconds": 0,
+  "percentage_watched": 0,
+  "user_reaction": 0,
   "playback_policy": "signed",
   "mux_thumbnail_time": 12.5,
   "description": "Full description",
@@ -2760,9 +2884,9 @@
       </article>
 
       <article class="route" data-method="GET">
-        <div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/:id/similar/vector</code><span class="auth optional">Optional</span></div>
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/:id/similar/vector</code><span class="auth auth">Auth</span></div>
         <p class="desc">Ranks other public ready videos using the source video’s indexed overview or transcript embeddings.</p>
-        <div class="grid"><div class="box"><h3>Path</h3><p><code>id</code>: video UUID. A private source is available only to its uploader.</p></div><div class="box"><h3>Query</h3><p><code>page</code> and <code>limit</code> must be positive integers (defaults 1 and 20). Limit is capped at 100; an unsafe offset returns 400.</p></div><div class="box"><h3>Behavior</h3><p>404 for an unavailable source; an unindexed source returns an empty list. Results exclude the source video.</p></div><div class="box"><h3>Response</h3><pre>{
+        <div class="grid"><div class="box"><h3>Visibility</h3><p>The source must be ready and published/public or uploaded by the caller. The current unfinished recording of a live/disconnected stream also qualifies under the stream’s visibility. Returned candidates are public, ready, and published. Inaccessible sources return 404.</p></div><div class="box"><h3>Access</h3><p>Bearer access JWT required, including for public videos. Video visibility and publication rules still apply.</p></div><div class="box"><h3>Path</h3><p><code>id</code>: video UUID. A private source is available only to its uploader.</p></div><div class="box"><h3>Query</h3><p><code>page</code> and <code>limit</code> must be positive integers (defaults 1 and 20). Limit is capped at 100; an unsafe offset returns 400.</p></div><div class="box"><h3>Behavior</h3><p>404 for an unavailable source; an unindexed source returns an empty list. Results exclude the source video.</p></div><div class="box"><h3>Response</h3><pre>{
   "videos": [
     {
       "id": "11111111-1111-4111-8111-111111111111",
@@ -2818,9 +2942,9 @@
       </article>
 
       <article class="route" data-method="POST">
-        <div class="route-head"><span class="method post">POST</span><code class="path">/api/videos/:id/playback</code><span class="auth optional">Optional</span></div>
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/videos/:id/playback</code><span class="auth auth">Auth</span></div>
         <p class="desc">Prepares a stream URL and, for signed playback, playback, thumbnail, and storyboard tokens.</p>
-        <div class="grid"><div class="box"><h3>Path</h3><p><code>id</code>: video UUID. No body. Public videos allow anonymous playback; private videos require their uploader’s token. Visibility and playback policy are separate settings.</p></div><div class="box"><h3>Response</h3><pre>{
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer access JWT required, including for public videos. Video visibility and publication rules still apply.</p></div><div class="box"><h3>Path</h3><p><code>id</code>: video UUID. No body. Viewers require a ready public video whose published_at is at or before now; the uploader may preview their own ready private, draft, or scheduled video. Visibility and playback policy are separate settings.</p></div><div class="box"><h3>Response</h3><pre>{
   "video_id": "11111111-1111-4111-8111-111111111111",
   "mux_playback_id": "playback-id",
   "playback_policy": "signed",
@@ -2848,7 +2972,7 @@ Subtitle text...</pre></div></div></article>
       <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/video-moderation/subtitle/autogenerate/:videoId</code><span class="auth permission">Permission</span></div><p class="desc">Automatically translates/generates a subtitle and attaches it to Mux.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>videos.update_own</code> for a resource you own, or <code>videos.update_any</code> for any resource.</p></div><div class="box"><h3>Query</h3><p><code>lang</code>, <code>name</code></p></div><div class="box"><h3>Integration</h3><p>n8n webhook and Mux text tracks.</p></div><div class="box"><h3>Response</h3><p>Subtitle creation result.</p></div></div></article>
       <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/video-moderation/subtitle/autogenerate/:videoId</code><span class="auth permission">Permission</span></div><p class="desc">Returns a preview of the auto-generated subtitle without replacing the existing one.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>videos.update_own</code> for a resource you own, or <code>videos.update_any</code> for any resource.</p></div><div class="box"><h3>Query</h3><p><code>lang</code>, <code>name</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>VTT preview or JSON result.</p></div></div></article>
       <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/video-moderation/details/autogenerate/:videoId</code><span class="auth permission">Permission</span></div><p class="desc">Generates a suggested set of video details from the transcript/subtitle.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>videos.update_own</code> for a resource you own, or <code>videos.update_any</code> for any resource.</p></div><div class="box"><h3>Query</h3><p><code>type</code></p></div><div class="box"><h3>Integration</h3><p>n8n webhook for detail generation.</p></div><div class="box"><h3>Response</h3><p>Suggested title/description/tags.</p></div></div></article>
-      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/video-moderation/video-details/:videoId</code><span class="auth permission">Permission</span></div><p class="desc">Partially updates video metadata, thumbnail time, chapters, and people associations.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>videos.update_own</code> for a resource you own, or <code>videos.update_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><pre>{
+      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/video-moderation/video-details/:videoId</code><span class="auth permission">Permission</span></div><p class="desc">Partially updates video metadata, thumbnail time, chapters, and people associations.</p><div class="grid"><div class="box"><h3>Publishing</h3><p>published_at accepts an ISO timestamp with Z or an explicit timezone offset, or null. A public ready video is available when published_at is at or before now. Null cancels publication; future timestamps schedule it. visibility: private clears the timestamp and cannot be paired with a non-null publication date. visibility: public alone preserves an existing timestamp or sets now if absent. Updating published_at alone does not change visibility.</p></div><div class="box"><h3>Access</h3><p>Bearer JWT. <code>videos.update_own</code> for a resource you own, or <code>videos.update_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><pre>{
   "title": "Title",
   "description": "Description",
   "time": 12.5,
@@ -2862,13 +2986,14 @@ Subtitle text...</pre></div></div></article>
     }
   ],
   "visibility": "public",
+  "published_at": "2026-10-01T18:00:00+02:00",
   "chairs": [
     {
       "person_id": "11111111-1111-4111-8111-111111111111"
     }
   ],
   "speakers": []
-}</pre></div><div class="box"><h3>Effect</h3><p>Omitted fields stay unchanged. time is a finite non-negative number of seconds or null (reset to 0). Chapters use title and startTime. chairs/speakers accept IDs or objects with person_id; empty arrays or null clear assignments. thumbnail_settings and thumbnail_url return 400. Metadata changes queue overview reindexing. Use the dedicated playback-policy route to change playback policy.</p></div><div class="box"><h3>Response</h3><pre>{
+}</pre></div><div class="box"><h3>Effect</h3><p>Omitted fields stay unchanged. time is a finite non-negative number of seconds or null (reset to 0). Chapters use title and startTime. chairs/speakers accept IDs or objects with person_id; empty arrays or null clear assignments. thumbnail_settings and thumbnail_url return 400. Metadata and chairs/speakers changes queue overview reindexing. Use the dedicated playback-policy route to change playback policy.</p></div><div class="box"><h3>Response</h3><pre>{
   "success": true
 }</pre></div></div></article>
       <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/video-moderation/:videoId/thumbnail</code><span class="auth permission">Permission</span></div><p class="desc">Uploads or removes the custom video thumbnail.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>videos.update_own</code> for a resource you own, or <code>videos.update_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><p><code>multipart/form-data</code>, field <code>file</code>, jpeg/png/webp up to 5 MB. Omitting the file removes the custom thumbnail.</p></div><div class="box"><h3>Storage</h3><p>The image is optimized and stored on R2/S3.</p></div><div class="box"><h3>Response</h3><pre>{
@@ -2878,7 +3003,7 @@ Subtitle text...</pre></div></div></article>
     "thumbnail_url": "https://\u2026"
   }
 }</pre></div></div></article>
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/video-moderation/my/videos</code><span class="auth permission">Permission</span></div><p class="desc">Returns only videos uploaded by the current user, including private or processing videos.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>videos.update_own</code>.</p></div><div class="box"><h3>Query</h3><p><code>page</code> (default 1), <code>limit</code> (1–100, default 20), <code>sort_by=created_at|date|view_count|views|like_count|likes|visibility</code> (default created_at), <code>sort_dir=asc|desc</code> (default desc).</p></div><div class="box"><h3>Sort</h3><p>Sort columns are allowlisted.</p></div><div class="box"><h3>Response</h3><pre>{
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/video-moderation/my/videos</code><span class="auth permission">Permission</span></div><p class="desc">Returns the caller’s uploads, including drafts, scheduled videos, and published videos. Livestream recordings appear only once mux_status is ready.</p><div class="grid"><div class="box"><h3>Fields</h3><p>Video entries include published_at and uploader_id, plus the standard video-card media fields. Uploads not associated with a livestream can still appear while processing.</p></div><div class="box"><h3>Search</h3><p><code>q</code> (alias <code>query</code>) filters by prefix full-text search. q takes precedence. Trimmed empty text leaves results unfiltered; nonempty punctuation-only text matches nothing. Each must be a single string.</p></div><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>videos.update_own</code>.</p></div><div class="box"><h3>Query</h3><p><code>page</code> (default 1), <code>limit</code> (1–100, default 20), <code>sort_by=created_at|date|view_count|views|like_count|likes|visibility</code> (default created_at), <code>sort_dir=asc|desc</code> (default desc).</p></div><div class="box"><h3>Sort</h3><p>Sort columns are allowlisted.</p></div><div class="box"><h3>Response</h3><pre>{
   "page": 1,
   "limit": 20,
   "total": 0,
@@ -2887,7 +3012,12 @@ Subtitle text...</pre></div></div></article>
   "sort_dir": "desc",
   "videos": []
 }</pre></div></div></article>
-      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/video-moderation/video/:videoId</code><span class="auth permission">Permission</span></div><p class="desc">Requests video deletion, including the Mux asset.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>videos.delete_own</code> for a resource you own, or <code>videos.delete_any</code> for any resource.</p></div><div class="box"><h3>Path</h3><p><code>videoId</code></p></div><div class="box"><h3>Effect</h3><p>Deletes the asset on Mux, while the database is cleaned through the matching flow.</p></div><div class="box"><h3>Response</h3><p>Deletion request status.</p></div></div></article>
+      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/video-moderation/video/:videoId</code><span class="auth permission">Permission</span></div><p class="desc">Deletes the Mux asset and then the video record without waiting for a deletion webhook.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>videos.delete_own</code> for a resource you own, or <code>videos.delete_any</code> for any resource.</p></div><div class="box"><h3>Path</h3><p><code>videoId</code></p></div><div class="box"><h3>Effect</h3><p>Already-missing Mux assets are tolerated. A Mux failure returns 502 and retains local records for retry. Deleting an individual livestream recording retains its parent stream and marks the asset to prevent delayed webhooks recreating it.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "video_id": "22222222-2222-4222-8222-222222222222",
+  "mux_asset_id": "mux-asset-id",
+  "message": "Video deleted."
+}</pre><p>Recording deletion also includes live_stream_id.</p></div></div></article>
 
       <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/video-moderation/generate-chapters</code><span class="auth permission">Permission</span></div><p class="desc">Generates suggested chapters through the Mux AI workflow. Save them with the video-details PATCH endpoint.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>videos.update_own</code> for a resource you own, or <code>videos.update_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><pre>{ "videoId": "uuid", "languageCode": "en" }</pre></div><div class="box"><h3>Integration</h3><p><code>@mux/ai/workflows</code></p></div><div class="box"><h3>Response</h3><pre>{
   "chapters": [
@@ -2916,6 +3046,7 @@ Subtitle text...</pre></div></div></article>
 
     <section class="section" id="people" data-section>
       <h2>People <span class="base">/api/people</span></h2>
+      <p class="section-intro">Public video counts include only ready, public videos whose published_at has been reached; drafts and scheduled videos are excluded.</p>
       <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/people/search</code><span class="auth optional">Optional</span></div><p class="desc">Searches people/speakers.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>q</code>, <code>limit</code>, <code>page</code></p></div><div class="box"><h3>Response</h3><p>Results and pagination.</p></div><div class="box"><h3>Note</h3><p>Uses full-text search and related video counts.</p></div></div></article>
       <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/people</code><span class="auth optional">Optional</span></div><p class="desc">Returns all people with pagination and sorting.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code>, <code>sortBy=name|total_video_count</code>, <code>sortOrder=asc|desc</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>People list and pagination/sorting metadata.</p></div></div></article>
       <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/people/:personId</code><span class="auth optional">Optional</span></div><p class="desc">Fetches one person's details.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>personId</code> UUID.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Person details.</p></div></div></article>
@@ -2927,6 +3058,7 @@ Subtitle text...</pre></div></div></article>
 
     <section class="section" id="playlists" data-section>
       <h2>Playlists <span class="base">/api/playlists</span></h2>
+      <p class="section-intro">Playlist cards/details include thumbnail_url and media_expires_at. Custom playlist artwork takes priority; otherwise the first accessible ready video supplies its custom or generated thumbnail. Signed fallback images have an expiry in Unix seconds; custom/public images use null. Public video lists and counts exclude unpublished videos.</p>
       <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/playlists/search</code><span class="auth optional">Optional</span></div><p class="desc">Searches playlists by tags, sorting, and pagination.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>q</code>, <code>tags</code>, <code>sort</code>, <code>limit</code>, <code>page</code></p></div><div class="box"><h3>Sort</h3><p><code>relevance</code>, <code>date</code>, <code>views</code>, <code>videos</code></p></div><div class="box"><h3>Response</h3><p>Playlists and pagination metadata.</p></div></div></article>
       <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/playlists/featured</code><span class="auth optional">Optional</span></div><p class="desc">Returns featured playlists for the home page.</p><div class="grid"><div class="box"><h3>Query</h3><p>None.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Featured playlist list.</p></div></div></article>
       <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/playlists/:id/save</code><span class="auth permission">Permission</span></div><p class="desc">Toggles saving the playlist for the user.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>playlists.save</code>.</p></div><div class="box"><h3>Path</h3><p><code>id</code> - playlist ID.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "saved": true, "save_count": 12 }</pre></div></div></article>
@@ -2937,7 +3069,7 @@ Subtitle text...</pre></div></div></article>
 
     <section class="section" id="playlist-moderation" data-section>
       <h2>Playlist Moderation <span class="base">/api/playlists-moderation</span></h2>
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/playlists-moderation/my/playlists</code><span class="auth permission">Permission</span></div><p class="desc">Returns only playlists created by the current user.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>playlists.update_own</code>.</p></div><div class="box"><h3>Query</h3><p><code>page</code>, <code>limit</code>, <code>sort</code>, <code>order</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/playlists-moderation/my/playlists</code><span class="auth permission">Permission</span></div><p class="desc">Returns only playlists created by the current user.</p><div class="grid"><div class="box"><h3>Search</h3><p><code>q</code> (alias <code>query</code>) filters by prefix full-text search. q takes precedence. Trimmed empty text leaves results unfiltered; nonempty punctuation-only text matches nothing. Each must be a single string.</p></div><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>playlists.update_own</code>.</p></div><div class="box"><h3>Query</h3><p><code>page</code>, <code>limit</code>, <code>sort</code>, <code>order</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{
   "success": true,
   "page": 1,
   "limit": 20,
@@ -2958,8 +3090,8 @@ Subtitle text...</pre></div></div></article>
 
     <section class="section" id="comments" data-section>
       <h2>Comments <span class="base">/api/comments</span></h2>
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/comments/post</code><span class="auth permission">Permission</span></div><p class="desc">Adds a comment or reply to a video.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>comments.create</code>.</p></div><div class="box"><h3>Body</h3><pre>{ "video_id": "uuid", "parent_id": null, "content": "Comment" }</pre></div><div class="box"><h3>Validation</h3><p>Content is required and passes through text moderation.</p></div><div class="box"><h3>Response</h3><p>Created comment.</p></div></div></article>
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/comments/:id/replies</code><span class="auth optional">Optional</span></div><p class="desc">Returns replies to a comment.</p><div class="grid"><div class="box"><h3>Query</h3><p><code>page</code>, <code>limit</code>, <code>sort=new|top</code></p></div><div class="box"><h3>Path</h3><p><code>id</code> - parent comment ID.</p></div><div class="box"><h3>Response</h3><p>Replies and pagination.</p></div></div></article>
+      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/comments/post</code><span class="auth permission">Permission</span></div><p class="desc">Adds a comment or reply to a video.</p><div class="grid"><div class="box"><h3>Visibility</h3><p>Checks video access before creating a comment. Supports published/public videos, uploader previews, and the current unfinished recording of a live/disconnected stream using its visibility. Inaccessible videos return 404.</p></div><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>comments.create</code>.</p></div><div class="box"><h3>Body</h3><pre>{ "video_id": "uuid", "parent_id": null, "content": "Comment" }</pre></div><div class="box"><h3>Validation</h3><p>Content is required and passes through text moderation.</p></div><div class="box"><h3>Response</h3><p>Created comment.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/comments/:id/replies</code><span class="auth optional">Optional</span></div><p class="desc">Returns replies to a comment.</p><div class="grid"><div class="box"><h3>Visibility</h3><p>Replies require access to the parent video, including the current unfinished live recording under the stream’s visibility. Missing/inaccessible videos return 404.</p></div><div class="box"><h3>Query</h3><p><code>page</code>, <code>limit</code>, <code>sort=new|top</code></p></div><div class="box"><h3>Path</h3><p><code>id</code> - parent comment ID.</p></div><div class="box"><h3>Response</h3><p>Replies and pagination.</p></div></div></article>
       <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/comments/:id/like</code><span class="auth permission">Permission</span></div><p class="desc">Likes a comment or changes the reaction.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>comments.react</code>.</p></div><div class="box"><h3>Path</h3><p><code>id</code> - comment ID.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Reaction state and counts.</p></div></div></article>
       <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/comments/:id/dislike</code><span class="auth permission">Permission</span></div><p class="desc">Dislikes a comment or changes the reaction.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>comments.react</code>.</p></div><div class="box"><h3>Path</h3><p><code>id</code> - comment ID.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Reaction state and counts.</p></div></div></article>
       <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/comments/:id/edit</code><span class="auth permission">Permission</span></div><p class="desc">Updates a comment when the user owns it.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>comments.edit_own</code> for a resource you own.</p></div><div class="box"><h3>Body</h3><pre>{ "content": "Updated comment" }</pre></div><div class="box"><h3>IDOR protection</h3><p>The backend verifies <code>user_id</code> of the comment.</p></div><div class="box"><h3>Response</h3><p>Updated comment.</p></div></div></article>
@@ -3300,6 +3432,833 @@ Subtitle text...</pre></div></div></article>
       </article>
     </section>
 
+    <section class="section" id="notes" data-section>
+      <h2>Notes <span class="base">/api/notes</span></h2>
+      <p class="section-intro">Notes are private to their author, including for platform Owners. All routes require a Bearer access token. GET/create require access to a ready, published public video or a ready video uploaded by the caller. Editing/deleting existing notes remains possible after video visibility changes.</p>
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/notes/video/:videoId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Returns all of the caller’s notes on a video, ordered by timestamp then ID.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>notes.read_own</code>.</p></div><div class="box"><h3>Path</h3><p><code>videoId</code>: video UUID. No query parameters or body.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "notes": [
+    {
+      "id": "33333333-3333-4333-8333-333333333333",
+      "user_id": "11111111-1111-4111-8111-111111111111",
+      "video_id": "22222222-2222-4222-8222-222222222222",
+      "title": "Key point",
+      "text": "Review this example.",
+      "timestamp": 42.5,
+      "color": "#ffcc00"
+    }
+  ]
+}</pre></div><div class="box"><h3>Errors</h3><p>404 if the video is missing or inaccessible.</p></div></div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/notes</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Creates a personal note at a video timestamp.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>notes.create</code>.</p></div><div class="box"><h3>Body</h3><pre>{
+  "video_id": "22222222-2222-4222-8222-222222222222",
+  "title": "Key point",
+  "text": "Review this example.",
+  "timestamp": 42.5,
+  "color": "#ffcc00"
+}</pre></div><div class="box"><h3>Validation</h3><p>Required title (trimmed, 1–200 characters), text (trimmed, 1–10,000), video_id (UUID), and timestamp (finite non-negative seconds). Optional color is null or a trimmed string of 1–50 characters; no palette is enforced. Unknown fields return 400.</p></div><div class="box"><h3>Response</h3><p>201 Created.</p><pre>{
+  "success": true,
+  "note": {
+    "id": "33333333-3333-4333-8333-333333333333",
+    "user_id": "11111111-1111-4111-8111-111111111111",
+    "video_id": "22222222-2222-4222-8222-222222222222",
+    "title": "Key point",
+    "text": "Review this example.",
+    "timestamp": 42.5,
+    "color": "#ffcc00"
+  }
+}</pre></div><div class="box"><h3>Errors</h3><p>409 at 100 notes per user per video. Deleting a note frees a slot.</p></div></div>
+      </article>
+
+      <article class="route" data-method="PATCH">
+        <div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/notes/:id</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Edits one of the caller’s notes.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>notes.edit_own</code>.</p></div><div class="box"><h3>Path</h3><p><code>id</code>: note UUID. Foreign or missing notes return 404.</p></div><div class="box"><h3>Body</h3><pre>{
+  "text": "Updated note",
+  "color": null
+}</pre></div><div class="box"><h3>Validation</h3><p>A nonempty subset of title, text, timestamp, color. Same field limits as creation. Author and video cannot change; color: null clears the color.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "note": {
+    "id": "33333333-3333-4333-8333-333333333333",
+    "user_id": "11111111-1111-4111-8111-111111111111",
+    "video_id": "22222222-2222-4222-8222-222222222222",
+    "title": "Key point",
+    "text": "Updated note",
+    "timestamp": 42.5,
+    "color": null
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="DELETE">
+        <div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/notes/:id</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Deletes one of the caller’s notes.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>notes.delete_own</code>.</p></div><div class="box"><h3>Path</h3><p><code>id</code>: note UUID. No body. Foreign or missing notes return 404.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "deleted": true
+}</pre></div></div>
+      </article>
+    </section>
+
+    <section class="section" id="posts" data-section>
+      <h2>Posts <span class="base">/api/posts</span></h2>
+      <p class="section-intro">Create metadata first, then append blocks. All mutations require authentication and their listed permissions. Public reads allow optional authentication; private post access requires the author or posts.update_any. Posts expose author_full_name, author_image_url, like_count, dislike_count, and user_reaction (1, -1, or 0). Video blocks include authorized video_card data; post access never grants access to another user’s private video.</p>
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/posts</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Creates post metadata; append content through the block endpoint.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>posts.create</code>.</p></div><div class="box"><h3>Body</h3><pre>{
+  "title": "Community update",
+  "status": "private"
+}</pre></div><div class="box"><h3>Validation</h3><p>Title is trimmed, 1–255 characters. status accepts private or public and defaults to private. Nested blocks, author IDs, and other unknown fields are rejected.</p></div><div class="box"><h3>Response</h3><p>201 Created.</p><pre>{
+  "success": true,
+  "post": {
+    "id": "11111111-1111-4111-8111-111111111111",
+    "user_id": "22222222-2222-4222-8222-222222222222",
+    "title": "Community update",
+    "status": "private",
+    "created_at": "2026-09-29T10:00:00.000Z",
+    "like_count": 0,
+    "dislike_count": 0,
+    "user_reaction": 0,
+    "blocks": []
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/posts/my</code><span class="auth auth">Auth</span></div>
+        <p class="desc">Lists only the caller’s public and private post summary cards.</p>
+        <div class="grid"><div class="box"><h3>Query</h3><p><code>page</code> (positive integer, default 1), <code>limit</code> (1–100, default 20), <code>sortBy=title|status|created_at|content</code>, <code>sortOrder=asc|desc</code> (default desc). Unknown or invalid query parameters return 400. Also accepts <code>q</code> (trimmed, up to 255 characters) to search titles and block text. content sorts by the sorted set of block types, not by text.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "posts": [],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 0,
+    "totalPages": 0,
+    "hasNextPage": false,
+    "hasPreviousPage": false
+  },
+  "sorting": {
+    "sortBy": "created_at",
+    "sortOrder": "desc"
+  }
+}</pre><p>Each card includes id, title, text (joined captions/prompts), status, created_at, block_types, video_blocks, author_full_name, author_image_url, like_count, dislike_count, and user_reaction.</p></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/posts/:userId</code><span class="auth optional">Optional</span></div>
+        <p class="desc">Lists a user’s public posts, with full blocks and options. Private posts are excluded even for their author.</p>
+        <div class="grid"><div class="box"><h3>Path</h3><p><code>userId</code>: author UUID; this is not a post-detail route.</p></div><div class="box"><h3>Query</h3><p><code>page</code> (positive integer, default 1), <code>limit</code> (1–100, default 20), <code>sortBy=created_at</code>, <code>sortOrder=asc|desc</code> (default desc). Unknown or invalid query parameters return 400.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "posts": [],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 0,
+    "totalPages": 0,
+    "hasNextPage": false,
+    "hasPreviousPage": false
+  },
+  "sorting": {
+    "sortBy": "created_at",
+    "sortOrder": "desc"
+  }
+}</pre><p>Pagination counts posts before expanding blocks. Unknown users and out-of-range pages return an empty list.</p></div></div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/posts/recommended</code><span class="auth optional">Optional</span></div>
+        <p class="desc">Returns a combined public-post feed for the supplied users.</p>
+        <div class="grid"><div class="box"><h3>Body</h3><pre>{
+  "user_ids": [
+    "11111111-1111-4111-8111-111111111111",
+    "22222222-2222-4222-8222-222222222222"
+  ]
+}</pre></div><div class="box"><h3>Query</h3><p><code>page</code> (positive integer, default 1), <code>limit</code> (1–100, default 20), <code>sortBy=created_at</code>, <code>sortOrder=asc|desc</code> (default desc). Unknown or invalid query parameters return 400.</p></div><div class="box"><h3>Validation</h3><p>Up to 100 UUIDs, deduplicated ignoring case. Empty user_ids returns an empty feed, never all users. Missing/invalid user_ids and unknown fields return 400.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "posts": [],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 0,
+    "totalPages": 0,
+    "hasNextPage": false,
+    "hasPreviousPage": false
+  },
+  "sorting": {
+    "sortBy": "created_at",
+    "sortOrder": "desc"
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/posts/details/:postId</code><span class="auth optional">Optional</span></div>
+        <p class="desc">Returns a post with all blocks and poll/questioner options in position order.</p>
+        <div class="grid"><div class="box"><h3>Path</h3><p><code>postId</code>: UUID. No body. Public posts are readable anonymously; private posts require the author or posts.update_any. Other viewers receive 404.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "post": {
+    "id": "11111111-1111-4111-8111-111111111111",
+    "user_id": "22222222-2222-4222-8222-222222222222",
+    "title": "Community update",
+    "status": "public",
+    "created_at": "2026-09-29T10:00:00.000Z",
+    "like_count": 0,
+    "dislike_count": 0,
+    "user_reaction": 0,
+    "blocks": [
+      {
+        "id": "33333333-3333-4333-8333-333333333333",
+        "post_id": "11111111-1111-4111-8111-111111111111",
+        "type": "text",
+        "position": 0,
+        "content": {
+          "text": "Welcome!"
+        }
+      }
+    ],
+    "author_full_name": "Example User",
+    "author_image_url": null
+  }
+}</pre></div><div class="box"><h3>Blocks</h3><p>Video blocks include video_card, or null for unavailable videos. Reads include participation counts and the viewer’s selection; questioner is_correct values are visible before answering. Respondent identities are never returned.</p></div></div>
+      </article>
+
+      <article class="route" data-method="PATCH">
+        <div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/posts/:postId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Updates post metadata and optionally reorders every block.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>posts.update_own</code> for a resource you own, or <code>posts.update_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><pre>{
+  "title": "Updated post",
+  "status": "public",
+  "block_order": [
+    "33333333-3333-4333-8333-333333333333"
+  ]
+}</pre></div><div class="box"><h3>Validation</h3><p>Nonempty subset of title, status, block_order. block_order must contain every existing block ID exactly once; omitting it preserves order. Unknown fields return 400. A stale or mismatched block_order returns 409.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "post": {
+    "id": "11111111-1111-4111-8111-111111111111",
+    "user_id": "22222222-2222-4222-8222-222222222222",
+    "title": "Updated post",
+    "status": "public",
+    "created_at": "2026-09-29T10:00:00.000Z",
+    "like_count": 0,
+    "dislike_count": 0
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="DELETE">
+        <div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/posts/:postId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Deletes a post, its blocks, options, responses, comments, and reactions.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>posts.delete_own</code> for a resource you own, or <code>posts.delete_any</code> for any resource.</p></div><div class="box"><h3>Path</h3><p><code>postId</code>: UUID. No body.</p></div><div class="box"><h3>Effect</h3><p>Deletes managed uploaded images; referenced videos and external image URLs remain. 502 on storage failure preserves database rows for retry; some remote files may already be removed. Missing posts return 404.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "deleted": true,
+  "post_id": "11111111-1111-4111-8111-111111111111"
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/posts/:postId/blocks</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Appends one text, image, video, poll, or questioner block; server assigns its zero-based position.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>posts.update_own</code> for a resource you own, or <code>posts.update_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><pre>{
+  "type": "text",
+  "content": {
+    "text": "Welcome!"
+  }
+}</pre><pre>{
+  "type": "video",
+  "content": {
+    "video_id": "22222222-2222-4222-8222-222222222222",
+    "text": "Watch this walkthrough."
+  }
+}</pre><pre>{
+  "type": "poll",
+  "content": {
+    "text": "Which topic next?"
+  },
+  "options": [
+    {
+      "text": "Basics"
+    },
+    {
+      "text": "Advanced"
+    }
+  ]
+}</pre><pre>{
+  "type": "questioner",
+  "content": {
+    "text": "Which answer is correct?"
+  },
+  "options": [
+    {
+      "text": "A",
+      "is_correct": true
+    },
+    {
+      "text": "B"
+    }
+  ]
+}</pre></div><div class="box"><h3>Validation</h3><p>At most 50 blocks per post (409 at the limit). Required text/prompts: 1–10,000 trimmed characters; image/video captions are optional. Polls/questioners need 2–20 options, text 1–500 characters; questioners need at least one is_correct: true. Initial option positions must cover 0 through option count minus one. Video references require a ready published public video or the caller’s own ready video.</p></div><div class="box"><h3>Uploads</h3><p>For images use multipart/form-data: <code>block</code> contains JSON, e.g. {"type":"image","content":{"text":"Caption"}}, plus <code>file</code>. Poll/questioner images use <code>option_0</code>, <code>option_1</code>, etc., indexed by request-array position. JPEG/PNG/WebP, up to 5 MiB each; URLs are server generated.</p></div><div class="box"><h3>Response</h3><p>201 Created; saved options are included where applicable.</p><pre>{
+  "success": true,
+  "block": {
+    "id": "33333333-3333-4333-8333-333333333333",
+    "post_id": "11111111-1111-4111-8111-111111111111",
+    "type": "text",
+    "position": 0,
+    "content": {
+      "text": "Welcome!"
+    }
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="PATCH">
+        <div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/posts/:postId/blocks/:blockId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Edits block content or replaces an image/video, retaining the block ID.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>posts.update_own</code> for a resource you own, or <code>posts.update_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><pre>{
+  "content": {
+    "text": "Updated text"
+  }
+}</pre></div><div class="box"><h3>Validation</h3><p>Type, position, IDs, and nested options cannot change here. Use content.video_id to replace a video; text-only media edits keep the existing media. Empty edits return 400. Poll/questioner options only. Options must belong to the specified block and post. Keep 2–20 options and at least one correct questioner option. Once a block has votes/answers, edits to its question or options return 409. IDs stay stable when reordering; reload details for shifted positions.</p></div><div class="box"><h3>Uploads</h3><p>Send JSON, or multipart/form-data with optional <code>data</code> containing JSON and one <code>file</code> (JPEG/PNG/WebP, up to 5 MiB). Omitted files preserve the current image; image-only PATCH may omit data. Upload limit errors return 413; other malformed input returns 400. Files are accepted only on image blocks.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "block": {
+    "id": "33333333-3333-4333-8333-333333333333",
+    "post_id": "11111111-1111-4111-8111-111111111111",
+    "type": "text",
+    "position": 0,
+    "content": {
+      "text": "Updated text"
+    }
+  }
+}</pre><p>Unchanged options are not included.</p></div></div>
+      </article>
+
+      <article class="route" data-method="DELETE">
+        <div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/posts/:postId/blocks/:blockId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Deletes a block and its options and responses, including blocks with existing participation.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>posts.update_own</code> for a resource you own, or <code>posts.update_any</code> for any resource.</p></div><div class="box"><h3>Path</h3><p><code>postId</code>, <code>blockId</code>: UUIDs. No body.</p></div><div class="box"><h3>Effect</h3><p>Remaining block positions keep gaps. Managed image deletion must succeed before database deletion; 502 preserves rows for retry. Referenced videos remain.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "deleted": true,
+  "block_id": "33333333-3333-4333-8333-333333333333"
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/posts/:postId/blocks/:blockId/options</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Adds a poll/questioner option at position or appends when omitted.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>posts.update_own</code> for a resource you own, or <code>posts.update_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><pre>{
+  "text": "Basics",
+  "position": 0
+}</pre><p>Questioner options additionally accept is_correct; polls reject it.</p></div><div class="box"><h3>Validation</h3><p>Poll/questioner options only. Options must belong to the specified block and post. Keep 2–20 options and at least one correct questioner option. Once a block has votes/answers, edits to its question or options return 409. IDs stay stable when reordering; reload details for shifted positions. Insertion accepts positions 0 through the current option count; moving accepts only existing indices.</p></div><div class="box"><h3>Uploads</h3><p>Send JSON, or multipart/form-data with optional <code>data</code> containing JSON and one <code>file</code> (JPEG/PNG/WebP, up to 5 MiB). Omitted files preserve the current image; image-only PATCH may omit data. Upload limit errors return 413; other malformed input returns 400.</p></div><div class="box"><h3>Response</h3><p>HTTP 201.</p><pre>{
+  "success": true,
+  "option": {
+    "id": "22222222-2222-4222-8222-222222222222",
+    "block_id": "33333333-3333-4333-8333-333333333333",
+    "text": "Basics",
+    "image_url": null,
+    "position": 0
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="PATCH">
+        <div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/posts/:postId/blocks/:blockId/options/:optionId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Updates an option or moves it to another zero-based position.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>posts.update_own</code> for a resource you own, or <code>posts.update_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><pre>{
+  "text": "Updated choice",
+  "position": 0
+}</pre><p>Questioner options additionally accept is_correct; polls reject it.</p></div><div class="box"><h3>Validation</h3><p>Poll/questioner options only. Options must belong to the specified block and post. Keep 2–20 options and at least one correct questioner option. Once a block has votes/answers, edits to its question or options return 409. IDs stay stable when reordering; reload details for shifted positions. Insertion accepts positions 0 through the current option count; moving accepts only existing indices.</p></div><div class="box"><h3>Uploads</h3><p>Send JSON, or multipart/form-data with optional <code>data</code> containing JSON and one <code>file</code> (JPEG/PNG/WebP, up to 5 MiB). Omitted files preserve the current image; image-only PATCH may omit data. Upload limit errors return 413; other malformed input returns 400.</p></div><div class="box"><h3>Response</h3><p>HTTP 200.</p><pre>{
+  "success": true,
+  "option": {
+    "id": "22222222-2222-4222-8222-222222222222",
+    "block_id": "33333333-3333-4333-8333-333333333333",
+    "text": "Basics",
+    "image_url": null,
+    "position": 0
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="DELETE">
+        <div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/posts/:postId/blocks/:blockId/options/:optionId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Deletes an option and its managed image; closes the position gap.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>posts.update_own</code> for a resource you own, or <code>posts.update_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Validation</h3><p>Poll/questioner options only. Options must belong to the specified block and post. Keep 2–20 options and at least one correct questioner option. Once a block has votes/answers, edits to its question or options return 409. IDs stay stable when reordering; reload details for shifted positions. Storage failure returns 502 and preserves the row for retry.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "deleted": true,
+  "option_id": "22222222-2222-4222-8222-222222222222"
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="DELETE">
+        <div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/posts/:postId/blocks/:blockId/options/:optionId/image</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Removes only the option image, retaining the option and its ID.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>posts.update_own</code> for a resource you own, or <code>posts.update_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Validation</h3><p>Poll/questioner options only. Options must belong to the specified block and post. Keep 2–20 options and at least one correct questioner option. Once a block has votes/answers, edits to its question or options return 409. IDs stay stable when reordering; reload details for shifted positions. Repeating removal of an absent image succeeds. Storage failure returns 502.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "option": {
+    "id": "22222222-2222-4222-8222-222222222222",
+    "block_id": "33333333-3333-4333-8333-333333333333",
+    "text": "Basics",
+    "image_url": null,
+    "position": 0
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/posts/:postId/like</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Toggles the like reaction; repeating it removes the reaction and the opposite reaction switches it.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>posts.react</code>.</p></div><div class="box"><h3>Body</h3><p>None. The post must be visible to the caller.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "status": 1
+}</pre><p>status is 1 (like), -1 (dislike), or 0 (none).</p></div></div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/posts/:postId/dislike</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Toggles the dislike reaction; repeating it removes the reaction and the opposite reaction switches it.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>posts.react</code>.</p></div><div class="box"><h3>Body</h3><p>None. The post must be visible to the caller.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "status": -1
+}</pre><p>status is 1 (like), -1 (dislike), or 0 (none).</p></div></div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/posts/:postId/blocks/:blockId/vote</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Selects one poll option, replaces a previous selection, or explicitly removes the vote.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>posts.poll.vote</code>.</p></div><div class="box"><h3>Body</h3><pre>{
+  "option_id": "22222222-2222-4222-8222-222222222222",
+  "remove": false
+}</pre></div><div class="box"><h3>Behavior</h3><p>remove defaults to false. remove: true clears the caller’s vote; both setting and removal are idempotent. Requires visibility to the post.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "post_id": "11111111-1111-4111-8111-111111111111",
+  "block_id": "33333333-3333-4333-8333-333333333333",
+  "selected_option_id": "22222222-2222-4222-8222-222222222222",
+  "selected_option_ids": [
+    "22222222-2222-4222-8222-222222222222"
+  ],
+  "has_responses": true,
+  "total_votes": 1,
+  "options": [
+    {
+      "id": "22222222-2222-4222-8222-222222222222",
+      "text": "Basics",
+      "image_url": null,
+      "position": 0,
+      "vote_count": 1,
+      "is_selected": true
+    },
+    {
+      "id": "11111111-1111-4111-8111-111111111111",
+      "text": "Advanced",
+      "image_url": null,
+      "position": 1,
+      "vote_count": 0,
+      "is_selected": false
+    }
+  ]
+}</pre><p>After removal selected_option_id is null and selected_option_ids is empty. Counts, not percentages, are returned.</p></div></div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/posts/:postId/blocks/:blockId/answer</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Records the caller’s first answer set to a questioner.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>posts.questioner.answer</code>.</p></div><div class="box"><h3>Body</h3><pre>{
+  "option_ids": [
+    "22222222-2222-4222-8222-222222222222"
+  ]
+}</pre><p>Alternatively send a single option_id. Arrays contain 1–20 distinct UUIDs; a questioner with one correct option accepts one choice only.</p></div><div class="box"><h3>Behavior</h3><p>The first answer set is final. Retrying the same set in any order succeeds; changing it returns 409. All options must belong to the specified block. remove is not accepted.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "post_id": "11111111-1111-4111-8111-111111111111",
+  "block_id": "33333333-3333-4333-8333-333333333333",
+  "selected_option_id": "22222222-2222-4222-8222-222222222222",
+  "selected_option_ids": [
+    "22222222-2222-4222-8222-222222222222"
+  ],
+  "has_responses": true,
+  "total_answers": 1,
+  "is_correct": true,
+  "correct_option_ids": [
+    "22222222-2222-4222-8222-222222222222"
+  ],
+  "options": [
+    {
+      "id": "22222222-2222-4222-8222-222222222222",
+      "text": "Basics",
+      "image_url": null,
+      "position": 0,
+      "answer_count": 1,
+      "is_selected": true,
+      "is_correct": true
+    },
+    {
+      "id": "11111111-1111-4111-8111-111111111111",
+      "text": "Advanced",
+      "image_url": null,
+      "position": 1,
+      "answer_count": 0,
+      "is_selected": false,
+      "is_correct": false
+    }
+  ]
+}</pre><p>total_answers counts selected options, not people. is_correct requires exactly the full correct set.</p></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/posts/:postId/comments</code><span class="auth optional">Optional</span></div>
+        <p class="desc">Lists non-deleted top-level comments; totals exclude replies.</p>
+        <div class="grid"><div class="box"><h3>Path</h3><p><code>postId</code>: UUID. No body.</p></div><div class="box"><h3>Query</h3><p><code>page</code> (default 1), <code>limit</code> (1–100, default 20), <code>sort=new|top</code> (default new). top orders by likes, then newest.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "comments": [
+    {
+      "id": "33333333-3333-4333-8333-333333333333",
+      "post_id": "11111111-1111-4111-8111-111111111111",
+      "user_id": "22222222-2222-4222-8222-222222222222",
+      "parent_id": null,
+      "content": "Thanks for sharing!",
+      "like_count": 0,
+      "dislike_count": 0,
+      "reply_count": 0,
+      "created_at": "2026-09-29T10:00:00.000Z",
+      "updated_at": "2026-09-29T10:00:00.000Z",
+      "author_full_name": "Example User",
+      "author_image_url": null,
+      "my_reaction": null
+    }
+  ],
+  "page": 1,
+  "limit": 20,
+  "total": 1,
+  "total_pages": 1
+}</pre></div><div class="box"><h3>Visibility</h3><p>Every operation checks post visibility: public posts, the author’s private posts, or posts readable with posts.update_any. Comment permissions do not grant access to private posts. Missing/inaccessible posts and missing/deleted comments return 404.</p></div></div>
+      </article>
+    </section>
+
+    <section class="section" id="post-comments" data-section>
+      <h2>Post Comments <span class="base">/api/post-comments</span></h2>
+      <p class="section-intro">Every operation checks post visibility: public posts, the author’s private posts, or posts readable with posts.update_any. Comment permissions do not grant access to private posts. Missing/inaccessible posts and missing/deleted comments return 404. Video comments remain under /api/comments; list post comments through GET /api/posts/:postId/comments.</p>
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/post-comments/post</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Creates a comment or reply on a post.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>comments.create</code>.</p></div><div class="box"><h3>Body</h3><pre>{
+  "post_id": "11111111-1111-4111-8111-111111111111",
+  "content": "Thanks for sharing!",
+  "parent_id": null
+}</pre></div><div class="box"><h3>Validation</h3><p>Content is trimmed, 1–500 characters. Omit parent_id or set null for a top-level comment; a reply’s parent must be a non-deleted comment on the same post. Unknown fields are rejected. Profanity moderation may return 403.</p></div><div class="box"><h3>Response</h3><p>201 Created.</p><pre>{
+  "success": true,
+  "comment": {
+    "id": "33333333-3333-4333-8333-333333333333",
+    "post_id": "11111111-1111-4111-8111-111111111111",
+    "user_id": "22222222-2222-4222-8222-222222222222",
+    "parent_id": null,
+    "content": "Thanks for sharing!",
+    "like_count": 0,
+    "dislike_count": 0,
+    "reply_count": 0,
+    "created_at": "2026-09-29T10:00:00.000Z",
+    "updated_at": "2026-09-29T10:00:00.000Z"
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/post-comments/:id/replies</code><span class="auth optional">Optional</span></div>
+        <p class="desc">Lists direct, non-deleted replies to a comment.</p>
+        <div class="grid"><div class="box"><h3>Query</h3><p><code>page</code> (default 1), <code>limit</code> (1–100, default 20), <code>sortBy=created_at|like_count</code> (default created_at), <code>sortOrder=asc|desc</code> (default asc).</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "replies": [],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 0,
+    "totalPages": 0,
+    "hasNextPage": false,
+    "hasPreviousPage": false
+  },
+  "sorting": {
+    "sortBy": "created_at",
+    "sortOrder": "asc"
+  },
+  "parent_id": "33333333-3333-4333-8333-333333333333",
+  "post_id": "11111111-1111-4111-8111-111111111111"
+}</pre></div><div class="box"><h3>Fields</h3><p>List entries include author_full_name, author_image_url, and my_reaction: 1, -1, or null for no reaction.</p></div></div>
+      </article>
+
+      <article class="route" data-method="PATCH">
+        <div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/post-comments/:id/edit</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Updates the author’s comment without replacing replies or reactions.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>comments.edit_own</code> for a resource you own.</p></div><div class="box"><h3>Body</h3><pre>{
+  "content": "Updated comment"
+}</pre></div><div class="box"><h3>Validation</h3><p>Trimmed content, 1–2000 characters. The caller must be the author, even if the platform Owner bypasses permission middleware.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "comment": {
+    "id": "33333333-3333-4333-8333-333333333333",
+    "post_id": "11111111-1111-4111-8111-111111111111",
+    "user_id": "22222222-2222-4222-8222-222222222222",
+    "parent_id": null,
+    "content": "Updated comment",
+    "like_count": 0,
+    "dislike_count": 0,
+    "reply_count": 0,
+    "created_at": "2026-09-29T10:00:00.000Z",
+    "updated_at": "2026-09-29T10:00:00.000Z"
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="DELETE">
+        <div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/post-comments/:id/delete</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Soft-deletes a comment and hides it from lists.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>comments.delete_own</code> for a resource you own, or <code>comments.moderate</code> for any resource.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Effect</h3><p>Existing replies remain stored, but a deleted parent cannot receive new replies or be read through the replies endpoint.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "deleted": true
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/post-comments/:id/like</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Toggles the like reaction on a post comment.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>comments.react</code>.</p></div><div class="box"><h3>Body</h3><p>None. Repeating the same reaction removes it; the opposite reaction switches it.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "status": 1,
+  "like_count": 1,
+  "dislike_count": 0
+}</pre><p>status is 1, -1, or 0. Counts are persisted totals.</p></div></div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/post-comments/:id/dislike</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Toggles the dislike reaction on a post comment.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>comments.react</code>.</p></div><div class="box"><h3>Body</h3><p>None. Repeating the same reaction removes it; the opposite reaction switches it.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "status": -1,
+  "like_count": 0,
+  "dislike_count": 1
+}</pre><p>status is 1, -1, or 0. Counts are persisted totals.</p></div></div>
+      </article>
+    </section>
+
+    <section class="section" id="live-streams" data-section>
+      <h2>Live Streams <span class="base">/api/live-streams</span></h2>
+      <p class="section-intro">All path IDs are UUIDs. Public/unlisted livestream details and playback allow guests; private streams require the actual owner. Management permissions do not override viewing visibility. Public cards show only public content. visibility and playback_policy are independent. Creation returns 201; other successes return 200, with success: true. List, cards, update, streaming-details, playback, and details responses use Cache-Control: private, no-store.</p>
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/live-streams</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Creates a Mux livestream and its database record; recordings are created later by asset webhooks.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>live_streams.create</code>.</p></div><div class="box"><h3>Body</h3><pre>{
+  "title": "Live workshop",
+  "description": "Questions and answers",
+  "dvr_enabled": true,
+  "scheduled_at": "2026-10-01T18:00:00Z",
+  "visibility": "public",
+  "playback_policy": "signed"
+}</pre></div><div class="box"><h3>Validation</h3><p>Required title: trimmed, 1–512 characters. description and scheduled_at default to null; timestamps must include a timezone. visibility defaults to public (public/unlisted/private); playback_policy defaults to signed (public/signed). dvr_enabled defaults to false and cannot change later. Unknown fields return 400.</p></div><div class="box"><h3>Response</h3><p>201 Created. Abbreviated example; live_stream contains the inserted row, including lifecycle and Mux resource fields.</p><pre>{
+  "success": true,
+  "live_stream": {
+    "id": "11111111-1111-4111-8111-111111111111",
+    "user_id": "22222222-2222-4222-8222-222222222222",
+    "title": "Live workshop",
+    "description": "Questions and answers",
+    "thumbnail_url": null,
+    "status": "scheduled",
+    "mux_status": "idle",
+    "visibility": "public",
+    "playback_policy": "signed",
+    "dvr_enabled": true,
+    "scheduled_at": "2026-10-01T18:00:00Z",
+    "started_at": null,
+    "ended_at": null,
+    "connected_at": null,
+    "disconnected_at": null,
+    "completed_at": null,
+    "created_at": "2026-09-29T10:00:00.000Z",
+    "updated_at": "2026-09-29T10:00:00.000Z"
+  },
+  "stream_key": "encoder-key",
+  "max_continuous_duration": 14399
+}</pre></div><div class="box"><h3>Broadcasting</h3><p>Maximum continuous duration is 14,399 seconds with DVR or 43,200 without DVR. Use streaming-details for the RTMPS server URL. Creation uses Cache-Control: no-store. Mux creation failure returns 502.</p></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/live-streams/my/lives</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Lists all of the caller’s livestreams, including private streams and every lifecycle state.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>live_streams.update_own</code>.</p></div><div class="box"><h3>Query</h3><p><code>page</code> (positive, default 1), <code>limit</code> (1–100, default 20), <code>sort_by=created_at|scheduled_at|started_at|updated_at|title|status|visibility</code> (default created_at), <code>sort_dir=asc|desc</code> (default desc). <code>sort=new|old</code> is shorthand; explicit sort_dir wins.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "live_streams": [
+    {
+      "id": "11111111-1111-4111-8111-111111111111",
+      "user_id": "22222222-2222-4222-8222-222222222222",
+      "title": "Live workshop",
+      "description": "Questions and answers",
+      "thumbnail_url": null,
+      "status": "scheduled",
+      "mux_status": "idle",
+      "visibility": "public",
+      "playback_policy": "signed",
+      "dvr_enabled": true,
+      "scheduled_at": "2026-10-01T18:00:00Z",
+      "started_at": null,
+      "ended_at": null,
+      "connected_at": null,
+      "disconnected_at": null,
+      "completed_at": null,
+      "created_at": "2026-09-29T10:00:00.000Z",
+      "updated_at": "2026-09-29T10:00:00.000Z"
+    }
+  ],
+  "page": 1,
+  "limit": 20,
+  "total": 1,
+  "total_pages": 1,
+  "sort_by": "created_at",
+  "sort_dir": "desc"
+}</pre></div><div class="box"><h3>Fields</h3><p>Management fields: id, user_id, title, description, thumbnail_url, status, mux_status, visibility, playback_policy, dvr_enabled, scheduled_at, started_at, ended_at, connected_at, disconnected_at, completed_at, created_at, updated_at. Application states are scheduled, live, disconnected, ended, cancelled; Mux states are idle, active, disabled. No recording, encoder credentials, or Mux resource IDs.</p></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/live-streams/users/:userId/cards</code><span class="auth optional">Optional</span></div>
+        <p class="desc">Lists a user’s public livestream and recording cards in one paginated feed.</p>
+        <div class="grid"><div class="box"><h3>Query</h3><p><code>page</code> (default 1), <code>limit</code> (1–100, default 20), <code>sort_by=streamed_at|views|view_count</code> (default streamed_at), <code>sort_dir=asc|desc</code> (default desc). views and view_count are aliases.</p></div><div class="box"><h3>Cards</h3><p>card_type is recording, scheduled, or live. Only public parent streams qualify. Recordings must be public, ready, and published. Scheduled cards have no recording rows; live cards can coexist with eligible recordings. Use card_type, not video_id, to choose the UI. Unknown users return an empty list.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "cards": [],
+  "page": 1,
+  "limit": 20,
+  "total": 0,
+  "total_pages": 0,
+  "sort_by": "streamed_at",
+  "sort_dir": "desc"
+}</pre><p>Cards include id, video_id, livestream_id, card_type, title, description, thumbnail_url, uploader_id, uploader_name, people, duration_seconds, view_count, created_at, streamed_at, livestream_status, scheduled_at, started_at, ended_at, dvr_enabled, recording_started_at, recording_completed_at, mux_thumbnail_url, preview_url, media_expires_at.</p></div><div class="box"><h3>Media</h3><p>Recording IDs are video UUIDs; live/scheduled IDs are livestream UUIDs. A live video_id may identify the active unfinished recording; scheduled video_id is null. Live/scheduled cards have no Mux images, duration, or views. Authenticated cards additionally include progress_seconds and percentage_watched for recordings.</p></div></div>
+      </article>
+
+      <article class="route" data-method="PATCH">
+        <div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/live-streams/:liveStreamId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Updates stream metadata or changes the Mux live playback policy.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>live_streams.update_own</code> for a resource you own, or <code>live_streams.update_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><pre>{
+  "title": "Updated workshop",
+  "description": null,
+  "scheduled_at": null,
+  "visibility": "unlisted",
+  "playback_policy": "public"
+}</pre></div><div class="box"><h3>Validation</h3><p>At least one supported field; same validation as creation. Null clears description/schedule. dvr_enabled, status, thumbnail fields, and unknown fields are rejected.</p></div><div class="box"><h3>Effect</h3><p>Policy changes replace and revoke the live playback ID. Existing recordings keep their metadata and policy; future recordings inherit current settings. A 502 cleanup error can occur after saving; retry to finish revoking the old ID.</p></div><div class="box"><h3>Response</h3><p>Management fields: id, user_id, title, description, thumbnail_url, status, mux_status, visibility, playback_policy, dvr_enabled, scheduled_at, started_at, ended_at, connected_at, disconnected_at, completed_at, created_at, updated_at. Application states are scheduled, live, disconnected, ended, cancelled; Mux states are idle, active, disabled. Also includes mux_live_stream_id and mux_live_playback_id, but no stream key or current recording.</p><pre>{
+  "success": true,
+  "live_stream": {
+    "id": "11111111-1111-4111-8111-111111111111",
+    "user_id": "22222222-2222-4222-8222-222222222222",
+    "title": "Updated workshop",
+    "description": null,
+    "thumbnail_url": null,
+    "status": "scheduled",
+    "mux_status": "idle",
+    "visibility": "unlisted",
+    "playback_policy": "public",
+    "dvr_enabled": true,
+    "scheduled_at": null,
+    "started_at": null,
+    "ended_at": null,
+    "connected_at": null,
+    "disconnected_at": null,
+    "completed_at": null,
+    "created_at": "2026-09-29T10:00:00.000Z",
+    "updated_at": "2026-09-29T10:00:00.000Z",
+    "mux_live_stream_id": "mux-live-id",
+    "mux_live_playback_id": "new-playback-id"
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/live-streams/:liveStreamId/thumbnail</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Uploads or clears the custom livestream thumbnail.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>live_streams.update_own</code> for a resource you own, or <code>live_streams.update_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><p>multipart/form-data with one file: JPEG/PNG/WebP, maximum 5 MiB. Calling without a file clears the thumbnail.</p></div><div class="box"><h3>Effect</h3><p>Creates a 1280×720 WebP on R2. Preparing recordings receive separate copies of the image, or have their thumbnail cleared. Other recordings keep their image. Invalid/oversized uploads return 400.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "live_stream": {
+    "id": "11111111-1111-4111-8111-111111111111",
+    "thumbnail_url": "https://example.com/live-stream-thumbnails/image.webp"
+  }
+}</pre><p>Removal returns thumbnail_url: null.</p></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/live-streams/:liveStreamId/streaming-details</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Returns the RTMPS server and current encoder key for broadcasting.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>live_streams.stream_own</code> for a resource you own, or <code>live_streams.stream_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><p>None. No query parameters.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "server": "rtmps://global-live.mux.com:443/app",
+  "stream_key": "encoder-key"
+}</pre></div><div class="box"><h3>Errors</h3><p>409 for ended/cancelled streams or disabled Mux ingest; 404 if the Mux stream is missing; 502 for lookup failure or missing key. Works before a recording exists and during reconnect windows.</p></div><div class="box"><h3>Caching</h3><p>Cache-Control: private, no-store. These are encoder credentials, not viewer playback data.</p></div></div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/live-streams/:liveStreamId/playback</code><span class="auth optional">Optional</span></div>
+        <p class="desc">Returns live HLS playback or DVR playback from the current unfinished recording.</p>
+        <div class="grid"><div class="box"><h3>Body</h3><p>None. No query parameters.</p></div><div class="box"><h3>Behavior</h3><p>Requires application status live or disconnected and Mux status active. DVR uses the current preparing/ready recording’s playback ID and policy; never a previous recording. Non-DVR uses the live playback ID. Finished recordings use the authenticated video playback route.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "livestream_id": "11111111-1111-4111-8111-111111111111",
+  "video_id": "33333333-3333-4333-8333-333333333333",
+  "status": "live",
+  "dvr_enabled": true,
+  "playback_mode": "dvr",
+  "playback_source": "asset",
+  "mux_playback_id": "playback-id",
+  "playback_policy": "signed",
+  "stream_url": "https://stream.mux.com/playback-id.m3u8?token=\u2026",
+  "tokens": {
+    "playback": "\u2026",
+    "thumbnail": "\u2026",
+    "storyboard": "\u2026"
+  },
+  "expires_at": 1790877600
+}</pre></div><div class="box"><h3>Tokens</h3><p>Non-DVR uses playback_mode: live and playback_source: live_stream; video_id may be null. Public playback returns empty tokens and null expires_at. Signed tokens last one hour; expiry is Unix seconds. Guests with viewing access can receive signed tokens.</p></div><div class="box"><h3>Errors</h3><p>404 unavailable/inaccessible stream; 409 not playable or DVR recording not ready; 503 invalid policy or missing signing configuration.</p></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/live-streams/:liveStreamId</code><span class="auth optional">Optional</span></div>
+        <p class="desc">Returns livestream details in any lifecycle state and the matching current recording, if one exists.</p>
+        <div class="grid"><div class="box"><h3>Body</h3><p>None. No query parameters.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "live_stream": {
+    "id": "11111111-1111-4111-8111-111111111111",
+    "title": "Live workshop",
+    "description": "Questions and answers",
+    "thumbnail_url": null,
+    "status": "scheduled",
+    "mux_status": "idle",
+    "visibility": "public",
+    "playback_policy": "signed",
+    "dvr_enabled": true,
+    "scheduled_at": "2026-10-01T18:00:00Z",
+    "started_at": null,
+    "ended_at": null,
+    "connected_at": null,
+    "disconnected_at": null,
+    "completed_at": null,
+    "created_at": "2026-09-29T10:00:00.000Z",
+    "updated_at": "2026-09-29T10:00:00.000Z",
+    "uploader_id": "22222222-2222-4222-8222-222222222222",
+    "uploader_name": "Example User",
+    "uploader_image": null,
+    "video_id": null,
+    "current_recording": null
+  }
+}</pre></div><div class="box"><h3>Recording</h3><p>Attached only while live/disconnected, for the active unfinished, non-deleted Mux asset. Preparing/unpublished recordings inherit livestream visibility; previous recordings are not substituted. current_recording includes id, livestream_id, title, description, thumbnail_url, mux_status, visibility, playback_policy, duration_seconds, view_count, like_count, dislike_count, comment_count, created_at, updated_at, published_at, recording_started_at, recording_completed_at, progress_seconds, percentage_watched, user_reaction.</p></div><div class="box"><h3>Behavior</h3><p>Does not increment views or return playback URLs or encoder credentials. Guests get null progress and user_reaction: 0.</p></div></div>
+      </article>
+
+      <article class="route" data-method="DELETE">
+        <div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/live-streams/:liveStreamId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Deletes the livestream and all its recordings.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>live_streams.delete_own</code> for a resource you own, or <code>live_streams.delete_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><p>None. No query parameters.</p></div><div class="box"><h3>Effect</h3><p>Disables ingest, requests Mux resource deletion, removes managed thumbnails from R2, then deletes the local stream and cascading records without waiting for a webhook. Missing Mux resources are tolerated; other upstream failures preserve local records for retry. Some remote resources may already be removed.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "live_stream_id": "11111111-1111-4111-8111-111111111111",
+  "message": "Live stream and recordings deleted."
+}</pre></div><div class="box"><h3>Errors</h3><p>404 missing/already-deleted stream; 502 Mux/R2 cleanup failure; 500 storage configuration or database failure.</p></div></div>
+      </article>
+    </section>
+
     <section class="section" id="reports" data-section>
       <h2>Reports <span class="base">/api/reports</span></h2>
       <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/reports/video-analytics.pdf</code><span class="auth permission">Permission</span></div><p class="desc">Generates a PDF analytics report for the video platform.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>reports.analytics.export</code>.</p></div><div class="box"><h3>Query</h3><p><code>range</code>, <code>from</code>, <code>to</code>, <code>groupBy</code>, <code>includePrivate</code>, <code>timezone</code></p></div><div class="box"><h3>Response</h3><p><code>application/pdf</code>, attachment filename.</p></div><div class="box"><h3>Integration</h3><p>Puppeteer generates the PDF from an HTML report.</p></div></div></article>
@@ -3329,11 +4288,11 @@ Subtitle text...</pre></div></div></article>
 }</pre></div><div class="box"><h3>Types</h3><p>Multiple question types are supported, including options and matching pairs.</p></div><div class="box"><h3>Response</h3><p>Created question.</p></div></div></article>
       <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/quizzes/question/:questionId</code><span class="auth permission">Permission</span></div><p class="desc">Updates the question and related options/pairs.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><p>Same structure as creation, with all supported fields.</p></div><div class="box"><h3>Path</h3><p><code>questionId</code></p></div><div class="box"><h3>Response</h3><p>Updated question.</p></div></div></article>
       <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/quizzes/question/:questionId</code><span class="auth permission">Permission</span></div><p class="desc">Deletes a question from the quiz.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Path</h3><p><code>questionId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "deleted": true }</pre></div></div></article>
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/rules</code><span class="auth permission">Permission</span></div><p class="desc">Returns quiz access rules.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Access rule list.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/rules</code><span class="auth permission">Permission</span></div><p class="desc">Returns quiz access rules.</p><div class="grid"><div class="box"><h3>Playlist artwork</h3><p>Entries with playlist_id include playlist_thumbnail and playlist_media_expires_at. The thumbnail uses current custom artwork or the first accessible ready video; signed fallback expiry is Unix seconds, otherwise null.</p></div><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Access rule list.</p></div></div></article>
       <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/:quizId/rule/create</code><span class="auth permission">Permission</span></div><p class="desc">Adds an access rule to the quiz.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><pre>{ "video_id": "uuid", "playlist_id": null, "required_percentage": 80, "required_seconds": 300 }</pre></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Response</h3><p>Created rule.</p></div></div></article>
       <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/quizzes/rule/:ruleId</code><span class="auth permission">Permission</span></div><p class="desc">Updates a quiz access rule.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><p>Access rule fields.</p></div><div class="box"><h3>Path</h3><p><code>ruleId</code></p></div><div class="box"><h3>Response</h3><p>Updated rule.</p></div></div></article>
       <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/quizzes/rule/:ruleId</code><span class="auth permission">Permission</span></div><p class="desc">Deletes a quiz access rule.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Path</h3><p><code>ruleId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "deleted": true }</pre></div></div></article>
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/question-sources</code><span class="auth permission">Permission</span></div><p class="desc">Returns quiz question sources.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Question source list.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/question-sources</code><span class="auth permission">Permission</span></div><p class="desc">Returns quiz question sources.</p><div class="grid"><div class="box"><h3>Playlist artwork</h3><p>Entries with playlist_id include playlist_thumbnail and playlist_media_expires_at. The thumbnail uses current custom artwork or the first accessible ready video; signed fallback expiry is Unix seconds, otherwise null.</p></div><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Question source list.</p></div></div></article>
       <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/:quizId/question-source/create</code><span class="auth permission">Permission</span></div><p class="desc">Adds a question source to the quiz.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><pre>{ "source_type": "video", "video_id": "uuid", "playlist_id": null, "question_count": 5 }</pre></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Response</h3><p>Created question source.</p></div></div></article>
       <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/quizzes/question-source/:sourceId</code><span class="auth permission">Permission</span></div><p class="desc">Updates a question source.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><p>Question source fields.</p></div><div class="box"><h3>Path</h3><p><code>sourceId</code></p></div><div class="box"><h3>Response</h3><p>Updated source.</p></div></div></article>
       <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/quizzes/question-source/:sourceId</code><span class="auth permission">Permission</span></div><p class="desc">Deletes a question source.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Path</h3><p><code>sourceId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "deleted": true }</pre></div></div></article>
@@ -3412,7 +4371,7 @@ Subtitle text...</pre></div></div></article>
           <h2>Module boundaries</h2>
           <p>The backend is organized by domain, with shared infrastructure kept outside business modules.</p>
           <div class="doc-grid">
-            <div class="doc-card"><h3>Domain modules</h3><p><code>auth</code>, <code>videos</code>, <code>playlists</code>, <code>people</code>, <code>comments</code>, <code>channels</code>, <code>quizzes</code>, <code>analytics</code>, <code>reports</code>, <code>users</code>, <code>roles</code>, <code>authorization</code>, and <code>video-indexing</code>.</p></div>
+            <div class="doc-card"><h3>Domain modules</h3><p><code>auth</code>, <code>videos</code>, <code>playlists</code>, <code>people</code>, <code>comments</code>, <code>channels</code>, <code>quizzes</code>, <code>analytics</code>, <code>reports</code>, <code>users</code>, <code>roles</code>, <code>authorization</code>, <code>video-indexing</code>, <code>live-streams</code>, <code>posts</code>, <code>post-comments</code>, and <code>notes</code>.</p></div>
             <div class="doc-card"><h3>Cross-cutting code</h3><p><code>config</code>, <code>database</code>, <code>middleware</code>, and <code>common</code> hold environment, DB pools, request processing, ownership checks, validation, logging, and response helpers.</p></div>
             <div class="doc-card"><h3>Read/write separation</h3><p>Queries use explicit <code>readPool</code> and <code>writePool</code> connections. Production reads can be routed to a regional replica while writes remain on the leader.</p></div>
             <div class="doc-card"><h3>Service integrations</h3><p>Mux handles video delivery, R2 stores uploaded images, n8n supports automation workflows, MaxMind resolves geography, and Puppeteer renders PDF reports and certificates.</p></div>
@@ -3430,6 +4389,9 @@ Subtitle text...</pre></div></div></article>
     ├── authorization/     Permission and ownership checks
     ├── roles/ users/      Role and user management
     ├── video-indexing/    Semantic search indexing
+    ├── live-streams/      Broadcasting, playback, recordings
+    ├── posts/ post-comments/  Community content
+    ├── notes/             Private video annotations
     ├── videos/            Delivery and moderation
     ├── playlists/         Browsing and collection moderation
     ├── people/ comments/ channels/
@@ -3458,8 +4420,8 @@ Subtitle text...</pre></div></div></article>
               <thead><tr><th>Level</th><th>Token behavior</th><th>Typical usage</th></tr></thead>
               <tbody>
                 <tr><td><span class="doc-pill">Public</span></td><td>No Bearer token is required.</td><td>Registration, login, password reset, OAuth, health, and the signed Mux webhook.</td></tr>
-                <tr><td><span class="doc-pill">Optional</span></td><td>A valid token populates <code>req.user</code>; a missing header is anonymous, while an invalid supplied token returns 401.</td><td>Video search and details, playlists, people, comments, and channel browsing with optional personalization.</td></tr>
-                <tr><td><span class="doc-pill">Auth</span></td><td><code>requireAuth</code> verifies <code>Authorization: Bearer &lt;token&gt;</code>. Missing or invalid tokens return 401.</td><td>User profile, effective permission lookup, and account deletion. Other protected routes also require their listed permissions.</td></tr>
+                <tr><td><span class="doc-pill">Optional</span></td><td>A valid token populates <code>req.user</code>; a missing header is anonymous, while an invalid supplied token returns 401.</td><td>Video discovery, playlists, people, comment replies, post reads, livestream viewing, and channel browsing with optional personalization. Video details, playback, similar videos, and video comment lists require authentication.</td></tr>
+                <tr><td><span class="doc-pill">Auth</span></td><td><code>requireAuth</code> verifies <code>Authorization: Bearer &lt;token&gt;</code>. Missing or invalid tokens return 401.</td><td>User profile, video details/playback, similar videos, video comment lists, post management lists, 2FA settings, effective permissions, and account deletion. Other protected routes also require their listed permissions.</td></tr>
                 <tr><td><span class="doc-pill">Permission</span></td><td><code>requirePermission</code> and resource access middleware evaluate database-backed grants. Deny overrides allow; the Owner bypasses permission checks. Missing grants return 403.</td><td>Uploads, moderation, libraries, reactions, quizzes, analytics, people, roles, user administration, and PDF reporting.</td></tr>
               </tbody>
             </table>
@@ -3469,9 +4431,9 @@ Subtitle text...</pre></div></div></article>
         <div class="doc-section">
           <h2>Bearer token flow</h2>
           <div class="flow-list">
-            <div class="flow-step"><span class="flow-number">1</span><div><h3>Issue</h3><p>Login, registration, or Google OAuth returns a signed JWT together with the user profile.</p></div></div>
+            <div class="flow-step"><span class="flow-number">1</span><div><h3>Issue</h3><p>Registration returns an access JWT. Password and Google login either complete immediately or return requires2fa with a temporary challenge; exchange that challenge and an unused OTP at POST /api/auth/2fa/login.</p></div></div>
             <div class="flow-step"><span class="flow-number">2</span><div><h3>Send</h3><p>The client places the token in <code>Authorization: Bearer &lt;jwt-token&gt;</code> on protected requests.</p></div></div>
-            <div class="flow-step"><span class="flow-number">3</span><div><h3>Verify</h3><p><code>jsonwebtoken</code> verifies the signature with <code>JWT_SECRET</code>. The backend checks that the account is active and that the token’s authzVersion matches the database, then sets req.user. Role changes may require signing in again.</p></div></div>
+            <div class="flow-step"><span class="flow-number">3</span><div><h3>Verify</h3><p><code>jsonwebtoken</code> verifies the signature with <code>JWT_SECRET</code>. The backend checks that the account is active and that the token’s authzVersion matches the database, then sets req.user. Role changes may require signing in again. Access tokens use purpose: access; temporary 2FA tokens are rejected by normal authentication.</p></div></div>
             <div class="flow-step"><span class="flow-number">4</span><div><h3>Authorize</h3><p>Permission middleware and ownership helpers decide whether the authenticated subject can access the requested resource. Role names in the profile are descriptive; use GET /api/users/me/permissions for effective permission keys.</p></div></div>
           </div>
         </div>
@@ -3500,7 +4462,7 @@ Subtitle text...</pre></div></div></article>
             <div class="flow-step"><span class="flow-number">2</span><div><h3>Direct client transfer</h3><p>The browser uploads the media to the returned Mux URL. Mux receives the database video ID through passthrough metadata and can generate the requested subtitle track.</p></div></div>
             <div class="flow-step"><span class="flow-number">3</span><div><h3>Signed webhook</h3><p>Mux posts asset events to <code>/api/videos/webhook/mux</code>. The backend keeps the body raw until its HMAC signature is verified.</p></div></div>
             <div class="flow-step"><span class="flow-number">4</span><div><h3>Asset synchronization</h3><p>A ready event stores duration, asset ID, playback ID, status, and a default thumbnail URL. Error and deletion events update or remove the matching record.</p></div></div>
-            <div class="flow-step"><span class="flow-number">5</span><div><h3>Playback delivery</h3><p>Discovery and detail responses include generated thumbnail and preview URLs. Call POST /api/videos/:id/playback for stream credentials. Private videos remain limited to their uploader; signed playback policy is independent of visibility.</p></div></div>
+            <div class="flow-step"><span class="flow-number">5</span><div><h3>Playback delivery</h3><p>Discovery and detail responses include generated thumbnail and preview URLs. Call POST /api/videos/:id/playback for stream credentials. Video details/playback require authentication. Public videos must be ready and published; uploaders can preview their own ready drafts and scheduled videos. Signed playback policy is independent of visibility.</p></div></div>
             <div class="flow-step"><span class="flow-number">6</span><div><h3>Post-upload moderation</h3><p>Users with the corresponding update/delete permissions can edit metadata, change playback policy, upload thumbnails, manage subtitles, generate chapters, and delete videos.</p></div></div>
           </div>
         </div>
@@ -3518,6 +4480,15 @@ Subtitle text...</pre></div></div></article>
         <div class="doc-callout">
           <svg class="ui-icon" aria-hidden="true"><use href="#icon-security"></use></svg>
           <div><strong>Webhook parsing is intentionally different</strong><p>The Mux endpoint receives <code>application/json</code> as raw bytes, while regular JSON routes use the normal Express JSON parser. This preserves the exact payload needed for signature verification.</p></div>
+        </div>
+        <div class="doc-section">
+          <h2>Publishing and livestreams</h2>
+          <div class="doc-grid">
+            <div class="doc-card"><h3>Scheduled publishing</h3><p>PATCH video-details with an explicit published_at instant. Public ready videos appear when that time is reached; null means unpublished. Uploaders can preview their own ready drafts and scheduled videos. Rescheduling does not revoke already-issued signed URLs.</p></div>
+            <div class="doc-card"><h3>Live and DVR playback</h3><p>Create a livestream, fetch streaming-details for the encoder, and request viewer playback separately. Non-DVR uses the live playback ID; DVR uses the current unfinished recording. Public/unlisted streams allow guest viewing; private streams require their owner.</p></div>
+            <div class="doc-card"><h3>Recordings</h3><p>The existing Mux webhook creates one video per live asset. Completed recordings are published once ready unless a publication date already exists. Future dates are preserved. Finished recordings use the authenticated video playback endpoint.</p></div>
+            <div class="doc-card"><h3>Personal notes</h3><p>Notes belong only to their author, with up to 100 notes per video. Each stores a title, text, timestamp, and optional color. Their author may edit or delete them after the video becomes inaccessible.</p></div>
+          </div>
         </div>
       </section>
 
@@ -3815,19 +4786,6 @@ Subtitle text...</pre></div></div></article>
   ],
   "pagination": { "page": 1, "limit": 12 }
 }`,
-      "/api/videos/:id/comments": `{
-  "comments": [
-    {
-      "id": "comment_uuid",
-      "content": "Great explanation.",
-      "user": { "id": "user_uuid", "full_name": "Full Name" },
-      "like_count": 4,
-      "reply_count": 1,
-      "created_at": "2026-06-23T00:00:00.000Z"
-    }
-  ],
-  "pagination": { "page": 1, "limit": 20, "total": 12 }
-}`,
       "/api/video-moderation/subtitle/:videoId": `WEBVTT
 
 00:00:00.000 --> 00:00:04.000
@@ -3857,11 +4815,6 @@ Subtitle text...`,
   "chapters": [
     { "start": 0, "title": "Introduction" }
   ]
-}`,
-      "/api/video-moderation/video/:videoId": `{
-  "deleted": true,
-  "video_id": "uuid",
-  "mux_asset_deleted": true
 }`,
       "/api/people/search": `{
   "people": [

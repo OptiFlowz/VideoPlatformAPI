@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>OptiFlowz API Reference | Video Platform Documentation</title>
-  <meta name="description" content="Complete OptiFlowz Video Platform API documentation for authentication, videos, playlists, moderation, people, comments, notes, posts, livestreams, quizzes, analytics, users, roles, reports, and database structure." />
+  <meta name="description" content="Complete OptiFlowz Video Platform API documentation for authentication, videos, playlists, moderation, people, comments, notes, posts, livestreams, quizzes, question banks, collections, certificates, analytics, users, roles, reports, and database structure." />
   <meta name="application-name" content="OptiFlowz API Reference" />
   <meta name="author" content="OptiFlowz" />
   <meta name="robots" content="index, follow" />
@@ -27,9 +27,7 @@
   <meta name="twitter:title" content="OptiFlowz API Reference" />
   <meta name="twitter:description" content="Express API reference and backend documentation for the OptiFlowz Video Platform." />
   <meta name="twitter:image" content="https://api.optiflowz.com/assets/og-image.png" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;650;700;750;800;900&family=Geist+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="preload" href="assets/fonts/outfit/Outfit-Variable.ttf" as="font" type="font/ttf" crossorigin />
   <script>
     window.__initialHashTarget = window.location.hash.replace("#", "");
     if (window.__initialHashTarget) {
@@ -45,7 +43,18 @@
     }
   </script>
   <style>
+    @font-face {
+      font-family: "Outfit";
+      src: url("assets/fonts/outfit/Outfit-Variable.ttf") format("truetype");
+      font-weight: 100 900;
+      font-style: normal;
+      font-display: swap;
+    }
+
     :root {
+      --sidebar-width: 256px;
+      --header-height: 74px;
+      --font-mono: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
       --bg: #000;
       --surface: #070707;
       --surface-subtle: #030303;
@@ -233,19 +242,23 @@
     }
 
     html {
-      scroll-padding-top: 64px;
+      scroll-padding-top: var(--header-height);
       overscroll-behavior-y: none;
     }
 
     body {
       margin: 0;
-      padding-top: 64px;
+      padding-top: var(--header-height);
       background: #000;
       color: var(--text);
-      font-family: "Geist", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: "Outfit", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       line-height: 1.5;
       min-height: 100vh;
       overscroll-behavior-y: none;
+    }
+
+    button, input, select, textarea {
+      font-family: inherit;
     }
 
     .skip-link {
@@ -277,10 +290,12 @@
       left: 0;
       z-index: 40;
       background: var(--header-bg);
+      background: color-mix(in srgb, var(--bg) 66%, transparent);
       color: var(--text);
       padding: 0;
       border-bottom: 1px solid var(--border);
-      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
     }
 
     header::before {
@@ -294,14 +309,14 @@
       display: flex;
       align-items: center;
       gap: 24px;
-      min-height: 64px;
-      padding: 0 28px;
+      min-height: calc(var(--header-height) - 1px);
+      padding: 10px 28px;
     }
 
     .brand {
       display: inline-flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
       min-width: 0;
       color: var(--text);
       text-decoration: none;
@@ -351,22 +366,27 @@
     }
 
     .brand img {
-      width: 34px;
-      height: 34px;
+      width: 36px;
+      height: 36px;
+      flex-shrink: 0;
       object-fit: contain;
     }
 
     .brand-copy strong {
       display: block;
-      font-size: 15px;
+      font-size: 1.25rem;
+      font-weight: 500;
+      line-height: 1.4;
       letter-spacing: 0;
+      margin-bottom: -0.3125rem;
     }
 
     .brand-copy span {
       display: block;
       color: var(--muted-soft);
-      font-size: 11px;
-      margin-top: 1px;
+      font-size: 0.875rem;
+      font-weight: 300;
+      line-height: 1.25rem;
     }
 
     .top-links {
@@ -563,15 +583,14 @@
       font-weight: 600;
     }
 
-    .theme-toggle-value::after {
-      content: "\203A";
+    .theme-chevron {
+      width: 16px;
+      height: 16px;
       color: var(--muted-soft);
-      font-size: 18px;
-      line-height: 1;
       transition: transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
     }
 
-    .theme-toggle[aria-expanded="true"] .theme-toggle-value::after {
+    .theme-toggle[aria-expanded="true"] .theme-chevron {
       transform: rotate(90deg);
     }
 
@@ -682,7 +701,7 @@
       .settings-popover,
       .theme-options,
       .settings-trigger .ui-icon,
-      .theme-toggle-value::after,
+      .theme-chevron,
       .theme-option,
       .theme-option-check,
       .search-icon {
@@ -727,15 +746,18 @@
 
     .sidebar {
       position: fixed;
-      top: 64px;
+      top: var(--header-height);
       left: 0;
       bottom: 0;
-      width: 300px;
+      width: var(--sidebar-width);
       height: auto;
       overflow-y: auto;
-      padding: 34px 28px 40px 34px;
-      border-right: 1px solid rgba(255, 255, 255, 0.10);
-      background: #000;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border-strong) transparent;
+      padding: 16px 12px 32px;
+      border-right: 1px solid var(--border);
+      background: var(--surface);
     }
 
     .sidebar-search {
@@ -749,49 +771,65 @@
     }
 
     .side-group {
-      margin-bottom: 28px;
+      display: grid;
+      gap: 2px;
+    }
+
+    .side-group + .side-group {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
     }
 
     .side-label {
-      color: #e5e7eb;
-      font-size: 12px;
-      font-weight: 800;
-      margin-bottom: 10px;
+      margin: 0 12px 4px;
+      color: var(--muted-soft);
+      font-size: 0.875rem;
+      font-weight: 600;
     }
 
     .sidebar a {
       display: flex;
       align-items: center;
-      gap: 10px;
-      min-height: 34px;
-      color: #9ca3af;
+      gap: 12px;
+      min-height: 38px;
+      padding: 7px 12px;
+      border-radius: 9px;
+      color: var(--muted-strong);
+      font-size: 0.9375rem;
+      font-weight: 450;
+      line-height: 1.3;
       text-decoration: none;
-      border-radius: 8px;
-      padding: 0 10px;
-      font-size: 14px;
-      font-weight: 600;
     }
 
-    .sidebar a:hover {
-      background: rgba(255, 255, 255, 0.07);
-      color: #fff;
+    .sidebar a:hover,
+    .sidebar a:focus-visible {
+      background: var(--surface-hover);
+      color: var(--text);
+    }
+
+    .sidebar a:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: -2px;
     }
 
     .sidebar a.active {
-      background: rgba(255, 255, 255, 0.10);
-      color: #fff;
+      background: var(--surface-raised);
+      color: var(--text);
+      font-weight: 600;
     }
 
     .nav-icon {
-      width: 16px;
-      height: 16px;
-      color: #718096;
-      transition: color 140ms ease;
+      flex: none;
+      width: 18px;
+      height: 18px;
+      color: var(--muted-soft);
     }
 
     .sidebar a:hover .nav-icon,
+    .sidebar a:focus-visible .nav-icon,
     .sidebar a.active .nav-icon {
-      color: #8bc3ff;
+      color: var(--accent);
     }
 
     .sidebar-mode {
@@ -805,7 +843,7 @@
     .content {
       min-width: 0;
       max-width: 920px;
-      margin-left: 372px;
+      margin-left: calc(var(--sidebar-width) + clamp(24px, 4vw, 64px));
       padding-top: 42px;
     }
 
@@ -1067,7 +1105,7 @@
       border-radius: 999px;
       background: rgba(64, 149, 255, 0.10);
       color: #8bc3ff;
-      font: 700 13px "Geist Mono", monospace;
+      font: 700 13px var(--font-mono);
     }
 
     .flow-step h3 {
@@ -1089,7 +1127,7 @@
       border-radius: 12px;
       background: #020202;
       color: #cbd5e1;
-      font: 13px/1.75 "Geist Mono", ui-monospace, monospace;
+      font: 13px/1.75 var(--font-mono);
       white-space: pre;
     }
 
@@ -1203,7 +1241,7 @@
 
     .erd-toolbar {
       position: sticky;
-      top: 64px;
+      top: var(--header-height);
       z-index: 15;
       display: flex;
       align-items: center;
@@ -1277,7 +1315,7 @@
 
     .toolbar {
       position: sticky;
-      top: 64px;
+      top: var(--header-height);
       z-index: 20;
       display: grid;
       grid-template-columns: 1fr auto;
@@ -1458,7 +1496,7 @@
 
     code,
     pre {
-      font-family: "Geist Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-family: var(--font-mono);
     }
 
     .path {
@@ -1562,9 +1600,7 @@
       border-radius: 999px;
       background: #111;
       color: #fff;
-      font: inherit;
-      font-size: 18px;
-      font-weight: 900;
+      font-size: 20px;
       cursor: pointer;
       opacity: 0;
       pointer-events: none;
@@ -1583,13 +1619,8 @@
     }
 
     /* Shared semantic colors keep every palette consistent across the reference UI. */
-    body,
-    .sidebar {
+    body {
       background: var(--bg);
-    }
-
-    .sidebar {
-      border-color: var(--border);
     }
 
     .intro,
@@ -1609,7 +1640,6 @@
       color: var(--muted);
     }
 
-    .side-label,
     .doc-card h3,
     .doc-table th,
     .erd-toolbar button,
@@ -1618,12 +1648,6 @@
       color: var(--text);
     }
 
-    .sidebar a {
-      color: var(--muted-soft);
-    }
-
-    .sidebar a:hover,
-    .sidebar a.active,
     .mobile-sidebar-switch a.active,
     .mobile-sidebar-switch a:hover,
     .copy-route:hover,
@@ -1632,16 +1656,11 @@
       color: var(--text);
     }
 
-    .sidebar a:hover,
-    .sidebar a.active,
     .mobile-sidebar-switch a.active,
     .mobile-sidebar-switch a:hover {
       background: var(--surface-raised);
     }
 
-    .nav-icon,
-    .sidebar a:hover .nav-icon,
-    .sidebar a.active .nav-icon,
     .doc-overview-icon,
     .flow-number,
     .doc-callout .ui-icon {
@@ -1780,7 +1799,7 @@
     @media (min-width: 861px) and (max-width: 1020px) {
       header .wrap {
         gap: 16px;
-        padding: 0 20px;
+        padding-inline: 20px;
       }
 
       .header-search {
@@ -1795,7 +1814,7 @@
     @media (max-width: 860px) {
       header .wrap {
         gap: 12px;
-        padding: 0 16px;
+        padding-inline: 16px;
       }
 
       .menu-toggle {
@@ -1806,12 +1825,6 @@
 
       .brand {
         order: 1;
-        gap: 10px;
-      }
-
-      .brand-copy span {
-        display: block;
-        font-size: 10px;
       }
 
       .header-search {
@@ -1857,7 +1870,7 @@
 
       .sidebar {
         position: fixed;
-        top: 64px;
+        top: var(--header-height);
         left: 0;
         bottom: 0;
         z-index: 60;
@@ -1904,7 +1917,7 @@
       .drawer-scrim {
         display: block;
         position: fixed;
-        inset: 64px 0 0;
+        inset: var(--header-height) 0 0;
         z-index: 55;
         border: 0;
         background: rgba(0, 0, 0, 0.58);
@@ -1926,7 +1939,7 @@
 
       .toolbar {
         grid-template-columns: 1fr;
-        top: 64px;
+        top: var(--header-height);
       }
 
       .endpoint-grid {
@@ -1950,7 +1963,7 @@
       }
 
       .erd-toolbar {
-        top: 64px;
+        top: var(--header-height);
         flex-wrap: wrap;
       }
 
@@ -1967,6 +1980,18 @@
         grid-column: 1 / -1;
         justify-self: start;
       }
+    }
+    @media (max-width: 650px) {
+      .brand { gap: 8px; }
+      .brand img { width: 32px; height: 32px; }
+      .brand-copy strong { font-size: 18px; }
+      .brand-copy span { font-size: 11px; }
+    }
+
+    @media (max-width: 360px) {
+      .brand { gap: 6px; }
+      .brand-copy strong { font-size: 16px; }
+      .brand-copy span { font-size: 10px; }
     }
   </style>
 </head>
@@ -1992,6 +2017,8 @@
     <symbol id="icon-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></symbol>
     <symbol id="icon-api" viewBox="0 0 24 24"><path d="m8 5-6 7 6 7M16 5l6 7-6 7M14 3l-4 18"/></symbol>
     <symbol id="icon-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></symbol>
+    <symbol id="icon-chevron-right" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+    <symbol id="icon-arrow-up" viewBox="0 0 24 24"><path d="M12 19V5m-7 7 7-7 7 7"/></symbol>
     <symbol id="icon-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1A1.7 1.7 0 0 0 9 4.6 1.7 1.7 0 0 0 10 3V2.8h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/></symbol>
   </svg>
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -2023,7 +2050,10 @@
             <div class="theme-control">
               <button class="theme-toggle" type="button" data-theme-toggle aria-expanded="false" aria-controls="desktopThemeOptions">
                 <span>Theme</span>
-                <span class="theme-toggle-value" data-theme-label>OptiFlowz</span>
+                <span class="theme-toggle-value">
+                  <span data-theme-label>OptiFlowz</span>
+                  <svg class="ui-icon theme-chevron" aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
+                </span>
               </button>
               <div class="theme-options" id="desktopThemeOptions" role="listbox" aria-label="Choose theme" aria-hidden="true" inert>
                 <button class="theme-option" type="button" role="option" data-theme-choice="optiflowz" aria-selected="true"><span class="theme-preview" aria-hidden="true" style="--preview-bg:#000;--preview-accent:#4095ff;--preview-text:#f8fafc"></span><span>OptiFlowz</span><span class="theme-option-check" aria-hidden="true">✓</span></button>
@@ -2052,7 +2082,10 @@
         <div class="theme-control">
           <button class="theme-toggle" type="button" data-theme-toggle aria-expanded="false" aria-controls="mobileThemeOptions">
             <span>Theme</span>
-            <span class="theme-toggle-value" data-theme-label>OptiFlowz</span>
+            <span class="theme-toggle-value">
+              <span data-theme-label>OptiFlowz</span>
+              <svg class="ui-icon theme-chevron" aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
+            </span>
           </button>
           <div class="theme-options" id="mobileThemeOptions" role="listbox" aria-label="Choose theme" aria-hidden="true" inert>
             <button class="theme-option" type="button" role="option" data-theme-choice="optiflowz" aria-selected="true"><span class="theme-preview" aria-hidden="true" style="--preview-bg:#000;--preview-accent:#4095ff;--preview-text:#f8fafc"></span><span>OptiFlowz</span><span class="theme-option-check" aria-hidden="true">✓</span></button>
@@ -2093,9 +2126,22 @@
           <a href="#posts" data-target="posts"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-comments"></use></svg><span>Posts</span></a>
           <a href="#post-comments" data-target="post-comments"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-comments"></use></svg><span>Post Comments</span></a>
           <a href="#live-streams" data-target="live-streams"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-channels"></use></svg><span>Live Streams</span></a>
-          <a href="#quizzes" data-target="quizzes"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-quizzes"></use></svg><span>Quizzes</span></a>
+          <a href="#collections" data-target="collections"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-playlists"></use></svg><span>Collections</span></a>
           <a href="#analytics" data-target="analytics"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-analytics"></use></svg><span>Analytics</span></a>
           <a href="#reports" data-target="reports"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-reports"></use></svg><span>Reports</span></a>
+        </div>
+        <div class="side-group">
+          <div class="side-label">Learning</div>
+          <a href="#quizzes" data-target="quizzes"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-quizzes"></use></svg><span>Quizzes</span></a>
+          <a href="#questions" data-target="questions"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-quizzes"></use></svg><span>Question Bank</span></a>
+          <a href="#question-categories" data-target="question-categories"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-quizzes"></use></svg><span>Question Categories</span></a>
+          <a href="#quiz-questions" data-target="quiz-questions"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-quizzes"></use></svg><span>Fixed Quiz Questions</span></a>
+          <a href="#quiz-sources" data-target="quiz-sources"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-quizzes"></use></svg><span>Random Question Sources</span></a>
+          <a href="#quiz-requirements" data-target="quiz-requirements"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-quizzes"></use></svg><span>Quiz Video Requirements</span></a>
+          <a href="#quiz-attempts" data-target="quiz-attempts"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-quizzes"></use></svg><span>Quiz Attempts</span></a>
+          <a href="#quiz-results" data-target="quiz-results"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-quizzes"></use></svg><span>Quiz Results Management</span></a>
+          <a href="#certificates" data-target="certificates"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-reports"></use></svg><span>Issued Certificates</span></a>
+          <a href="#certificate-templates" data-target="certificate-templates"><svg class="ui-icon nav-icon" aria-hidden="true"><use href="#icon-reports"></use></svg><span>Certificate Templates</span></a>
         </div>
       </div>
       <div class="sidebar-mode documentation-sidebar view-hidden">
@@ -2118,7 +2164,7 @@
         <p class="intro">Complete Express API reference for authentication, video delivery, playlists, quizzes, moderation, analytics, reports, and user-facing platform features.</p>
 
         <div class="overview-copy">
-          <p>The OptiFlowz backend exposes REST endpoints for a video platform built around users, video assets, watch progress, playlists, comments, people, quiz attempts, certificates, livestreams, posts, personal notes, and analytics.</p>
+          <p>The OptiFlowz backend exposes REST endpoints for a video platform built around users, video assets, watch progress, playlists, comments, people, question banks, quiz attempts, collections, certificates, livestreams, posts, personal notes, and analytics.</p>
           <p>Use the cards below to open a focused route group. Protected endpoints require a Bearer JWT token. Permission badges identify additional permission and ownership requirements.</p>
         </div>
 
@@ -2179,7 +2225,57 @@
           <a class="endpoint-card" href="#quizzes" data-target="quizzes">
             <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-quizzes"></use></svg></span>
             <h2>Quizzes</h2>
-            <p>Quiz management, questions, access rules, attempts, answers, certificates, and scoring.</p>
+            <p>Quiz authoring, published participant catalog, feedback settings, and thumbnails.</p>
+          </a>
+          <a class="endpoint-card" href="#questions" data-target="questions">
+            <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-quizzes"></use></svg></span>
+            <h2>Question Bank</h2>
+            <p>Reusable questions, choice and matching answers, categories, and Moodle XML import/export.</p>
+          </a>
+          <a class="endpoint-card" href="#question-categories" data-target="question-categories">
+            <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-quizzes"></use></svg></span>
+            <h2>Question Categories</h2>
+            <p>Category metadata and complete question membership replacement.</p>
+          </a>
+          <a class="endpoint-card" href="#quiz-questions" data-target="quiz-questions">
+            <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-quizzes"></use></svg></span>
+            <h2>Fixed Quiz Questions</h2>
+            <p>Link bank questions, set point weights, and reorder fixed quiz questions.</p>
+          </a>
+          <a class="endpoint-card" href="#quiz-sources" data-target="quiz-sources">
+            <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-quizzes"></use></svg></span>
+            <h2>Random Question Sources</h2>
+            <p>Configure random category quotas, point weights, and source ordering.</p>
+          </a>
+          <a class="endpoint-card" href="#quiz-requirements" data-target="quiz-requirements">
+            <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-quizzes"></use></svg></span>
+            <h2>Quiz Video Requirements</h2>
+            <p>Configure video watch prerequisites and inspect participant completion.</p>
+          </a>
+          <a class="endpoint-card" href="#quiz-attempts" data-target="quiz-attempts">
+            <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-quizzes"></use></svg></span>
+            <h2>Quiz Attempts</h2>
+            <p>Eligibility, start/resume, saved answers, checking, submission, and participant review.</p>
+          </a>
+          <a class="endpoint-card" href="#quiz-results" data-target="quiz-results">
+            <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-quizzes"></use></svg></span>
+            <h2>Quiz Results Management</h2>
+            <p>Author access to participant results, grouped attempts, full review, and per-attempt deletion.</p>
+          </a>
+          <a class="endpoint-card" href="#collections" data-target="collections">
+            <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-playlists"></use></svg></span>
+            <h2>Collections</h2>
+            <p>Public and private playlist collections, featured placement, artwork, and ordering.</p>
+          </a>
+          <a class="endpoint-card" href="#certificates" data-target="certificates">
+            <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-reports"></use></svg></span>
+            <h2>Issued Certificates</h2>
+            <p>Personal certificate history, public verification, and PDF downloads.</p>
+          </a>
+          <a class="endpoint-card" href="#certificate-templates" data-target="certificate-templates">
+            <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-reports"></use></svg></span>
+            <h2>Certificate Templates</h2>
+            <p>Private and system template discovery, HTML/CSS editing, and PDF previews.</p>
           </a>
           <a class="endpoint-card" href="#people" data-target="people">
             <span class="card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-people"></use></svg></span>
@@ -2317,7 +2413,7 @@
         <p class="desc">Generates a password reset token and sends it through the external n8n webhook.</p>
         <div class="grid">
           <div class="box"><h3>Body</h3><pre>{ "email": "user@example.com" }</pre></div>
-          <div class="box"><h3>Limit</h3><p>This route is rate-limited to prevent abuse.</p></div>
+          <div class="box"><h3>Limit</h3><p>One request per 10 seconds per client IP and normalized email. Exceeding the limit returns 429.</p></div>
           <div class="box"><h3>Response</h3><pre>{
   "message": "If that email is registered..."
 }</pre></div>
@@ -2328,6 +2424,7 @@
         <div class="route-head"><span class="method post">POST</span><code class="path">/api/auth/passwordReset/verify</code><span class="auth public">Public</span></div>
         <p class="desc">Checks whether the reset token is valid and not expired.</p>
         <div class="grid">
+          <div class="box"><h3>Limit</h3><p>One request per 10 seconds per client IP, normalized email and normalized reset token. Exceeding the limit returns 429.</p></div>
           <div class="box"><h3>Body</h3><pre>{
   "email": "user@example.com",
   "token": "ABC123"
@@ -2341,6 +2438,7 @@
         <div class="route-head"><span class="method post">POST</span><code class="path">/api/auth/passwordReset</code><span class="auth public">Public</span></div>
         <p class="desc">Changes the password when the reset token is valid.</p>
         <div class="grid">
+          <div class="box"><h3>Limit</h3><p>One request per 10 seconds per client IP. Exceeding the limit returns 429.</p></div>
           <div class="box"><h3>Body</h3><pre>{
   "email": "user@example.com",
   "token": "ABC123",
@@ -2800,9 +2898,9 @@
   "status": -1
 }</pre><p>status is 1 for like, -1 for dislike, or 0 after removing a reaction.</p></div></div></article>
 
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/:id/similar</code><span class="auth auth">Auth</span></div><p class="desc">Returns similar videos by categories and tags.</p><div class="grid"><div class="box"><h3>Visibility</h3><p>The source must be ready and published/public or uploaded by the caller. The current unfinished recording of a live/disconnected stream also qualifies under the stream’s visibility. Returned candidates are public, ready, and published. Inaccessible sources return an empty list.</p></div><div class="box"><h3>Access</h3><p>Bearer access JWT required, including for public videos. Video visibility and publication rules still apply.</p></div><div class="box"><h3>Path</h3><p><code>id</code> - video ID</p></div><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code></p></div><div class="box"><h3>Response</h3><p>Similar video list.</p></div></div></article>
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/:id/similar</code><span class="auth optional">Optional</span></div><p class="desc">Returns similar videos by categories and tags.</p><div class="grid"><div class="box"><h3>Visibility</h3><p>The source must be ready and published/public or uploaded by the caller. The current unfinished recording of a live/disconnected stream also qualifies under the stream’s visibility. Returned candidates are public, ready, and published. Inaccessible sources return an empty list.</p></div><div class="box"><h3>Access</h3><p>Optional Bearer access JWT. Guests can access eligible public videos; a token enables personalization and uploader previews. Invalid supplied tokens return 401. Visibility and publication rules still apply.</p></div><div class="box"><h3>Path</h3><p><code>id</code> - video ID</p></div><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code></p></div><div class="box"><h3>Response</h3><p>Similar video list.</p></div></div></article>
 
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/:id/comments</code><span class="auth auth">Auth</span></div><p class="desc">Returns video comments with pagination and sorting.</p><div class="grid"><div class="box"><h3>Visibility</h3><p>Requires Bearer authentication. Published/public videos and the uploader’s ready previews are accessible. Comments also support the active unfinished recording of a live/disconnected public or unlisted stream, or a private stream owned by the caller.</p></div><div class="box"><h3>Access</h3><p>Bearer access JWT required, including for public videos. Video visibility and publication rules still apply.</p></div><div class="box"><h3>Path</h3><p><code>id</code> - video ID</p></div><div class="box"><h3>Query</h3><p><code>page</code>, <code>limit</code>, <code>sort=new|top</code></p></div><div class="box"><h3>Response</h3><pre>{
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/:id/comments</code><span class="auth optional">Optional</span></div><p class="desc">Returns video comments with pagination and sorting.</p><div class="grid"><div class="box"><h3>Visibility</h3><p>Published/public videos and the uploader’s ready previews are accessible. Comments also support the active unfinished recording of a live/disconnected public or unlisted stream, or a private stream owned by the caller.</p></div><div class="box"><h3>Access</h3><p>Optional Bearer access JWT. Guests can access eligible public videos; a token enables personalization and uploader previews. Invalid supplied tokens return 401. Visibility and publication rules still apply.</p></div><div class="box"><h3>Path</h3><p><code>id</code> - video ID</p></div><div class="box"><h3>Query</h3><p><code>page</code>, <code>limit</code>, <code>sort=new|top</code></p></div><div class="box"><h3>Response</h3><pre>{
   "comments": [],
   "page": 1,
   "limit": 20,
@@ -2810,7 +2908,7 @@
   "total_pages": 0
 }</pre></div></div></article>
 
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/:id</code><span class="auth auth">Auth</span></div><p class="desc">Returns a ready, published public video or the uploader’s own ready private/draft/scheduled video, and records a view.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer access JWT required, including for public videos. Video visibility and publication rules still apply.</p></div><div class="box"><h3>Path</h3><p><code>id</code> - video ID</p></div><div class="box"><h3>Effect</h3><p>Returns progress_seconds, percentage_watched, user_reaction, and view tracking data. Includes at most five public playlists, ordered by featured status then views; counts exclude unpublished videos. Playlist thumbnail responses may include media_expires_at.</p></div><div class="box"><h3>Response</h3><p>The video is returned directly. Fetch stream credentials separately with POST /api/videos/:id/playback. Signed image URLs expire after one hour; media_expires_at is Unix seconds (null for public playback).</p><pre>{
+      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/:id</code><span class="auth optional">Optional</span></div><p class="desc">Returns a ready, published public video or the uploader’s own ready private/draft/scheduled video, and records a view.</p><div class="grid"><div class="box"><h3>Access</h3><p>Optional Bearer access JWT. Guests can access eligible public videos; a token enables personalization and uploader previews. Invalid supplied tokens return 401. Visibility and publication rules still apply.</p></div><div class="box"><h3>Path</h3><p><code>id</code> - video ID</p></div><div class="box"><h3>Effect</h3><p>Returns progress_seconds, percentage_watched, user_reaction, and view tracking data. Includes at most five public playlists, ordered by featured status then views; counts exclude unpublished videos. Playlist thumbnail responses may include media_expires_at.</p></div><div class="box"><h3>Response</h3><p>The video is returned directly. Fetch stream credentials separately with POST /api/videos/:id/playback. Signed image URLs expire after one hour; media_expires_at is Unix seconds (null for public playback).</p><pre>{
   "id": "11111111-1111-4111-8111-111111111111",
   "title": "Video title",
   "thumbnail_url": null,
@@ -2884,9 +2982,9 @@
       </article>
 
       <article class="route" data-method="GET">
-        <div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/:id/similar/vector</code><span class="auth auth">Auth</span></div>
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/videos/:id/similar/vector</code><span class="auth optional">Optional</span></div>
         <p class="desc">Ranks other public ready videos using the source video’s indexed overview or transcript embeddings.</p>
-        <div class="grid"><div class="box"><h3>Visibility</h3><p>The source must be ready and published/public or uploaded by the caller. The current unfinished recording of a live/disconnected stream also qualifies under the stream’s visibility. Returned candidates are public, ready, and published. Inaccessible sources return 404.</p></div><div class="box"><h3>Access</h3><p>Bearer access JWT required, including for public videos. Video visibility and publication rules still apply.</p></div><div class="box"><h3>Path</h3><p><code>id</code>: video UUID. A private source is available only to its uploader.</p></div><div class="box"><h3>Query</h3><p><code>page</code> and <code>limit</code> must be positive integers (defaults 1 and 20). Limit is capped at 100; an unsafe offset returns 400.</p></div><div class="box"><h3>Behavior</h3><p>404 for an unavailable source; an unindexed source returns an empty list. Results exclude the source video.</p></div><div class="box"><h3>Response</h3><pre>{
+        <div class="grid"><div class="box"><h3>Visibility</h3><p>The source must be ready and published/public or uploaded by the caller. The current unfinished recording of a live/disconnected stream also qualifies under the stream’s visibility. Returned candidates are public, ready, and published. Inaccessible sources return 404.</p></div><div class="box"><h3>Access</h3><p>Optional Bearer access JWT. Guests can access eligible public videos; a token enables personalization and uploader previews. Invalid supplied tokens return 401. Visibility and publication rules still apply.</p></div><div class="box"><h3>Path</h3><p><code>id</code>: video UUID. A private source is available only to its uploader.</p></div><div class="box"><h3>Query</h3><p><code>page</code> and <code>limit</code> must be positive integers (defaults 1 and 20). Limit is capped at 100; an unsafe offset returns 400.</p></div><div class="box"><h3>Behavior</h3><p>404 for an unavailable source; an unindexed source returns an empty list. Results exclude the source video.</p></div><div class="box"><h3>Response</h3><pre>{
   "videos": [
     {
       "id": "11111111-1111-4111-8111-111111111111",
@@ -2942,9 +3040,9 @@
       </article>
 
       <article class="route" data-method="POST">
-        <div class="route-head"><span class="method post">POST</span><code class="path">/api/videos/:id/playback</code><span class="auth auth">Auth</span></div>
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/videos/:id/playback</code><span class="auth optional">Optional</span></div>
         <p class="desc">Prepares a stream URL and, for signed playback, playback, thumbnail, and storyboard tokens.</p>
-        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer access JWT required, including for public videos. Video visibility and publication rules still apply.</p></div><div class="box"><h3>Path</h3><p><code>id</code>: video UUID. No body. Viewers require a ready public video whose published_at is at or before now; the uploader may preview their own ready private, draft, or scheduled video. Visibility and playback policy are separate settings.</p></div><div class="box"><h3>Response</h3><pre>{
+        <div class="grid"><div class="box"><h3>Access</h3><p>Optional Bearer access JWT. Guests can access eligible public videos; a token enables personalization and uploader previews. Invalid supplied tokens return 401. Visibility and publication rules still apply.</p></div><div class="box"><h3>Path</h3><p><code>id</code>: video UUID. No body. Viewers require a ready public video whose published_at is at or before now; the uploader may preview their own ready private, draft, or scheduled video. Visibility and playback policy are separate settings.</p></div><div class="box"><h3>Response</h3><pre>{
   "video_id": "11111111-1111-4111-8111-111111111111",
   "mux_playback_id": "playback-id",
   "playback_policy": "signed",
@@ -4046,7 +4144,7 @@ Subtitle text...</pre></div></div></article>
 
     <section class="section" id="live-streams" data-section>
       <h2>Live Streams <span class="base">/api/live-streams</span></h2>
-      <p class="section-intro">All path IDs are UUIDs. Public/unlisted livestream details and playback allow guests; private streams require the actual owner. Management permissions do not override viewing visibility. Public cards show only public content. visibility and playback_policy are independent. Creation returns 201; other successes return 200, with success: true. List, cards, update, streaming-details, playback, and details responses use Cache-Control: private, no-store.</p>
+      <p class="section-intro">All path IDs are UUIDs. Livestream details and playback require a Bearer token, including public/unlisted streams; private streams require the actual owner. Management permissions do not override viewing visibility. Public cards show only public content. visibility and playback_policy are independent. Creation returns 201; other successes return 200, with success: true. List, cards, update, streaming-details, playback, and details responses use Cache-Control: private, no-store.</p>
       <article class="route" data-method="POST">
         <div class="route-head"><span class="method post">POST</span><code class="path">/api/live-streams</code><span class="auth permission">Permission</span></div>
         <p class="desc">Creates a Mux livestream and its database record; recordings are created later by asset webhooks.</p>
@@ -4194,9 +4292,9 @@ Subtitle text...</pre></div></div></article>
       </article>
 
       <article class="route" data-method="POST">
-        <div class="route-head"><span class="method post">POST</span><code class="path">/api/live-streams/:liveStreamId/playback</code><span class="auth optional">Optional</span></div>
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/live-streams/:liveStreamId/playback</code><span class="auth auth">Auth</span></div>
         <p class="desc">Returns live HLS playback or DVR playback from the current unfinished recording.</p>
-        <div class="grid"><div class="box"><h3>Body</h3><p>None. No query parameters.</p></div><div class="box"><h3>Behavior</h3><p>Requires application status live or disconnected and Mux status active. DVR uses the current preparing/ready recording’s playback ID and policy; never a previous recording. Non-DVR uses the live playback ID. Finished recordings use the authenticated video playback route.</p></div><div class="box"><h3>Response</h3><pre>{
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer access JWT required, including public and unlisted livestreams. Private streams require the actual owner; management permissions do not override viewing visibility.</p></div><div class="box"><h3>Body</h3><p>None. No query parameters.</p></div><div class="box"><h3>Behavior</h3><p>Requires application status live or disconnected and Mux status active. DVR uses the current preparing/ready recording’s playback ID and policy; never a previous recording. Non-DVR uses the live playback ID. Finished recordings use the video playback route with optional authentication.</p></div><div class="box"><h3>Response</h3><pre>{
   "success": true,
   "livestream_id": "11111111-1111-4111-8111-111111111111",
   "video_id": "33333333-3333-4333-8333-333333333333",
@@ -4213,13 +4311,13 @@ Subtitle text...</pre></div></div></article>
     "storyboard": "\u2026"
   },
   "expires_at": 1790877600
-}</pre></div><div class="box"><h3>Tokens</h3><p>Non-DVR uses playback_mode: live and playback_source: live_stream; video_id may be null. Public playback returns empty tokens and null expires_at. Signed tokens last one hour; expiry is Unix seconds. Guests with viewing access can receive signed tokens.</p></div><div class="box"><h3>Errors</h3><p>404 unavailable/inaccessible stream; 409 not playable or DVR recording not ready; 503 invalid policy or missing signing configuration.</p></div></div>
+}</pre></div><div class="box"><h3>Tokens</h3><p>Non-DVR uses playback_mode: live and playback_source: live_stream; video_id may be null. Public playback returns empty tokens and null expires_at. Signed tokens last one hour; expiry is Unix seconds. Only authenticated viewers with stream access can request these tokens.</p></div><div class="box"><h3>Errors</h3><p>404 unavailable/inaccessible stream; 409 not playable or DVR recording not ready; 503 invalid policy or missing signing configuration.</p></div></div>
       </article>
 
       <article class="route" data-method="GET">
-        <div class="route-head"><span class="method get">GET</span><code class="path">/api/live-streams/:liveStreamId</code><span class="auth optional">Optional</span></div>
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/live-streams/:liveStreamId</code><span class="auth auth">Auth</span></div>
         <p class="desc">Returns livestream details in any lifecycle state and the matching current recording, if one exists.</p>
-        <div class="grid"><div class="box"><h3>Body</h3><p>None. No query parameters.</p></div><div class="box"><h3>Response</h3><pre>{
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer access JWT required, including public and unlisted livestreams. Private streams require the actual owner; management permissions do not override viewing visibility.</p></div><div class="box"><h3>Body</h3><p>None. No query parameters.</p></div><div class="box"><h3>Response</h3><pre>{
   "success": true,
   "live_stream": {
     "id": "11111111-1111-4111-8111-111111111111",
@@ -4245,7 +4343,7 @@ Subtitle text...</pre></div></div></article>
     "video_id": null,
     "current_recording": null
   }
-}</pre></div><div class="box"><h3>Recording</h3><p>Attached only while live/disconnected, for the active unfinished, non-deleted Mux asset. Preparing/unpublished recordings inherit livestream visibility; previous recordings are not substituted. current_recording includes id, livestream_id, title, description, thumbnail_url, mux_status, visibility, playback_policy, duration_seconds, view_count, like_count, dislike_count, comment_count, created_at, updated_at, published_at, recording_started_at, recording_completed_at, progress_seconds, percentage_watched, user_reaction.</p></div><div class="box"><h3>Behavior</h3><p>Does not increment views or return playback URLs or encoder credentials. Guests get null progress and user_reaction: 0.</p></div></div>
+}</pre></div><div class="box"><h3>Recording</h3><p>Attached only while live/disconnected, for the active unfinished, non-deleted Mux asset. Preparing/unpublished recordings inherit livestream visibility; previous recordings are not substituted. current_recording includes id, livestream_id, title, description, thumbnail_url, mux_status, visibility, playback_policy, duration_seconds, view_count, like_count, dislike_count, comment_count, created_at, updated_at, published_at, recording_started_at, recording_completed_at, progress_seconds, percentage_watched, user_reaction.</p></div><div class="box"><h3>Behavior</h3><p>Does not increment views or return playback URLs or encoder credentials. Progress and reactions reflect the authenticated viewer.</p></div></div>
       </article>
 
       <article class="route" data-method="DELETE">
@@ -4266,41 +4364,1877 @@ Subtitle text...</pre></div></div></article>
 
     <section class="section" id="quizzes" data-section>
       <h2>Quizzes <span class="base">/api/quizzes</span></h2>
+      <p class="section-intro">Management reads and writes require the permission shown on each route. Participants use the published catalog and eligibility check. Publishing a quiz does not validate its questions; the server checks them when starting an attempt.</p>
+      <p class="section-intro">Question selection uses bank questions and random category sources; watch prerequisites use video requirements. Participant attempt resources live under <code>/api/quiz-attempts</code>; issued certificates under <code>/api/certificates</code>.</p>
 
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/create</code><span class="auth permission">Permission</span></div><p class="desc">Creates a quiz.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.create</code>.</p></div><div class="box"><h3>Body</h3><pre>{ "title": "Quiz", "description": "Description", "time_limit_seconds": 600, "max_attempts": 3, "passing_score_percentage": 70 }</pre></div><div class="box"><h3>Ownership</h3><p>The quiz is assigned to the creator from the JWT token.</p></div><div class="box"><h3>Response</h3><p>Created quiz.</p></div></div></article>
-      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/quizzes/:quizId</code><span class="auth permission">Permission</span></div><p class="desc">Updates basic quiz fields.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><p>Partial update of quiz fields.</p></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Response</h3><p>Updated quiz.</p></div></div></article>
-      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/quizzes/:quizId</code><span class="auth permission">Permission</span></div><p class="desc">Deletes the quiz when the user created it or has administration rights.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "deleted": true }</pre></div></div></article>
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/user</code><span class="auth permission">Permission</span></div><p class="desc">Returns quizzes created by the current user.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.manage_own</code>.</p></div><div class="box"><h3>Query</h3><p><code>page</code>, <code>limit</code>, <code>sort</code>, <code>order</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Quiz list.</p></div></div></article>
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/certificates</code><span class="auth permission">Permission</span></div><p class="desc">Returns the user's certificates.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.certificates</code>.</p></div><div class="box"><h3>Query</h3><p><code>limit</code>, <code>page</code> if supported.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Certificate list.</p></div></div></article>
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/certificate/generate</code><span class="auth permission">Permission</span></div><p class="desc">Generates a PDF certificate for a passed quiz.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.certificates</code>.</p></div><div class="box"><h3>Body</h3><pre>{ "quizId": "uuid", "attemptId": "uuid" }</pre></div><div class="box"><h3>Response</h3><p><code>application/pdf</code> attachment.</p></div><div class="box"><h3>Integration</h3><p>Puppeteer renders the certificate.</p></div></div></article>
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/details</code><span class="auth optional">Optional</span></div><p class="desc">Returns public quiz details for a video/playlist context.</p><div class="grid"><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Quiz details.</p></div></div></article>
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/requirements</code><span class="auth permission">Permission</span></div><p class="desc">Checks whether the user meets the requirements to start the quiz.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.participate</code>.</p></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Logic</h3><p>Checks access rules and watch progress.</p></div><div class="box"><h3>Response</h3><pre>{ "hasMetRequirements": true }</pre></div></div></article>
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/requirements/videos</code><span class="auth permission">Permission</span></div><p class="desc">Returns videos the user must watch to access the quiz.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.participate</code>.</p></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Required videos and progress list.</p></div></div></article>
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/questions</code><span class="auth permission">Permission</span></div><p class="desc">Returns all quiz questions for administration.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Query</h3><p><code>page</code>, <code>limit</code>, <code>sortBy</code>, <code>sortOrder</code></p></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Response</h3><p>Questions, options, matching pairs, and pagination.</p></div></div></article>
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/:quizId/question/create</code><span class="auth permission">Permission</span></div><p class="desc">Adds a question to the quiz.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><pre>{
-  "question_text": "Question?",
-  "question_type": "single_choice",
-  "explanation": "Explanation",
-  "points": 1,
-  "position": 1,
-  "options": [{ "option_text": "A", "is_correct": true }],
-  "pairs": []
-}</pre></div><div class="box"><h3>Types</h3><p>Multiple question types are supported, including options and matching pairs.</p></div><div class="box"><h3>Response</h3><p>Created question.</p></div></div></article>
-      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/quizzes/question/:questionId</code><span class="auth permission">Permission</span></div><p class="desc">Updates the question and related options/pairs.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><p>Same structure as creation, with all supported fields.</p></div><div class="box"><h3>Path</h3><p><code>questionId</code></p></div><div class="box"><h3>Response</h3><p>Updated question.</p></div></div></article>
-      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/quizzes/question/:questionId</code><span class="auth permission">Permission</span></div><p class="desc">Deletes a question from the quiz.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Path</h3><p><code>questionId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "deleted": true }</pre></div></div></article>
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/rules</code><span class="auth permission">Permission</span></div><p class="desc">Returns quiz access rules.</p><div class="grid"><div class="box"><h3>Playlist artwork</h3><p>Entries with playlist_id include playlist_thumbnail and playlist_media_expires_at. The thumbnail uses current custom artwork or the first accessible ready video; signed fallback expiry is Unix seconds, otherwise null.</p></div><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Access rule list.</p></div></div></article>
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/:quizId/rule/create</code><span class="auth permission">Permission</span></div><p class="desc">Adds an access rule to the quiz.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><pre>{ "video_id": "uuid", "playlist_id": null, "required_percentage": 80, "required_seconds": 300 }</pre></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Response</h3><p>Created rule.</p></div></div></article>
-      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/quizzes/rule/:ruleId</code><span class="auth permission">Permission</span></div><p class="desc">Updates a quiz access rule.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><p>Access rule fields.</p></div><div class="box"><h3>Path</h3><p><code>ruleId</code></p></div><div class="box"><h3>Response</h3><p>Updated rule.</p></div></div></article>
-      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/quizzes/rule/:ruleId</code><span class="auth permission">Permission</span></div><p class="desc">Deletes a quiz access rule.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Path</h3><p><code>ruleId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "deleted": true }</pre></div></div></article>
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/question-sources</code><span class="auth permission">Permission</span></div><p class="desc">Returns quiz question sources.</p><div class="grid"><div class="box"><h3>Playlist artwork</h3><p>Entries with playlist_id include playlist_thumbnail and playlist_media_expires_at. The thumbnail uses current custom artwork or the first accessible ready video; signed fallback expiry is Unix seconds, otherwise null.</p></div><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Question source list.</p></div></div></article>
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/:quizId/question-source/create</code><span class="auth permission">Permission</span></div><p class="desc">Adds a question source to the quiz.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><pre>{ "source_type": "video", "video_id": "uuid", "playlist_id": null, "question_count": 5 }</pre></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Response</h3><p>Created question source.</p></div></div></article>
-      <article class="route" data-method="PATCH"><div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/quizzes/question-source/:sourceId</code><span class="auth permission">Permission</span></div><p class="desc">Updates a question source.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Body</h3><p>Question source fields.</p></div><div class="box"><h3>Path</h3><p><code>sourceId</code></p></div><div class="box"><h3>Response</h3><p>Updated source.</p></div></div></article>
-      <article class="route" data-method="DELETE"><div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/quizzes/question-source/:sourceId</code><span class="auth permission">Permission</span></div><p class="desc">Deletes a question source.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. <code>quizzes.manage_own</code> for a resource you own, or <code>quizzes.manage_any</code> for any resource.</p></div><div class="box"><h3>Path</h3><p><code>sourceId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{ "deleted": true }</pre></div></div></article>
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/:quizId/attempt/start</code><span class="auth permission">Permission</span></div><p class="desc">Starts a new quiz attempt for the user.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.participate</code>.</p></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Logic</h3><p>Checks requirements, attempt count, and creates an attempt with questions.</p></div><div class="box"><h3>Response</h3><p>Attempt metadata.</p></div></div></article>
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/attempts</code><span class="auth permission">Permission</span></div><p class="desc">Returns the user's attempts for the quiz.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.participate</code>.</p></div><div class="box"><h3>Path</h3><p><code>quizId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Attempt list.</p></div></div></article>
-      <article class="route" data-method="GET"><div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/attempt/:attemptId/questions</code><span class="auth permission">Permission</span></div><p class="desc">Returns questions for the active quiz attempt.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.participate</code>.</p></div><div class="box"><h3>Path</h3><p><code>attemptId</code></p></div><div class="box"><h3>Security</h3><p>A user can only see their own attempt.</p></div><div class="box"><h3>Response</h3><p>Questions, options, and saved answers.</p></div></div></article>
-      <article class="route" data-method="PUT"><div class="route-head"><span class="method put">PUT</span><code class="path">/api/quizzes/attempt/:attemptId/question/:questionId/answer</code><span class="auth permission">Permission</span></div><p class="desc">Saves an answer during the attempt.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.participate</code>.</p></div><div class="box"><h3>Body</h3><pre>{ "answer": "answer value or object" }</pre></div><div class="box"><h3>Path</h3><p><code>attemptId</code>, <code>questionId</code></p></div><div class="box"><h3>Response</h3><p>Saved answer and result when applicable.</p></div></div></article>
-      <article class="route" data-method="POST"><div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/attempt/:attemptId/submit</code><span class="auth permission">Permission</span></div><p class="desc">Submits the attempt, grades the quiz, and finishes the attempt.</p><div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.participate</code>.</p></div><div class="box"><h3>Path</h3><p><code>attemptId</code></p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><p>Quiz result, pass/fail, and score.</p></div></div></article>
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Creates a draft quiz owned by the caller.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.create</code>.</p></div><div class="box"><h3>Body</h3><pre>{
+  "title": "Programming basics",
+  "questions_per_page": 1,
+  "time_limit_seconds": null,
+  "max_attempts": null,
+  "passing_score_percentage": 50,
+  "shuffle_questions": true,
+  "shuffle_options": true,
+  "certificate_template_id": null,
+  "min_answered_percentage": 0,
+  "min_correct_percentage": 0,
+  "correctness_visibility": "after_finish",
+  "correct_answers_visibility": "after_finish",
+  "explanation_visibility": "after_finish",
+  "explanation_incorrect_only": false,
+  "allow_answer_changes_after_check": false,
+  "allow_attempt_review": true,
+  "show_final_score": true,
+  "scoring_mode": "exact_match"
+}</pre></div><div class="box"><h3>Validation</h3><p>Only title is required (trimmed, 1–255 characters). description defaults to null; status defaults to draft and accepts draft|published|archived. The example shows the default settings. time_limit_seconds and max_attempts accept positive integers or null for unlimited time/attempts. Percentages are 0–100 with at most two decimals. questions_per_page is a positive integer; it may exceed question_count.</p></div><div class="box"><h3>Settings</h3><p>Feedback visibility: never|after_check|after_finish. scoring_mode: exact_match|partial_credit. question_count is derived from fixed questions plus source quotas and cannot be written. thumbnail_url and has_certificate cannot be written. certificate_template_id accepts null or an accessible system/own template; unavailable templates return 422.</p></div><div class="box"><h3>Response</h3><p>201 Created.</p><pre>{
+  "success": true,
+  "quiz": {
+    "id": "22222222-2222-4222-8222-222222222222",
+    "user_id": "11111111-1111-4111-8111-111111111111",
+    "title": "Programming basics",
+    "description": null,
+    "status": "draft",
+    "question_count": 0,
+    "thumbnail_url": null,
+    "questions_per_page": 1,
+    "time_limit_seconds": null,
+    "max_attempts": null,
+    "passing_score_percentage": 50,
+    "shuffle_questions": true,
+    "shuffle_options": true,
+    "certificate_template_id": null,
+    "min_answered_percentage": 0,
+    "min_correct_percentage": 0,
+    "correctness_visibility": "after_finish",
+    "correct_answers_visibility": "after_finish",
+    "explanation_visibility": "after_finish",
+    "explanation_incorrect_only": false,
+    "allow_answer_changes_after_check": false,
+    "allow_attempt_review": true,
+    "show_final_score": true,
+    "scoring_mode": "exact_match",
+    "created_at": "2026-10-30T10:00:00.000Z",
+    "updated_at": "2026-10-30T10:00:00.000Z"
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Lists quizzes within the caller’s authoring permission scope.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.read_any</code> or <code>quizzes.read_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Query</h3><p><code>page</code>: positive integer, default 1; <code>limit</code>: 1–100, default 20. <code>sortOrder</code>: asc (default) or desc. Unknown query fields are rejected. <code>user_id</code>: author UUID; <code>title</code>: trimmed substring, max 255; <code>status</code>: draft|published|archived. <code>sortBy</code>: created_at (default)|updated_at|title|status|question_count|passing_score_percentage. read_own scopes to the caller; another author filter returns an empty list.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "quizzes": [],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 0,
+    "totalPages": 0,
+    "hasNextPage": false,
+    "hasPreviousPage": false
+  },
+  "sorting": {
+    "sortBy": "created_at",
+    "sortOrder": "asc"
+  }
+}</pre><p>Each item contains the full management quiz fields, including user_id, certificate_template_id, thumbnail_url and feedback settings.</p></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Reads management details for one quiz, including drafts and archived quizzes.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.read_any</code> or <code>quizzes.read_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Path</h3><p><code>quizId</code>: quiz UUID.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "quiz": {
+    "id": "22222222-2222-4222-8222-222222222222",
+    "user_id": "11111111-1111-4111-8111-111111111111",
+    "title": "Programming basics",
+    "description": null,
+    "status": "draft",
+    "question_count": 0,
+    "thumbnail_url": null,
+    "questions_per_page": 1,
+    "time_limit_seconds": null,
+    "max_attempts": null,
+    "passing_score_percentage": 50,
+    "shuffle_questions": true,
+    "shuffle_options": true,
+    "certificate_template_id": null,
+    "min_answered_percentage": 0,
+    "min_correct_percentage": 0,
+    "correctness_visibility": "after_finish",
+    "correct_answers_visibility": "after_finish",
+    "explanation_visibility": "after_finish",
+    "explanation_incorrect_only": false,
+    "allow_answer_changes_after_check": false,
+    "allow_attempt_review": true,
+    "show_final_score": true,
+    "scoring_mode": "exact_match",
+    "created_at": "2026-10-30T10:00:00.000Z",
+    "updated_at": "2026-10-30T10:00:00.000Z"
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="PATCH">
+        <div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/quizzes/:quizId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Updates a nonempty subset of writable quiz settings.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.update_any</code> or <code>quizzes.update_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Body</h3><pre>{
+  "status": "published",
+  "questions_per_page": 5,
+  "certificate_template_id": null
+}</pre></div><div class="box"><h3>Behavior</h3><p>Same fields and limits as POST. Omission preserves a field; null clears description, time_limit_seconds, max_attempts, or certificate_template_id. Publication does not validate candidate questions. Existing attempts retain settings snapshots; certificate issuance uses the current quiz template selection. An editor with update_any may select their own private template or a system template, not another user’s private template.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "quiz": {
+    "id": "22222222-2222-4222-8222-222222222222",
+    "user_id": "11111111-1111-4111-8111-111111111111",
+    "title": "Programming basics",
+    "description": null,
+    "status": "published",
+    "question_count": 0,
+    "thumbnail_url": null,
+    "questions_per_page": 5,
+    "time_limit_seconds": null,
+    "max_attempts": null,
+    "passing_score_percentage": 50,
+    "shuffle_questions": true,
+    "shuffle_options": true,
+    "certificate_template_id": null,
+    "min_answered_percentage": 0,
+    "min_correct_percentage": 0,
+    "correctness_visibility": "after_finish",
+    "correct_answers_visibility": "after_finish",
+    "explanation_visibility": "after_finish",
+    "explanation_incorrect_only": false,
+    "allow_answer_changes_after_check": false,
+    "allow_attempt_review": true,
+    "show_final_score": true,
+    "scoring_mode": "exact_match",
+    "created_at": "2026-10-30T10:00:00.000Z",
+    "updated_at": "2026-10-30T10:00:00.000Z"
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/published</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Lists published quizzes from all authors for participants.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.participate</code>.</p></div><div class="box"><h3>Query</h3><p><code>page</code>: positive integer, default 1; <code>limit</code>: 1–100, default 20. <code>sortOrder</code>: asc (default) or desc. Unknown query fields are rejected. <code>user_id</code>: author UUID; <code>title</code>: trimmed substring, max 255; <code>status</code>, if provided, must be published. <code>sortBy</code>: created_at (default)|updated_at|title|status|question_count|passing_score_percentage. user_id filters by author without author read permissions.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "quizzes": [
+    {
+      "id": "22222222-2222-4222-8222-222222222222",
+      "title": "Programming basics",
+      "description": null,
+      "status": "published",
+      "question_count": 0,
+      "thumbnail_url": null,
+      "questions_per_page": 1,
+      "time_limit_seconds": null,
+      "max_attempts": null,
+      "passing_score_percentage": 50,
+      "shuffle_questions": true,
+      "shuffle_options": true,
+      "min_answered_percentage": 0,
+      "min_correct_percentage": 0,
+      "correctness_visibility": "after_finish",
+      "correct_answers_visibility": "after_finish",
+      "explanation_visibility": "after_finish",
+      "explanation_incorrect_only": false,
+      "allow_answer_changes_after_check": false,
+      "allow_attempt_review": true,
+      "show_final_score": true,
+      "scoring_mode": "exact_match",
+      "created_at": "2026-10-30T10:00:00.000Z",
+      "updated_at": "2026-10-30T10:00:00.000Z",
+      "has_certificate": false
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 1,
+    "totalPages": 1,
+    "hasNextPage": false,
+    "hasPreviousPage": false
+  },
+  "sorting": {
+    "sortBy": "created_at",
+    "sortOrder": "asc"
+  }
+}</pre></div><div class="box"><h3>Behavior</h3><p>Returns current participant settings and has_certificate, excluding author/template IDs, questions, solutions, sources and attempts. Does not check requirements or attempt limits; use eligibility before starting. Cache-Control: private, no-store.</p></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/published/:quizId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Reads a published quiz without requiring author management permissions.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.participate</code>.</p></div><div class="box"><h3>Path</h3><p><code>quizId</code>: quiz UUID. Draft, archived, and missing quizzes return 404 even to their author/Owner.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "quiz": {
+    "id": "22222222-2222-4222-8222-222222222222",
+    "title": "Programming basics",
+    "description": null,
+    "status": "published",
+    "question_count": 0,
+    "thumbnail_url": null,
+    "questions_per_page": 1,
+    "time_limit_seconds": null,
+    "max_attempts": null,
+    "passing_score_percentage": 50,
+    "shuffle_questions": true,
+    "shuffle_options": true,
+    "min_answered_percentage": 0,
+    "min_correct_percentage": 0,
+    "correctness_visibility": "after_finish",
+    "correct_answers_visibility": "after_finish",
+    "explanation_visibility": "after_finish",
+    "explanation_incorrect_only": false,
+    "allow_answer_changes_after_check": false,
+    "allow_attempt_review": true,
+    "show_final_score": true,
+    "scoring_mode": "exact_match",
+    "created_at": "2026-10-30T10:00:00.000Z",
+    "updated_at": "2026-10-30T10:00:00.000Z",
+    "has_certificate": false
+  }
+}</pre></div><div class="box"><h3>Behavior</h3><p>Returns current participant settings and has_certificate, excluding author/template IDs, questions, solutions, sources and attempts. Does not check requirements or attempt limits; use eligibility before starting. Cache-Control: private, no-store.</p></div></div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/:quizId/thumbnail</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Uploads or removes the quiz thumbnail.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.update_any</code> or <code>quizzes.update_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Upload</h3><p>multipart/form-data, one <code>file</code>: JPEG, PNG or WebP, at most 5 MiB. Let the client set the boundary. Server rotates and center-crops to 1280 × 1280 WebP. POST without a file removes the thumbnail. Works in every quiz status.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "quiz": {
+    "id": "22222222-2222-4222-8222-222222222222",
+    "thumbnail_url": "https://cdn.example.com/quiz-thumbnails/22222222-2222-4222-8222-222222222222/image.webp"
+  }
+}</pre></div><div class="box"><h3>Behavior</h3><p>Removal returns thumbnail_url: null. Replacements delete the old managed object after commit. Invalid/oversized files return 400; storage failures return 500. Cache-Control: private, no-store.</p></div></div>
+      </article>
+
+      <article class="route" data-method="DELETE">
+        <div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/quizzes/:quizId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Deletes a quiz within the caller’s delete scope.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.delete_any</code> or <code>quizzes.delete_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Body</h3><p>None. Quiz-linked configuration and attempts follow database cascades; bank questions remain. Issued certificate foreign keys can prevent deletion.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "deleted": true
+}</pre></div></div>
+      </article>
+    </section>
+
+    <section class="section" id="questions" data-section>
+      <h2>Question Bank <span class="base">/api/quizzes/questions</span></h2>
+      <p class="section-intro">Questions and categories must share an owner, even when an administrator edits across owners. CRUD allows incomplete drafts; attempt creation validates selected questions. Question edits never rewrite existing attempt snapshots. Resource IDs are UUIDs; option_no and item_no are positive integers.</p>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/questions</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Creates a reusable question in the caller’s bank.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>questions.create</code>.</p></div><div class="box"><h3>Body</h3><pre>{
+  "type": "single_choice",
+  "content": "Which is a programming language?",
+  "max_points": 1,
+  "explanation": "Python is a programming language.",
+  "category_id": null,
+  "options": [
+    {
+      "option_no": 1,
+      "content": "Python",
+      "is_correct": true,
+      "position": 1
+    },
+    {
+      "option_no": 2,
+      "content": "CSS",
+      "is_correct": false,
+      "position": 2
+    }
+  ]
+}</pre><p>Matching example:</p><pre>{
+  "type": "matching",
+  "content": "Match each item.",
+  "matching_options": [
+    {
+      "option_no": 1,
+      "content": "Language",
+      "position": 1
+    }
+  ],
+  "matching_items": [
+    {
+      "item_no": 1,
+      "content": "Python",
+      "correct_option_no": 1,
+      "position": 1
+    }
+  ]
+}</pre></div><div class="box"><h3>Validation</h3><p>Required type (single_choice|multiple_choice|matching) and content string; trimmed empty content is allowed for drafts. max_points defaults to 1: >0, ≤99999999.99, at most two decimals. explanation defaults to null. Optional category_id UUID/null must belong to the question owner. Choice option_no/item_no identifiers are 1–32767, unique per array; positions are positive integers. Child arrays default to empty, is_correct defaults to false. Matching items must reference an existing matching option; several items may share an option. Nonempty child arrays for another question type are rejected.</p></div><div class="box"><h3>Response</h3><p>201 Created.</p><pre>{
+  "success": true,
+  "question": {
+    "type": "single_choice",
+    "content": "Which is a programming language?",
+    "max_points": 1,
+    "explanation": "Python is a programming language.",
+    "options": [
+      {
+        "option_no": 1,
+        "content": "Python",
+        "is_correct": true,
+        "position": 1
+      },
+      {
+        "option_no": 2,
+        "content": "CSS",
+        "is_correct": false,
+        "position": 2
+      }
+    ],
+    "id": "44444444-4444-4444-8444-444444444444",
+    "user_id": "11111111-1111-4111-8111-111111111111",
+    "category": null,
+    "matching_options": [],
+    "matching_items": [],
+    "created_at": "2026-10-30T10:00:00.000Z",
+    "updated_at": "2026-10-30T10:00:00.000Z"
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/questions</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Lists question metadata within the permitted owner scope.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>questions.read_any</code> or <code>questions.read_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Query</h3><p><code>page</code>: positive integer, default 1; <code>limit</code>: 1–100, default 20. <code>sortOrder</code>: asc (default) or desc. Unknown query fields are rejected. Optional type and category_id UUID filters. sortBy: created_at (default)|updated_at|content|type. No user_id, content-search, or offset parameter.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "questions": [],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 0,
+    "totalPages": 0,
+    "hasNextPage": false,
+    "hasPreviousPage": false
+  },
+  "sorting": {
+    "sortBy": "created_at",
+    "sortOrder": "asc"
+  }
+}</pre><p>Items include id, user_id, type, content, explanation, max_points, category: {id, name} or null, created_at and updated_at; child answer arrays are omitted.</p></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/questions/:questionId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Returns a question and all choice/matching answer data for authoring.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>questions.read_any</code> or <code>questions.read_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Path</h3><p><code>questionId</code>: bank question UUID.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "question": {
+    "type": "single_choice",
+    "content": "Which is a programming language?",
+    "max_points": 1,
+    "explanation": "Python is a programming language.",
+    "options": [
+      {
+        "option_no": 1,
+        "content": "Python",
+        "is_correct": true,
+        "position": 1
+      },
+      {
+        "option_no": 2,
+        "content": "CSS",
+        "is_correct": false,
+        "position": 2
+      }
+    ],
+    "id": "44444444-4444-4444-8444-444444444444",
+    "user_id": "11111111-1111-4111-8111-111111111111",
+    "category": null,
+    "matching_options": [],
+    "matching_items": [],
+    "created_at": "2026-10-30T10:00:00.000Z",
+    "updated_at": "2026-10-30T10:00:00.000Z"
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="PATCH">
+        <div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/quizzes/questions/:questionId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Edits question metadata, answers, type or category.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>questions.update_any</code> or <code>questions.update_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Body</h3><pre>{
+  "content": "Updated prompt",
+  "category_id": null
+}</pre></div><div class="box"><h3>Behavior</h3><p>Nonempty subset of POST fields. Omitted arrays are preserved; each supplied array replaces its entire collection. Keep stable option_no/item_no identifiers when reordering. Changing type clears old child collections. Clear explanation/category with null. To remove a referenced matching option, update matching_items in the same request. Required type (single_choice|multiple_choice|matching) and content string; trimmed empty content is allowed for drafts. max_points defaults to 1: >0, ≤99999999.99, at most two decimals. explanation defaults to null. Optional category_id UUID/null must belong to the question owner. Choice option_no/item_no identifiers are 1–32767, unique per array; positions are positive integers. Child arrays default to empty, is_correct defaults to false. Matching items must reference an existing matching option; several items may share an option.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "question": {
+    "type": "single_choice",
+    "content": "Updated prompt",
+    "max_points": 1,
+    "explanation": "Python is a programming language.",
+    "options": [
+      {
+        "option_no": 1,
+        "content": "Python",
+        "is_correct": true,
+        "position": 1
+      },
+      {
+        "option_no": 2,
+        "content": "CSS",
+        "is_correct": false,
+        "position": 2
+      }
+    ],
+    "id": "44444444-4444-4444-8444-444444444444",
+    "user_id": "11111111-1111-4111-8111-111111111111",
+    "category": null,
+    "matching_options": [],
+    "matching_items": [],
+    "created_at": "2026-10-30T10:00:00.000Z",
+    "updated_at": "2026-10-30T10:00:00.000Z"
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="DELETE">
+        <div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/quizzes/questions/:questionId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Deletes a bank question and its current relationships.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>questions.delete_any</code> or <code>questions.delete_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Behavior</h3><p>No body. Fixed quiz links are removed and derived counts update. Saved attempt snapshots remain; their question_id may become null.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "deleted": true
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/questions/import</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Imports Moodle XML into the caller’s question bank in one transaction.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>questions.create</code>.</p></div><div class="box"><h3>Upload</h3><p>multipart/form-data with one .xml <code>file</code>, or raw application/xml or text/xml. Maximum 5 MiB and 1000 questions. JSON is unsupported. Optional query category_id overrides XML categories and must be owned by the caller.</p></div><div class="box"><h3>Behavior</h3><p>Missing XML categories are created only with question_categories.create. Paths become flat category names; questions without categories remain uncategorized. Repeated imports create new questions. Supported: multichoice (single/multiple), matching, and truefalse converted to single choice with a warning. Preserves prompt/general feedback HTML and defaultgrade as max_points. Embedded files, unsupported types/formats and XML entities are rejected. Show returned warnings about scoring and unsupported metadata.</p></div><div class="box"><h3>Response</h3><p>201 Created; example item abbreviated.</p><pre>{
+  "success": true,
+  "imported_count": 1,
+  "questions": [
+    {
+      "id": "44444444-4444-4444-8444-444444444444",
+      "type": "single_choice",
+      "max_points": 1,
+      "category": null
+    }
+  ],
+  "warnings": []
+}</pre></div><div class="box"><h3>Errors</h3><p>400 invalid request/upload; 404 inaccessible category; 413 over 5 MiB; 415 unsupported Content-Type; 422 invalid XML/question, unsupported content or more than 1000 questions. Entire import rolls back on failure.</p></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/questions/export</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Exports the caller’s own bank as Moodle XML, including for Owner/read_any callers.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>questions.read_any</code> or <code>questions.read_own</code>. Export always uses the authenticated user’s bank.</p></div><div class="box"><h3>Query</h3><p>Optional question_ids: comma-separated UUIDs, at most 1000; category_id UUID; type: single_choice|multiple_choice|matching. Filters intersect. No pagination; narrow the filters if the result exceeds 1000 questions or 5 MiB.</p></div><div class="box"><h3>Response</h3><p>200 application/xml; charset=utf-8. Attachment filename: questions-moodle.xml. Cache-Control: no-store.</p></div><div class="box"><h3>Errors</h3><p>404 for empty results or explicitly requested unavailable/nonmatching IDs. 422 for incomplete draft questions, incompatible matching options or unsupported export structure; 413 for oversized output. No quiz links, attempts or quiz scoring settings are exported.</p></div></div>
+      </article>
+    </section>
+
+    <section class="section" id="question-categories" data-section>
+      <h2>Question Categories <span class="base">/api/quizzes/question-categories</span></h2>
+      <p class="section-intro">Each question has at most one category. Assigning a question moves it from its previous category. Category names are case-sensitive and unique per owner.</p>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/question-categories</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Creates a category owned by the caller.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>question_categories.create</code>.</p></div><div class="box"><h3>Body</h3><pre>{
+  "name": "Programming",
+  "description": null
+}</pre></div><div class="box"><h3>Validation</h3><p>Required trimmed name, 1–255 characters; optional trimmed description defaults to null. Duplicate names for the same owner return 409.</p></div><div class="box"><h3>Response</h3><p>201 Created.</p><pre>{
+  "success": true,
+  "category": {
+    "id": "33333333-3333-4333-8333-333333333333",
+    "user_id": "11111111-1111-4111-8111-111111111111",
+    "name": "Programming",
+    "description": null
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/question-categories</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Lists accessible categories and their current question counts.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>question_categories.read_any</code> or <code>question_categories.read_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Query</h3><p><code>page</code>: positive integer, default 1; <code>limit</code>: 1–100, default 20. <code>sortOrder</code>: asc (default) or desc. Unknown query fields are rejected. Optional name: case-insensitive substring, max 255; empty means no filter. sortBy: name (default)|id.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "categories": [],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 0,
+    "totalPages": 0,
+    "hasNextPage": false,
+    "hasPreviousPage": false
+  },
+  "sorting": {
+    "sortBy": "name",
+    "sortOrder": "asc"
+  }
+}</pre><p>Each item contains category metadata and integer question_count, including incomplete draft questions.</p></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/question-categories/:categoryId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Returns category metadata, question_count and its question list.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>question_categories.read_any</code> or <code>question_categories.read_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "category": {
+    "id": "33333333-3333-4333-8333-333333333333",
+    "user_id": "11111111-1111-4111-8111-111111111111",
+    "name": "Programming",
+    "description": null,
+    "question_count": 0,
+    "questions": []
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="PATCH">
+        <div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/quizzes/question-categories/:categoryId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Updates category name and/or description.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>question_categories.update_any</code> or <code>question_categories.update_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Body</h3><pre>{
+  "description": "Language practice"
+}</pre></div><div class="box"><h3>Validation</h3><p>Nonempty subset of name/description; same limits as creation. null clears description. Membership is changed separately.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "category": {
+    "id": "33333333-3333-4333-8333-333333333333",
+    "user_id": "11111111-1111-4111-8111-111111111111",
+    "name": "Programming",
+    "description": "Language practice"
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="PUT">
+        <div class="route-head"><span class="method put">PUT</span><code class="path">/api/quizzes/question-categories/:categoryId/questions</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Replaces the entire category membership set.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>question_categories.update_any</code> or <code>question_categories.update_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Body</h3><pre>{
+  "question_ids": [
+    "44444444-4444-4444-8444-444444444444"
+  ]
+}</pre></div><div class="box"><h3>Behavior</h3><p>Required UUID array, normalized and deduplicated. [] clears the category. All questions must share the category owner. Supplied questions move from previous categories; omitted members become uncategorized. Missing/foreign IDs return 404 and roll back the whole operation. Idempotent; updates affected question timestamps.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "category": {
+    "id": "33333333-3333-4333-8333-333333333333",
+    "user_id": "11111111-1111-4111-8111-111111111111",
+    "name": "Programming",
+    "description": null
+  },
+  "question_ids": [
+    "44444444-4444-4444-8444-444444444444"
+  ]
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="DELETE">
+        <div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/quizzes/question-categories/:categoryId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Deletes a category while preserving its bank questions.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>question_categories.delete_any</code> or <code>question_categories.delete_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Behavior</h3><p>Questions become uncategorized. Random sources referencing the category are removed and affected quiz counts update. No body.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "deleted": true
+}</pre></div></div>
+      </article>
+    </section>
+
+    <section class="section" id="quiz-questions" data-section>
+      <h2>Fixed Quiz Questions <span class="base">/api/quizzes/:quizId/questions</span></h2>
+      <p class="section-intro">These resources link bank questions to a quiz. Quiz read permissions govern reads; quiz update permissions govern every mutation. Linked questions must belong to the quiz owner. Fixed questions and random sources share a zero-based layout.</p>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/:quizId/questions</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Links one fixed question to a quiz.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.update_any</code> or <code>quizzes.update_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Body</h3><pre>{
+  "question_id": "44444444-4444-4444-8444-444444444444",
+  "position": 0,
+  "max_points": 1
+}</pre></div><div class="box"><h3>Validation</h3><p>Required question_id; optional position 0–2147483647, default 0. Optional max_points >0, ≤99999999.99 with two decimals; omission copies the bank question’s current max_points. Duplicate links return 409; foreign questions return 404. Updates derived question_count. No bulk-create route.</p></div><div class="box"><h3>Response</h3><p>201 Created.</p><pre>{
+  "success": true,
+  "quiz_question": {
+    "quiz_id": "22222222-2222-4222-8222-222222222222",
+    "question_id": "44444444-4444-4444-8444-444444444444",
+    "position": 0,
+    "max_points": 1,
+    "question": {
+      "id": "44444444-4444-4444-8444-444444444444",
+      "type": "single_choice",
+      "content": "Which is a programming language?",
+      "explanation": "Python is a programming language."
+    }
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/questions</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Lists fixed question links, rather than the question bank.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.read_any</code> or <code>quizzes.read_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Query</h3><p><code>page</code>: positive integer, default 1; <code>limit</code>: 1–100, default 20. <code>sortOrder</code>: asc (default) or desc. Unknown query fields are rejected. sortBy: position (default)|max_points|question_id. No additional filters.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "questions": [
+    {
+      "quiz_id": "22222222-2222-4222-8222-222222222222",
+      "question_id": "44444444-4444-4444-8444-444444444444",
+      "position": 0,
+      "max_points": 1,
+      "question": {
+        "id": "44444444-4444-4444-8444-444444444444",
+        "type": "single_choice",
+        "content": "Which is a programming language?",
+        "explanation": "Python is a programming language.",
+        "category": null
+      }
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 1,
+    "totalPages": 1,
+    "hasNextPage": false,
+    "hasPreviousPage": false
+  },
+  "sorting": {
+    "sortBy": "position",
+    "sortOrder": "asc"
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/questions/:questionId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Reads a fixed question link by quiz and bank question UUID.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.read_any</code> or <code>quizzes.read_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "quiz_question": {
+    "quiz_id": "22222222-2222-4222-8222-222222222222",
+    "question_id": "44444444-4444-4444-8444-444444444444",
+    "position": 0,
+    "max_points": 1,
+    "question": {
+      "id": "44444444-4444-4444-8444-444444444444",
+      "type": "single_choice",
+      "content": "Which is a programming language?",
+      "explanation": "Python is a programming language."
+    }
+  }
+}</pre><p>question contains only id, type, content and explanation. Full answers require the question-bank detail route and its read permission.</p></div></div>
+      </article>
+
+      <article class="route" data-method="PATCH">
+        <div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/quizzes/:quizId/questions/:questionId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Changes link position and/or point weight.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.update_any</code> or <code>quizzes.update_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Body</h3><pre>{
+  "position": 2,
+  "max_points": 2.5
+}</pre></div><div class="box"><h3>Behavior</h3><p>Nonempty subset of position/max_points using creation limits. Moves shift other fixed questions and source blocks in the affected range; refresh both lists. Does not edit bank content. Existing attempts retain their snapshot order and points. Equal positions and gaps are allowed.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "quiz_question": {
+    "quiz_id": "22222222-2222-4222-8222-222222222222",
+    "question_id": "44444444-4444-4444-8444-444444444444",
+    "position": 2,
+    "max_points": 2.5,
+    "question": {
+      "id": "44444444-4444-4444-8444-444444444444",
+      "type": "single_choice",
+      "content": "Which is a programming language?",
+      "explanation": "Python is a programming language."
+    }
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="DELETE">
+        <div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/quizzes/:quizId/questions/:questionId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Removes only the fixed link, preserving the bank question.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.update_any</code> or <code>quizzes.update_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Behavior</h3><p>No body. Updates quiz.question_count; refresh quiz details and structure lists.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "deleted": true
+}</pre></div></div>
+      </article>
+    </section>
+
+    <section class="section" id="quiz-sources" data-section>
+      <h2>Random Question Sources <span class="base">/api/quizzes/:quizId/sources</span></h2>
+      <p class="section-intro">A source selects distinct questions from a category owned by the quiz author, or uncategorized questions when category_id is null. All fixed questions are excluded from random selection. Quotas and selected-question completeness are checked at attempt creation, which can return 422.</p>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/:quizId/sources</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Adds a random category source to the quiz.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.update_any</code> or <code>quizzes.update_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Body</h3><pre>{
+  "category_id": null,
+  "question_count": 2,
+  "max_points": null,
+  "position": 0
+}</pre></div><div class="box"><h3>Validation</h3><p>Required category_id (UUID or null) and question_count (positive integer ≤2147483647). position defaults to 0 and accepts nonnegative integers. max_points defaults to 1; a positive value ≤99999999.99 with two decimals overrides bank points, while null uses each sampled question’s current bank points. One source per category, including null, per quiz. question_percentage is unsupported. Duplicate categories return 409; inaccessible categories return 404.</p></div><div class="box"><h3>Response</h3><p>201 Created.</p><pre>{
+  "success": true,
+  "source": {
+    "id": "33333333-3333-4333-8333-333333333333",
+    "quiz_id": "22222222-2222-4222-8222-222222222222",
+    "category_id": null,
+    "position": 0,
+    "max_points": null,
+    "question_count": 2,
+    "category": null
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="PUT">
+        <div class="route-head"><span class="method put">PUT</span><code class="path">/api/quizzes/:quizId/sources</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Atomically replaces the complete source list, assigning new source IDs.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.update_any</code> or <code>quizzes.update_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Body</h3><pre>{
+  "sources": [
+    {
+      "category_id": null,
+      "question_count": 2,
+      "max_points": null,
+      "position": 0
+    }
+  ]
+}</pre></div><div class="box"><h3>Behavior</h3><p>Required sources array of 0–1000 entries, using POST fields. Categories must be unique. [] removes all random sources, keeping fixed questions. Updates derived quiz.question_count.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "sources": [
+    {
+      "id": "33333333-3333-4333-8333-333333333333",
+      "quiz_id": "22222222-2222-4222-8222-222222222222",
+      "category_id": null,
+      "position": 0,
+      "max_points": null,
+      "question_count": 2,
+      "category": null
+    }
+  ]
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/sources</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Lists random source blocks with their category metadata.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.read_any</code> or <code>quizzes.read_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Query</h3><p><code>page</code>: positive integer, default 1; <code>limit</code>: 1–100, default 20. <code>sortOrder</code>: asc (default) or desc. Unknown query fields are rejected. sortBy: position (default)|id|category_id|max_points|question_count. Null values sort last.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "sources": [
+    {
+      "id": "33333333-3333-4333-8333-333333333333",
+      "quiz_id": "22222222-2222-4222-8222-222222222222",
+      "category_id": null,
+      "position": 0,
+      "max_points": null,
+      "question_count": 2,
+      "category": null
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 1,
+    "totalPages": 1,
+    "hasNextPage": false,
+    "hasPreviousPage": false
+  },
+  "sorting": {
+    "sortBy": "position",
+    "sortOrder": "asc"
+  }
+}</pre><p>Non-null category includes id, name and description.</p></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/sources/:sourceId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Reads one source using its own UUID, not the category UUID.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.read_any</code> or <code>quizzes.read_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "source": {
+    "id": "33333333-3333-4333-8333-333333333333",
+    "quiz_id": "22222222-2222-4222-8222-222222222222",
+    "category_id": null,
+    "position": 0,
+    "max_points": null,
+    "question_count": 2,
+    "category": null
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="PATCH">
+        <div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/quizzes/:quizId/sources/:sourceId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Updates question_count, position and/or max_points.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.update_any</code> or <code>quizzes.update_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Body</h3><pre>{
+  "question_count": 3,
+  "max_points": null
+}</pre></div><div class="box"><h3>Behavior</h3><p>Nonempty subset; same limits as creation. category_id is immutable here: replace sources or delete/create to change it. Moving shifts fixed questions and source blocks in the affected range; refresh both lists. Existing attempts remain unchanged.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "source": {
+    "id": "33333333-3333-4333-8333-333333333333",
+    "quiz_id": "22222222-2222-4222-8222-222222222222",
+    "category_id": null,
+    "position": 0,
+    "max_points": null,
+    "question_count": 3,
+    "category": null
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="DELETE">
+        <div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/quizzes/:quizId/sources/:sourceId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Deletes a source while preserving its category and bank questions.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.update_any</code> or <code>quizzes.update_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Body</h3><p>None. Derived quiz counts update automatically.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "deleted": true
+}</pre></div></div>
+      </article>
+    </section>
+
+    <section class="section" id="quiz-requirements" data-section>
+      <h2>Quiz Video Requirements <span class="base">/api/quizzes/quiz-requirements</span></h2>
+      <p class="section-intro">Management access follows quiz read/update permissions and quiz ownership. Participants use check/progress for published quizzes. Only active requirements gate eligibility or starting an attempt; reads never record watch time.</p>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/quiz-requirements</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Adds a video watch requirement to a quiz.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.update_any</code> or <code>quizzes.update_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Body</h3><pre>{
+  "quiz_id": "22222222-2222-4222-8222-222222222222",
+  "video_id": "44444444-4444-4444-8444-444444444444",
+  "min_watch_percentage": 75,
+  "min_watch_seconds": null,
+  "position": 0,
+  "is_active": true
+}</pre></div><div class="box"><h3>Validation</h3><p>Exactly one non-null threshold: min_watch_percentage >0 to 100 with two decimals, or min_watch_seconds as a positive integer not exceeding known video duration. position defaults to 0 and accepts nonnegative integers; is_active defaults to true. Linked videos must be ready and either published/public or owned by the quiz author. is_active: false does not bypass write validation. Duplicate quiz/video pairs return 409.</p></div><div class="box"><h3>Response</h3><p>201 Created.</p><pre>{
+  "success": true,
+  "requirement": {
+    "quiz_id": "22222222-2222-4222-8222-222222222222",
+    "video_id": "44444444-4444-4444-8444-444444444444",
+    "min_watch_percentage": 75,
+    "min_watch_seconds": null,
+    "position": 0,
+    "is_active": true
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/quiz-requirements</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Lists active and inactive requirements within the permitted quiz scope.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.read_any</code> or <code>quizzes.read_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Query</h3><p><code>page</code>: positive integer, default 1; <code>limit</code>: 1–100, default 20. <code>sortOrder</code>: asc (default) or desc. Unknown query fields are rejected. Optional quiz_id UUID; inaccessible specific quizzes return 404. sortBy: position (default)|quiz_id|video_id|min_watch_percentage|min_watch_seconds. Null thresholds sort last.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "requirements": [
+    {
+      "quiz_id": "22222222-2222-4222-8222-222222222222",
+      "video_id": "44444444-4444-4444-8444-444444444444",
+      "min_watch_percentage": 75,
+      "min_watch_seconds": null,
+      "position": 0,
+      "is_active": true,
+      "video_card": null
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 1,
+    "totalPages": 1,
+    "hasNextPage": false,
+    "hasPreviousPage": false
+  },
+  "sorting": {
+    "sortBy": "position",
+    "sortOrder": "asc"
+  }
+}</pre><p>video_card includes current card media/progress or null when the linked video is unavailable; unavailable entries still count toward totals.</p></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/quiz-requirements/:quizId/:videoId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Reads a requirement identified by quiz and video UUID.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.read_any</code> or <code>quizzes.read_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "requirement": {
+    "quiz_id": "22222222-2222-4222-8222-222222222222",
+    "video_id": "44444444-4444-4444-8444-444444444444",
+    "min_watch_percentage": 75,
+    "min_watch_seconds": null,
+    "position": 0,
+    "is_active": true,
+    "video_card": null
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="PATCH">
+        <div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/quizzes/quiz-requirements/:quizId/:videoId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Updates thresholds, position or activation without changing either resource ID.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.update_any</code> or <code>quizzes.update_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Body</h3><pre>{
+  "min_watch_percentage": null,
+  "min_watch_seconds": 60,
+  "is_active": false
+}</pre></div><div class="box"><h3>Validation</h3><p>Nonempty subset of min_watch_percentage, min_watch_seconds, position, is_active. Clear the previous threshold explicitly when switching type. Exactly one non-null threshold: min_watch_percentage >0 to 100 with two decimals, or min_watch_seconds as a positive integer not exceeding known video duration. position defaults to 0 and accepts nonnegative integers; is_active defaults to true. Linked videos must be ready and either published/public or owned by the quiz author. is_active: false does not bypass write validation.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "requirement": {
+    "quiz_id": "22222222-2222-4222-8222-222222222222",
+    "video_id": "44444444-4444-4444-8444-444444444444",
+    "min_watch_percentage": null,
+    "min_watch_seconds": 60,
+    "position": 0,
+    "is_active": false
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="DELETE">
+        <div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/quizzes/quiz-requirements/:quizId/:videoId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Removes a requirement while retaining the quiz and video.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.update_any</code> or <code>quizzes.update_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "deleted": true
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/quiz-requirements/:quizId/check</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Checks all active video prerequisites for the authenticated participant.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.participate</code>.</p></div><div class="box"><h3>Behavior</h3><p>Requires a published quiz; unavailable quizzes return 404. No user_id/body. No active requirements means requirements_met: true. Cache-Control: private, no-store.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "requirements_met": true
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/quiz-requirements/:quizId/progress</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Returns the participant’s progress on every active video requirement.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.participate</code>.</p></div><div class="box"><h3>Behavior</h3><p>Published quiz only. No pagination; ordered by position then video_id. Display percentages are truncated to two decimals and capped at 100; use server is_met/requirements_met rather than recalculating. Unknown duration can make required_watch_seconds/watched_percentage/completion_percentage null. Cache-Control: private, no-store.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "quiz_id": "22222222-2222-4222-8222-222222222222",
+  "requirements_met": false,
+  "requirements": [
+    {
+      "quiz_id": "22222222-2222-4222-8222-222222222222",
+      "video_id": "44444444-4444-4444-8444-444444444444",
+      "min_watch_percentage": 75,
+      "min_watch_seconds": null,
+      "position": 0,
+      "is_active": true,
+      "total_watch_seconds": 120,
+      "required_watch_seconds": 150,
+      "watched_percentage": 60,
+      "is_met": false,
+      "completion_percentage": 80,
+      "video_card": null
+    }
+  ]
+}</pre></div></div>
+      </article>
+    </section>
+
+    <section class="section" id="quiz-attempts" data-section>
+      <h2>Quiz Attempts <span class="base">/api/quizzes · /api/quiz-attempts</span></h2>
+      <p class="section-intro">Requires quizzes.participate and the caller’s own attempt, including for Owner. questionNo is the positive attempt question number, not a bank UUID. Settings, selected questions and weights are snapshotted when starting. Cache-Control: private, no-store.</p>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/eligibility</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Returns advisory start/resume eligibility without creating or finalizing an attempt.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.participate</code>.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "can_start": true,
+  "can_resume": false,
+  "reason": null,
+  "active_attempt_id": null,
+  "attempts_used": 0,
+  "max_attempts": null,
+  "attempts_remaining": null
+}</pre></div><div class="box"><h3>Behavior</h3><p>Reasons: active_attempt, requirements_not_met, max_attempts_reached, quiz_unavailable, or null. Unavailable quizzes return 200 with both flags false and null counts. Unlimited attempts yields attempts_remaining: null. Starting rechecks eligibility under a lock; active attempts can be resumed despite changed requirements/limits.</p></div></div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/quizzes/:quizId/attempts</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Starts a new attempt or resumes the caller’s active unexpired attempt.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.participate</code>.</p></div><div class="box"><h3>Body</h3><p>None. 201 for creation; 200 for resume. Response fields are at the top level, without an attempt wrapper.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "id": "44444444-4444-4444-8444-444444444444",
+  "quiz_id": "22222222-2222-4222-8222-222222222222",
+  "attempt_no": 1,
+  "status": "in_progress",
+  "started_at": "2026-10-30T10:00:00.000Z",
+  "expires_at": null,
+  "settings": {
+    "question_count": 1,
+    "questions_per_page": 1,
+    "time_limit_seconds": null,
+    "max_attempts": null,
+    "passing_score_percentage": 50,
+    "shuffle_questions": true,
+    "shuffle_options": true,
+    "certificate_template_id": null,
+    "min_answered_percentage": 0,
+    "min_correct_percentage": 0,
+    "correctness_visibility": "after_finish",
+    "correct_answers_visibility": "after_finish",
+    "explanation_visibility": "after_finish",
+    "explanation_incorrect_only": false,
+    "allow_answer_changes_after_check": false,
+    "allow_attempt_review": true,
+    "show_final_score": true,
+    "scoring_mode": "exact_match"
+  }
+}</pre></div><div class="box"><h3>Behavior</h3><p>New attempts require a published quiz, active watch prerequisites and available attempt allowance. Snapshots include fixed questions plus distinct random selections; selected questions must be complete. Resume retains original settings/order. An expired active attempt blocks creation until the worker finalizes it.</p></div><div class="box"><h3>Errors</h3><p>403 REQUIREMENTS_NOT_MET; 404 QUIZ_NOT_FOUND; 409 QUIZ_UNAVAILABLE, MAX_ATTEMPTS_REACHED, ATTEMPT_FINALIZATION_PENDING, ATTEMPT_NUMBER_EXHAUSTED or ATTEMPT_CONFLICT; 422 INVALID_QUIZ_CONFIGURATION or INSUFFICIENT_QUESTIONS.</p></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/attempts</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Lists only the authenticated participant’s attempts for this quiz.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.participate</code>.</p></div><div class="box"><h3>Query</h3><p><code>page</code>: positive integer, default 1; <code>limit</code>: 1–100, default 20. <code>sortOrder</code>: desc (default) or asc. Unknown query fields are rejected. Optional status: in_progress|submitted|timed_out|cancelled. sortBy: started_at (default)|finished_at|attempt_no|status.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "attempts": [
+    {
+      "id": "44444444-4444-4444-8444-444444444444",
+      "quiz_id": "22222222-2222-4222-8222-222222222222",
+      "attempt_no": 1,
+      "status": "submitted",
+      "started_at": "2026-10-30T10:00:00.000Z",
+      "expires_at": null,
+      "settings": {
+        "question_count": 1,
+        "questions_per_page": 1,
+        "time_limit_seconds": null,
+        "max_attempts": null,
+        "passing_score_percentage": 50,
+        "shuffle_questions": true,
+        "shuffle_options": true,
+        "certificate_template_id": null,
+        "min_answered_percentage": 0,
+        "min_correct_percentage": 0,
+        "correctness_visibility": "after_finish",
+        "correct_answers_visibility": "after_finish",
+        "explanation_visibility": "after_finish",
+        "explanation_incorrect_only": false,
+        "allow_answer_changes_after_check": false,
+        "allow_attempt_review": true,
+        "show_final_score": true,
+        "scoring_mode": "exact_match"
+      },
+      "finished_at": "2026-10-30T10:10:00.000Z",
+      "max_points": 1,
+      "earned_points": 1,
+      "score_percentage": 100,
+      "passed": true
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 1,
+    "totalPages": 1,
+    "hasNextPage": false,
+    "hasPreviousPage": false
+  },
+  "sorting": {
+    "sortBy": "started_at",
+    "sortOrder": "desc"
+  }
+}</pre></div><div class="box"><h3>Visibility</h3><p>Each attempt includes its settings snapshot. Final earned_points, score_percentage and passed are null when show_final_score is false. Author results use separate routes and permissions.</p></div></div>
+      </article>
+
+      <article class="route" data-method="PUT">
+        <div class="route-head"><span class="method put">PUT</span><code class="path">/api/quiz-attempts/:attemptId/answers/:questionNo</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Saves or replaces one answer without grading it.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.participate</code>.</p></div><div class="box"><h3>Body</h3><pre>{
+  "answer": {
+    "option_no": 1
+  }
+}</pre><pre>{
+  "answer": {
+    "option_nos": [
+      1,
+      3
+    ]
+  }
+}</pre><pre>{
+  "answer": {
+    "pairs": [
+      {
+        "item_no": 1,
+        "option_no": 2
+      }
+    ]
+  }
+}</pre></div><div class="box"><h3>Validation</h3><p>Use the matching structure for single_choice, multiple_choice or matching. Stable option/item numbers must exist in the attempt snapshot. Clear with option_no: null, option_nos: [], or pairs: []; partial matching is allowed on save. No duplicate selections/items or extra fields. JSON numbers, not strings.</p></div><div class="box"><h3>Behavior</h3><p>Active, unexpired attempt only. Changed answers clear prior grading and feedback. After checking, edits require allow_answer_changes_after_check=true or return 409 ANSWER_LOCKED. An identical retry preserves timestamps and grading, regardless of array order.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "attempt_id": "44444444-4444-4444-8444-444444444444",
+  "question_no": 1,
+  "answer": {
+    "option_no": 1
+  },
+  "checked_at": null,
+  "updated_at": "2026-10-30T10:00:00.000Z",
+  "feedback": {},
+  "can_edit": true
+}</pre></div><div class="box"><h3>Errors</h3><p>404 ATTEMPT_NOT_FOUND or ATTEMPT_QUESTION_NOT_FOUND; 409 ATTEMPT_NOT_IN_PROGRESS, ATTEMPT_EXPIRED, ANSWER_LOCKED or retryable ATTEMPT_CONFLICT; 400 INVALID_ANSWER.</p></div></div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/quiz-attempts/:attemptId/answers/:questionNo/check</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Grades the most recently saved complete answer using the attempt snapshots.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.participate</code>.</p></div><div class="box"><h3>Body</h3><p>None; wait for the save request to finish before checking. An existing checked answer returns its saved grade without regrading.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "attempt_id": "44444444-4444-4444-8444-444444444444",
+  "question_no": 1,
+  "answer": {
+    "option_no": 1
+  },
+  "checked_at": "2026-10-30T10:00:00.000Z",
+  "updated_at": "2026-10-30T10:00:00.000Z",
+  "feedback": {},
+  "can_edit": false
+}</pre><p>With default after_finish visibility, feedback remains empty even after checking. after_check settings may expose is_correct/awarded_points, correct_answers.options or matching_items, and explanation independently.</p></div><div class="box"><h3>Behavior</h3><p>Does not update the final attempt score. exact_match awards all or zero; partial_credit subtracts wrong-choice share from correct-choice share (floor 0), or awards the fraction of correct matching items. Points round to two decimals. is_correct still means fully correct.</p></div><div class="box"><h3>Errors</h3><p>404 ANSWER_NOT_FOUND if no saved answer; 400 INCOMPLETE_ANSWER for an empty choice/selection or missing matching pairs. Same active-attempt, expiry and ownership errors as save.</p></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/quiz-attempts/:attemptId/questions</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Loads all snapshotted questions, saved answers and permitted feedback.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.participate</code>.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "attempt_id": "44444444-4444-4444-8444-444444444444",
+  "status": "in_progress",
+  "expires_at": null,
+  "is_expired": false,
+  "settings": {
+    "question_count": 1,
+    "questions_per_page": 1,
+    "time_limit_seconds": null,
+    "max_attempts": null,
+    "passing_score_percentage": 50,
+    "shuffle_questions": true,
+    "shuffle_options": true,
+    "certificate_template_id": null,
+    "min_answered_percentage": 0,
+    "min_correct_percentage": 0,
+    "correctness_visibility": "after_finish",
+    "correct_answers_visibility": "after_finish",
+    "explanation_visibility": "after_finish",
+    "explanation_incorrect_only": false,
+    "allow_answer_changes_after_check": false,
+    "allow_attempt_review": true,
+    "show_final_score": true,
+    "scoring_mode": "exact_match"
+  },
+  "questions": [
+    {
+      "question_no": 1,
+      "question_id": "44444444-4444-4444-8444-444444444444",
+      "type": "single_choice",
+      "content": "Which is a programming language?",
+      "max_points": 1,
+      "options": [
+        {
+          "option_no": 1,
+          "content": "Python",
+          "position": 1
+        },
+        {
+          "option_no": 2,
+          "content": "CSS",
+          "position": 2
+        }
+      ],
+      "matching_options": [],
+      "matching_items": [],
+      "answer": null,
+      "checked_at": null,
+      "updated_at": null,
+      "feedback": {},
+      "can_edit": true
+    }
+  ]
+}</pre></div><div class="box"><h3>Behavior</h3><p>No pagination. Stable question_no order and saved shuffled option positions. Base question objects omit solutions and explanations; permitted values appear only in feedback. Deleted bank questions have question_id: null. Active unexpired attempts are readable; expired/submitted/timed_out attempts require allow_attempt_review=true, otherwise 403 ATTEMPT_REVIEW_NOT_ALLOWED. cancelled returns 409.</p></div><div class="box"><h3>Review</h3><p>Expired in_progress may remain so until the worker commits: is_expired is true and can_edit false. GET never grades or finalizes. Submitted/timed_out responses add result with id, status, max_points, earned_points, score_percentage, passed, settings. show_final_score=false hides final scores/pass; never feedback stays hidden.</p></div></div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/quiz-attempts/:attemptId/submit</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Grades complete unchecked answers and finalizes an active unexpired attempt.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.participate</code>.</p></div><div class="box"><h3>Body</h3><p>None. Wait for pending answer saves. Already-submitted or expired attempts return 409.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "id": "44444444-4444-4444-8444-444444444444",
+  "quiz_id": "22222222-2222-4222-8222-222222222222",
+  "attempt_no": 1,
+  "status": "submitted",
+  "started_at": "2026-10-30T10:00:00.000Z",
+  "expires_at": null,
+  "settings": {
+    "question_count": 1,
+    "questions_per_page": 1,
+    "time_limit_seconds": null,
+    "max_attempts": null,
+    "passing_score_percentage": 50,
+    "shuffle_questions": true,
+    "shuffle_options": true,
+    "certificate_template_id": null,
+    "min_answered_percentage": 0,
+    "min_correct_percentage": 0,
+    "correctness_visibility": "after_finish",
+    "correct_answers_visibility": "after_finish",
+    "explanation_visibility": "after_finish",
+    "explanation_incorrect_only": false,
+    "allow_answer_changes_after_check": false,
+    "allow_attempt_review": true,
+    "show_final_score": true,
+    "scoring_mode": "exact_match"
+  },
+  "finished_at": "2026-10-30T10:10:00.000Z",
+  "max_points": 1,
+  "earned_points": 1,
+  "score_percentage": 100,
+  "passed": true
+}</pre></div><div class="box"><h3>Behavior</h3><p>Checks min_answered_percentage and min_correct_percentage against all attempt questions. Incomplete/unanswered questions contribute zero points. Failed thresholds return 409 MIN_ANSWERED_PERCENTAGE_NOT_MET or MIN_CORRECT_PERCENTAGE_NOT_MET and roll back new grading. show_final_score=false returns null earned_points/score_percentage/passed. Worker expiration uses the same grading but bypasses submission thresholds.</p></div><div class="box"><h3>Certificates</h3><p>A passed submitted/timed_out attempt issues at most one certificate when the current quiz selects an existing template. Issuance freezes recipient, current quiz metadata, result and template; it does not render a PDF. Failure rolls back finalization. Find issued records through GET /api/certificates.</p></div></div>
+      </article>
+    </section>
+
+    <section class="section" id="quiz-results" data-section>
+      <h2>Quiz Results Management <span class="base">/api/quizzes/:quizId</span></h2>
+      <p class="section-intro">Here own means the quiz author, not the participant. Separate quizzes.attempts.read_* and delete_* permissions are required. Results are available for every quiz/attempt status and use Cache-Control: private, no-store.</p>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/results</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Lists attempts from all participants of an authorized quiz.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.attempts.read_any</code> or <code>quizzes.attempts.read_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Query</h3><p><code>page</code>: positive integer, default 1; <code>limit</code>: 1–100, default 20. <code>sortOrder</code>: desc (default) or asc. Unknown query fields are rejected. Optional user_id participant UUID, status: in_progress|submitted|timed_out|cancelled, passed: true|false (excludes null). sortBy: started_at (default)|finished_at|attempt_no|status|earned_points|score_percentage. Filters intersect; null sort values are last.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "attempts": [
+    {
+      "id": "44444444-4444-4444-8444-444444444444",
+      "quiz_id": "22222222-2222-4222-8222-222222222222",
+      "attempt_no": 1,
+      "status": "submitted",
+      "started_at": "2026-10-30T10:00:00.000Z",
+      "expires_at": null,
+      "finished_at": "2026-10-30T10:10:00.000Z",
+      "max_points": 1,
+      "earned_points": 1,
+      "score_percentage": 100,
+      "passed": true,
+      "user": {
+        "id": "11111111-1111-4111-8111-111111111111",
+        "full_name": "Example User",
+        "image_url": null
+      }
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 1,
+    "totalPages": 1,
+    "hasNextPage": false,
+    "hasPreviousPage": false
+  },
+  "sorting": {
+    "sortBy": "started_at",
+    "sortOrder": "desc"
+  }
+}</pre></div><div class="box"><h3>Behavior</h3><p>User fields reflect current public profile only. Unfinished grades remain null. Lists omit questions and answers; stored final scores are not recomputed.</p></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/results/by-user</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Groups matching attempts by participant, paginating users rather than attempts.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.attempts.read_any</code> or <code>quizzes.attempts.read_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Query</h3><p><code>page</code>: positive integer, default 1; <code>limit</code>: 1–100, default 20. <code>sortOrder</code>: desc (default) or asc. Unknown query fields are rejected. Optional user_id participant UUID, status: in_progress|submitted|timed_out|cancelled, passed: true|false (excludes null). sortBy: started_at (default)|finished_at|attempt_no|status|earned_points|score_percentage. Filters intersect; null sort values are last.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "users": [
+    {
+      "user": {
+        "id": "11111111-1111-4111-8111-111111111111",
+        "full_name": "Example User",
+        "image_url": null
+      },
+      "attempts": [
+        {
+          "id": "44444444-4444-4444-8444-444444444444",
+          "quiz_id": "22222222-2222-4222-8222-222222222222",
+          "attempt_no": 1,
+          "status": "submitted",
+          "started_at": "2026-10-30T10:00:00.000Z",
+          "expires_at": null,
+          "finished_at": "2026-10-30T10:10:00.000Z",
+          "max_points": 1,
+          "earned_points": 1,
+          "score_percentage": 100,
+          "passed": true
+        }
+      ]
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 1,
+    "totalPages": 1,
+    "hasNextPage": false,
+    "hasPreviousPage": false
+  },
+  "sorting": {
+    "sortBy": "started_at",
+    "sortOrder": "desc"
+  }
+}</pre></div><div class="box"><h3>Pagination</h3><p>Filters apply before grouping. Each paged user includes all their matching attempts, even beyond limit. User order follows the first attempt under the requested sort; users without matching attempts are omitted. pagination.total counts users.</p></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/quizzes/:quizId/results/:attemptId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Returns a complete author review of one attempt belonging to the quiz.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.attempts.read_any</code> or <code>quizzes.attempts.read_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "attempt": {
+    "id": "44444444-4444-4444-8444-444444444444",
+    "quiz_id": "22222222-2222-4222-8222-222222222222",
+    "attempt_no": 1,
+    "status": "submitted",
+    "started_at": "2026-10-30T10:00:00.000Z",
+    "expires_at": null,
+    "finished_at": "2026-10-30T10:10:00.000Z",
+    "max_points": 1,
+    "earned_points": 1,
+    "score_percentage": 100,
+    "passed": true,
+    "user": {
+      "id": "11111111-1111-4111-8111-111111111111",
+      "full_name": "Example User",
+      "image_url": null
+    },
+    "settings": {
+      "question_count": 1,
+      "questions_per_page": 1,
+      "time_limit_seconds": null,
+      "max_attempts": null,
+      "passing_score_percentage": 50,
+      "shuffle_questions": true,
+      "shuffle_options": true,
+      "certificate_template_id": null,
+      "min_answered_percentage": 0,
+      "min_correct_percentage": 0,
+      "correctness_visibility": "after_finish",
+      "correct_answers_visibility": "after_finish",
+      "explanation_visibility": "after_finish",
+      "explanation_incorrect_only": false,
+      "allow_answer_changes_after_check": false,
+      "allow_attempt_review": true,
+      "show_final_score": true,
+      "scoring_mode": "exact_match"
+    },
+    "is_expired": false,
+    "questions": [
+      {
+        "question_no": 1,
+        "question_id": "44444444-4444-4444-8444-444444444444",
+        "max_points": 1,
+        "question_snapshot": {
+          "type": "single_choice",
+          "content": "Which is a programming language?",
+          "explanation": "Python is a programming language.",
+          "options": [
+            {
+              "option_no": 1,
+              "content": "Python",
+              "is_correct": true,
+              "position": 1
+            },
+            {
+              "option_no": 2,
+              "content": "CSS",
+              "is_correct": false,
+              "position": 2
+            }
+          ],
+          "matching_options": [],
+          "matching_items": []
+        },
+        "answer": {
+          "option_no": 1
+        },
+        "checked_at": "2026-10-30T10:00:00.000Z",
+        "updated_at": "2026-10-30T10:00:00.000Z",
+        "is_correct": true,
+        "awarded_points": 1,
+        "can_edit": false
+      }
+    ]
+  }
+}</pre></div><div class="box"><h3>Behavior</h3><p>Includes full stored solutions/explanations, answers and grades independent of participant feedback, review or final-score settings. Unchecked grading fields are null. This read never regrades, finalizes, or authorizes editing another participant’s answers.</p></div></div>
+      </article>
+
+      <article class="route" data-method="DELETE">
+        <div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/quizzes/:quizId/attempts/:attemptId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Permanently deletes one attempt and its saved question/answer rows.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>quizzes.attempts.delete_any</code> or <code>quizzes.attempts.delete_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Body</h3><p>None; any attempt status is supported.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "deleted": true
+}</pre></div><div class="box"><h3>Effect</h3><p>Quiz and bank questions remain. Issued certificates retain their snapshots and quiz_attempt_id becomes null. The deleted attempt no longer consumes max_attempts. Remaining attempt numbers do not change; the next uses MAX(attempt_no)+1, so the last deleted number may be reused. Identify attempts by UUID.</p></div><div class="box"><h3>Errors</h3><p>404 for a missing attempt, inaccessible quiz or mismatched quiz/attempt. 409 ATTEMPT_CONFLICT may be retried.</p></div></div>
+      </article>
+    </section>
+
+    <section class="section" id="collections" data-section>
+      <h2>Collections <span class="base">/api/collections</span></h2>
+      <p class="section-intro">Collections group ordered playlists. Reads accept optional authentication and expose public collections plus the caller’s own private collections. Management permissions do not bypass read visibility. IDs are UUIDs. Unknown fields return 400; inaccessible resources return 404. Read responses use Cache-Control: private, no-store.</p>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/collections</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Creates collection metadata owned by the caller.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>collections.create</code>.</p></div><div class="box"><h3>Body</h3><pre>{
+  "title": "Featured learning",
+  "subheading": null,
+  "description": null,
+  "visibility": "public",
+  "is_featured": false
+}</pre></div><div class="box"><h3>Validation</h3><p>Required trimmed title, 1–255 characters. subheading: trimmed, at most 255 or null; description: trimmed string/null. visibility: public (default)|private; is_featured defaults to false. Creating with is_featured=true also requires collections.feature. Owner/thumbnail/timestamps cannot be supplied.</p></div><div class="box"><h3>Response</h3><p>201 Created.</p><pre>{
+  "success": true,
+  "collection": {
+    "id": "33333333-3333-4333-8333-333333333333",
+    "title": "Featured learning",
+    "subheading": null,
+    "description": null,
+    "visibility": "public",
+    "is_featured": false,
+    "thumbnail_url": null,
+    "created_by": "11111111-1111-4111-8111-111111111111",
+    "created_at": "2026-10-30T10:00:00.000Z",
+    "updated_at": "2026-10-30T10:00:00.000Z"
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/collections</code><span class="auth optional">Optional</span></div>
+        <p class="desc">Lists visible collections with optional filters.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Optional Bearer JWT. Missing token is anonymous; invalid supplied tokens return 401.</p></div><div class="box"><h3>Query</h3><p><code>page</code>: positive integer, default 1; <code>limit</code>: 1–100, default 20. <code>sortOrder</code>: asc (default) or desc. Unknown query fields are rejected. userId: author UUID (camelCase); title: substring, max 255; visibility: private|public; is_featured: true|false. sortBy: created_at (default)|updated_at|title. Filters intersect visibility, so asking for another user’s private collections returns an empty list.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "collections": [
+    {
+      "id": "33333333-3333-4333-8333-333333333333",
+      "title": "Featured learning",
+      "subheading": null,
+      "description": null,
+      "visibility": "public",
+      "is_featured": false,
+      "thumbnail_url": null,
+      "created_by": "11111111-1111-4111-8111-111111111111",
+      "created_at": "2026-10-30T10:00:00.000Z",
+      "updated_at": "2026-10-30T10:00:00.000Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 1,
+    "totalPages": 1,
+    "hasNextPage": false,
+    "hasPreviousPage": false
+  },
+  "sorting": {
+    "sortBy": "created_at",
+    "sortOrder": "asc"
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/collections/:collectionId</code><span class="auth optional">Optional</span></div>
+        <p class="desc">Returns collection metadata and its visible ordered playlist cards.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Optional Bearer JWT. Missing token is anonymous; invalid supplied tokens return 401.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "collection": {
+    "id": "33333333-3333-4333-8333-333333333333",
+    "title": "Featured learning",
+    "subheading": null,
+    "description": null,
+    "visibility": "public",
+    "is_featured": false,
+    "thumbnail_url": null,
+    "created_by": "11111111-1111-4111-8111-111111111111",
+    "created_at": "2026-10-30T10:00:00.000Z",
+    "updated_at": "2026-10-30T10:00:00.000Z"
+  },
+  "playlists": []
+}</pre></div><div class="box"><h3>Visibility</h3><p>Private collections are readable only by their creator. Playlist cards include position and media URLs/expiry; only public playlists or the viewer’s own private playlists are included. Public collections never expose another user’s private playlists.</p></div></div>
+      </article>
+
+      <article class="route" data-method="PATCH">
+        <div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/collections/:collectionId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Updates a nonempty subset of collection metadata.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>collections.update_any</code> or <code>collections.update_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Body</h3><pre>{
+  "title": "Updated collection",
+  "subheading": "Start here",
+  "is_featured": true
+}</pre></div><div class="box"><h3>Validation</h3><p>Same writable fields and limits as creation. Omitted values remain; null clears subheading/description. Supplying is_featured, including false, also requires collections.feature.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "collection": {
+    "id": "33333333-3333-4333-8333-333333333333",
+    "title": "Updated collection",
+    "subheading": "Start here",
+    "description": null,
+    "visibility": "public",
+    "is_featured": true,
+    "thumbnail_url": null,
+    "created_by": "11111111-1111-4111-8111-111111111111",
+    "created_at": "2026-10-30T10:00:00.000Z",
+    "updated_at": "2026-10-30T10:00:00.000Z"
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/collections/:collectionId/thumbnail</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Uploads or removes collection artwork.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>collections.update_any</code> or <code>collections.update_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Upload</h3><p>multipart/form-data, one file field: JPEG/PNG/WebP up to 5 MiB. EXIF rotation and centered 1280 × 720 WebP crop. Send no file to remove the thumbnail. Malformed/oversized files return 400.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "collection": {
+    "id": "33333333-3333-4333-8333-333333333333",
+    "title": "Featured learning",
+    "subheading": null,
+    "description": null,
+    "visibility": "public",
+    "is_featured": false,
+    "thumbnail_url": "https://cdn.example.com/collection-thumbnails/33333333-3333-4333-8333-333333333333/image.webp",
+    "created_by": "11111111-1111-4111-8111-111111111111",
+    "created_at": "2026-10-30T10:00:00.000Z",
+    "updated_at": "2026-10-30T10:00:00.000Z"
+  }
+}</pre></div><div class="box"><h3>Behavior</h3><p>Returns the full updated collection. Removal sets thumbnail_url to null; replacement/removal cleans up the old object if it belongs to this collection’s managed prefix. Failed storage/database writes return 500.</p></div></div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/collections/:collectionId/playlists</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Appends playlists in request order and returns all membership rows.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>collections.update_any</code> or <code>collections.update_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Body</h3><pre>{
+  "playlist_ids": [
+    "22222222-2222-4222-8222-222222222222"
+  ]
+}</pre></div><div class="box"><h3>Validation</h3><p>Required nonempty array of distinct UUIDs. Each playlist must be public or privately owned by the caller. Inaccessible IDs return 404; already-linked playlists return 409. The entire request is transactional.</p></div><div class="box"><h3>Response</h3><p>201 Created.</p><pre>{
+  "success": true,
+  "collection": {
+    "id": "33333333-3333-4333-8333-333333333333",
+    "title": "Featured learning",
+    "subheading": null,
+    "description": null,
+    "visibility": "public",
+    "is_featured": false,
+    "thumbnail_url": null,
+    "created_by": "11111111-1111-4111-8111-111111111111",
+    "created_at": "2026-10-30T10:00:00.000Z",
+    "updated_at": "2026-10-30T10:00:00.000Z"
+  },
+  "playlists": [
+    {
+      "id": "44444444-4444-4444-8444-444444444444",
+      "collection_id": "33333333-3333-4333-8333-333333333333",
+      "playlist_id": "22222222-2222-4222-8222-222222222222",
+      "position": 0,
+      "created_at": "2026-10-30T10:00:00.000Z"
+    }
+  ]
+}</pre><p>Mutation playlists are membership rows (id, collection_id, playlist_id, position, created_at), not the cards returned by collection detail.</p></div></div>
+      </article>
+
+      <article class="route" data-method="PATCH">
+        <div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/collections/:collectionId/playlists/reorder</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Replaces the order of all existing collection memberships.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>collections.update_any</code> or <code>collections.update_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Body</h3><pre>{
+  "playlist_ids": [
+    "22222222-2222-4222-8222-222222222222"
+  ]
+}</pre></div><div class="box"><h3>Behavior</h3><p>Supply every existing playlist exactly once, in desired order. UUIDs must be distinct; stale/missing/extra membership sets return 409. [] is valid only for an empty collection. Positions become contiguous from 0.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "collection": {
+    "id": "33333333-3333-4333-8333-333333333333",
+    "title": "Featured learning",
+    "subheading": null,
+    "description": null,
+    "visibility": "public",
+    "is_featured": false,
+    "thumbnail_url": null,
+    "created_by": "11111111-1111-4111-8111-111111111111",
+    "created_at": "2026-10-30T10:00:00.000Z",
+    "updated_at": "2026-10-30T10:00:00.000Z"
+  },
+  "playlists": [
+    {
+      "id": "44444444-4444-4444-8444-444444444444",
+      "collection_id": "33333333-3333-4333-8333-333333333333",
+      "playlist_id": "22222222-2222-4222-8222-222222222222",
+      "position": 0,
+      "created_at": "2026-10-30T10:00:00.000Z"
+    }
+  ]
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="DELETE">
+        <div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/collections/:collectionId/playlists/:playlistId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Removes one membership, preserving the playlist.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>collections.update_any</code> or <code>collections.update_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Body</h3><p>None. Missing membership returns 404; remaining positions are compacted from 0.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "removed": true,
+  "collection": {
+    "id": "33333333-3333-4333-8333-333333333333",
+    "title": "Featured learning",
+    "subheading": null,
+    "description": null,
+    "visibility": "public",
+    "is_featured": false,
+    "thumbnail_url": null,
+    "created_by": "11111111-1111-4111-8111-111111111111",
+    "created_at": "2026-10-30T10:00:00.000Z",
+    "updated_at": "2026-10-30T10:00:00.000Z"
+  },
+  "playlists": []
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="DELETE">
+        <div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/collections/:collectionId</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Deletes collection metadata and memberships, preserving playlists.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>collections.delete_any</code> or <code>collections.delete_own</code>. The own permission is scoped to the resource owner; any permits access across owners.</p></div><div class="box"><h3>Body</h3><p>None.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "deleted": true
+}</pre></div></div>
+      </article>
+    </section>
+
+    <section class="section" id="certificates" data-section>
+      <h2>Issued Certificates <span class="base">/api/certificates</span></h2>
+      <p class="section-intro">Certificates are issued automatically when a passed submitted/timed-out attempt finalizes and the current quiz selects a template. No manual generation route exists. List requires authentication; detail and PDF are public by certificate UUID. Certificate deletion/revocation is not exposed by these routes.</p>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/certificates</code><span class="auth auth">Auth</span></div>
+        <p class="desc">Lists only the authenticated user’s issued and revoked certificates.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. No additional permission required.</p></div><div class="box"><h3>Query</h3><p>page=1, limit=20 (1–100). Optional status: issued|revoked; quiz_id and certificate_template_id UUIDs; certificate_number substring (≤100), quiz_title substring (≤255); issued_from/issued_to inclusive ISO timestamps with timezone, from ≤ to. sortBy: issued_at (default)|created_at|certificate_number|quiz_title|status; sortOrder: desc (default)|asc. user_id and unknown fields are rejected.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "certificates": [],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 0,
+    "totalPages": 0,
+    "hasNextPage": false,
+    "hasPreviousPage": false
+  },
+  "sorting": {
+    "sortBy": "issued_at",
+    "sortOrder": "desc"
+  }
+}</pre><p>Items include id, user_id, quiz_id, nullable quiz_attempt_id and certificate_template_id, certificate_number, status, issued_at, revoked_at, created_at and saved quiz_title. Rows include the issuance data_snapshot and template_snapshot. Cache-Control: private, no-store.</p></div><div class="box"><h3>Behavior</h3><p>Titles come from issuance snapshots. Template or attempt deletion preserves certificates and clears the corresponding reference. Filters combine; empty pages retain the correct total. Certificate numbers sort lexically.</p></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/certificates/:id</code><span class="auth public">Public</span></div>
+        <p class="desc">Publicly verifies a certificate and exposes its saved recipient, result and template.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Public; no Bearer token required.</p></div><div class="box"><h3>Path</h3><p><code>id</code>: certificate UUID, not its human-readable certificate_number. Anyone possessing the UUID can read this data.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "certificate": {
+    "id": "33333333-3333-4333-8333-333333333333",
+    "user_id": "11111111-1111-4111-8111-111111111111",
+    "quiz_id": "22222222-2222-4222-8222-222222222222",
+    "quiz_attempt_id": "44444444-4444-4444-8444-444444444444",
+    "certificate_template_id": "44444444-4444-4444-8444-444444444444",
+    "certificate_number": "CERT-2026-000001",
+    "status": "issued",
+    "issued_at": "2026-10-30T10:00:00.000Z",
+    "revoked_at": null,
+    "created_at": "2026-10-30T10:00:00.000Z",
+    "quiz_title": "Programming basics",
+    "data_snapshot": {
+      "user": {
+        "id": "11111111-1111-4111-8111-111111111111",
+        "full_name": "Example User"
+      },
+      "quiz": {
+        "id": "22222222-2222-4222-8222-222222222222",
+        "user_id": "11111111-1111-4111-8111-111111111111",
+        "title": "Programming basics",
+        "description": null,
+        "status": "published",
+        "question_count": 1,
+        "thumbnail_url": null,
+        "questions_per_page": 1,
+        "time_limit_seconds": null,
+        "max_attempts": null,
+        "passing_score_percentage": 50,
+        "shuffle_questions": true,
+        "shuffle_options": true,
+        "certificate_template_id": "44444444-4444-4444-8444-444444444444",
+        "min_answered_percentage": 0,
+        "min_correct_percentage": 0,
+        "correctness_visibility": "after_finish",
+        "correct_answers_visibility": "after_finish",
+        "explanation_visibility": "after_finish",
+        "explanation_incorrect_only": false,
+        "allow_answer_changes_after_check": false,
+        "allow_attempt_review": true,
+        "show_final_score": true,
+        "scoring_mode": "exact_match",
+        "created_at": "2026-10-30T10:00:00.000Z",
+        "updated_at": "2026-10-30T10:00:00.000Z"
+      },
+      "result": {
+        "score_percentage": 100,
+        "earned_points": 1,
+        "max_points": 1,
+        "passed": true,
+        "finished_at": "2026-10-30T10:00:00.000Z"
+      },
+      "certificate": {
+        "number": "CERT-2026-000001",
+        "issued_at": "2026-10-30T10:00:00.000Z"
+      }
+    },
+    "template_snapshot": {
+      "id": "44444444-4444-4444-8444-444444444444",
+      "user_id": "11111111-1111-4111-8111-111111111111",
+      "name": "Course completion",
+      "description": null,
+      "html_template": "&lt;section&gt;&lt;h1&gt;{{user.full_name}}&lt;/h1&gt;&lt;p&gt;{{quiz.title}}&lt;/p&gt;&lt;/section&gt;",
+      "css_template": "section { text-align: center; }",
+      "page_format": "A4",
+      "orientation": "landscape",
+      "is_system": false,
+      "is_default": false,
+      "created_at": "2026-10-30T10:00:00.000Z",
+      "updated_at": "2026-10-30T10:00:00.000Z"
+    }
+  }
+}</pre><p>Snapshots freeze data at issuance; subsequent profile/quiz/template changes do not rewrite them.</p></div><div class="box"><h3>Behavior</h3><p>Revoked certificates remain readable with status/revoked_at. 400 invalid UUID; 404 missing record. Cache-Control: private, no-store.</p></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/certificates/:id/pdf</code><span class="auth public">Public</span></div>
+        <p class="desc">Publicly renders the issued certificate PDF from saved snapshots.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Public; no Bearer token required.</p></div><div class="box"><h3>Response</h3><p>200 application/pdf; Content-Disposition: inline; filename="certificate-&lt;id&gt;.pdf". Cache-Control: no-store; X-Content-Type-Options: nosniff. No request body or caller-supplied render data.</p></div><div class="box"><h3>Behavior</h3><p>Rendered on demand without storing a PDF. QR resolves to the configured frontend certificate verification URL. Deleted/changed templates do not alter saved rendering.</p></div><div class="box"><h3>Errors</h3><p>10 requests/minute per IP (429). Revoked certificates return 403; missing records 404; invalid/unsafe snapshots or font failures 422. Shared renderer busy: 503 with Retry-After: 5; timeout: 504.</p></div></div>
+      </article>
+    </section>
+
+    <section class="section" id="certificate-templates" data-section>
+      <h2>Certificate Templates <span class="base">/api/certificates/certificate-templates</span></h2>
+      <p class="section-intro">All routes require a Bearer token and certificates.moderate. Reads/preview include system templates and the caller’s private templates. Only the caller’s private templates can be edited/deleted; Owner does not bypass this ownership restriction. IDs are UUIDs. Successful JSON responses include success: true.</p>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/certificates/certificate-templates</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Creates a private, non-default certificate template.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>certificates.moderate</code>.</p></div><div class="box"><h3>Body</h3><pre>{
+  "name": "Course completion",
+  "description": null,
+  "html_template": "&lt;section&gt;&lt;h1&gt;{{user.full_name}}&lt;/h1&gt;&lt;p&gt;{{quiz.title}}&lt;/p&gt;&lt;/section&gt;",
+  "css_template": "section { text-align: center; }",
+  "page_format": "A4",
+  "orientation": "landscape"
+}</pre></div><div class="box"><h3>Validation</h3><p>Required name (trimmed, 1–255) and nonempty html_template. description defaults to null, css_template to empty, page_format to A4 (A4|Letter), orientation to landscape (portrait|landscape). HTML/CSS source is preserved; each is limited to 1 MiB and total JSON body to 3 MiB. Owner IDs, timestamps and is_system/is_default are read-only. Invalid request fields return 400; disallowed HTML/CSS/placeholders return 422 with message and field.</p></div><div class="box"><h3>Content</h3><p>Allowed static HTML/CSS and inline SVG only; scripts, event handlers, forms, iframes and external SVG references are rejected. URLs must satisfy the content policy; arbitrary data/relative/HTTP URLs are rejected. Remote images are blocked during PDF rendering. Fonts support validated embedded WOFF/WOFF2/TTF/OTF, direct public HTTPS files, and Google Fonts stylesheets; failed font loading returns 422. CSS belongs in css_template rather than HTML style tags.</p></div><div class="box"><h3>Placeholders</h3><p>Text placeholders: {{user.full_name}}, {{quiz.title}}, {{result.score_percentage}}, {{result.earned_points}}, {{result.max_points}}, {{certificate.number}}, {{certificate.issued_at}}. Only HTML text may contain these. {{certificate.qr_code_data_uri}} is allowed only as the entire img src; e.g. {{certificate.qr_code_data_uri.size_200.color_002244.dots_rounded}}. Invalid/duplicate QR styling or insufficient contrast returns 422. Unknown placeholders, expressions, attribute/CSS placeholders and triple braces are rejected.</p></div><div class="box"><h3>Response</h3><p>201 Created.</p><pre>{
+  "success": true,
+  "template": {
+    "id": "44444444-4444-4444-8444-444444444444",
+    "user_id": "11111111-1111-4111-8111-111111111111",
+    "name": "Course completion",
+    "description": null,
+    "html_template": "&lt;section&gt;&lt;h1&gt;{{user.full_name}}&lt;/h1&gt;&lt;p&gt;{{quiz.title}}&lt;/p&gt;&lt;/section&gt;",
+    "css_template": "section { text-align: center; }",
+    "page_format": "A4",
+    "orientation": "landscape",
+    "is_system": false,
+    "is_default": false,
+    "created_at": "2026-10-30T10:00:00.000Z",
+    "updated_at": "2026-10-30T10:00:00.000Z"
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/certificates/certificate-templates</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Lists accessible private templates and all system templates.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>certificates.moderate</code>.</p></div><div class="box"><h3>Query</h3><p><code>page</code>: positive integer, default 1; <code>limit</code>: 1–100, default 20. <code>sortOrder</code>: asc (default) or desc. Unknown query fields are rejected. Optional name substring (≤255), page_format: A4|Letter, orientation: portrait|landscape. sortBy: created_at (default)|updated_at|name|page_format|orientation.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "templates": [
+    {
+      "id": "44444444-4444-4444-8444-444444444444",
+      "user_id": "11111111-1111-4111-8111-111111111111",
+      "name": "Course completion",
+      "description": null,
+      "html_template": "&lt;section&gt;&lt;h1&gt;{{user.full_name}}&lt;/h1&gt;&lt;p&gt;{{quiz.title}}&lt;/p&gt;&lt;/section&gt;",
+      "css_template": "section { text-align: center; }",
+      "page_format": "A4",
+      "orientation": "landscape",
+      "is_system": false,
+      "is_default": false,
+      "created_at": "2026-10-30T10:00:00.000Z",
+      "updated_at": "2026-10-30T10:00:00.000Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 1,
+    "totalPages": 1,
+    "hasNextPage": false,
+    "hasPreviousPage": false
+  },
+  "sorting": {
+    "sortBy": "created_at",
+    "sortOrder": "asc"
+  }
+}</pre><p>is_system and is_default identify built-in templates; these flags cannot be changed through CRUD.</p></div></div>
+      </article>
+
+      <article class="route" data-method="GET">
+        <div class="route-head"><span class="method get">GET</span><code class="path">/api/certificates/certificate-templates/:id</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Reads a system template or the caller’s own private template.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>certificates.moderate</code>.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "template": {
+    "id": "44444444-4444-4444-8444-444444444444",
+    "user_id": "11111111-1111-4111-8111-111111111111",
+    "name": "Course completion",
+    "description": null,
+    "html_template": "&lt;section&gt;&lt;h1&gt;{{user.full_name}}&lt;/h1&gt;&lt;p&gt;{{quiz.title}}&lt;/p&gt;&lt;/section&gt;",
+    "css_template": "section { text-align: center; }",
+    "page_format": "A4",
+    "orientation": "landscape",
+    "is_system": false,
+    "is_default": false,
+    "created_at": "2026-10-30T10:00:00.000Z",
+    "updated_at": "2026-10-30T10:00:00.000Z"
+  }
+}</pre></div><div class="box"><h3>Errors</h3><p>404 for missing templates or another user’s private template.</p></div></div>
+      </article>
+
+      <article class="route" data-method="PATCH">
+        <div class="route-head"><span class="method patch">PATCH</span><code class="path">/api/certificates/certificate-templates/:id</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Edits a nonempty subset of an owned private template’s writable fields.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>certificates.moderate</code>.</p></div><div class="box"><h3>Body</h3><pre>{
+  "name": "Updated certificate",
+  "css_template": ""
+}</pre></div><div class="box"><h3>Validation</h3><p>Required name (trimmed, 1–255) and nonempty html_template. description defaults to null, css_template to empty, page_format to A4 (A4|Letter), orientation to landscape (portrait|landscape). HTML/CSS source is preserved; each is limited to 1 MiB and total JSON body to 3 MiB. Owner IDs, timestamps and is_system/is_default are read-only. Invalid request fields return 400; disallowed HTML/CSS/placeholders return 422 with message and field. Omitted fields remain; description: null and css_template: "" clear those values. System templates return 404. Source validation uses the complete resulting HTML/CSS pair.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "template": {
+    "id": "44444444-4444-4444-8444-444444444444",
+    "user_id": "11111111-1111-4111-8111-111111111111",
+    "name": "Updated certificate",
+    "description": null,
+    "html_template": "&lt;section&gt;&lt;h1&gt;{{user.full_name}}&lt;/h1&gt;&lt;p&gt;{{quiz.title}}&lt;/p&gt;&lt;/section&gt;",
+    "css_template": "",
+    "page_format": "A4",
+    "orientation": "landscape",
+    "is_system": false,
+    "is_default": false,
+    "created_at": "2026-10-30T10:00:00.000Z",
+    "updated_at": "2026-10-30T10:00:00.000Z"
+  }
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="DELETE">
+        <div class="route-head"><span class="method delete">DELETE</span><code class="path">/api/certificates/certificate-templates/:id</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Deletes an owned private template.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>certificates.moderate</code>.</p></div><div class="box"><h3>Body</h3><p>None. System/foreign templates return 404. Affected quizzes lose their template selection; previously issued certificate snapshots remain and their template reference becomes null.</p></div><div class="box"><h3>Response</h3><pre>{
+  "success": true,
+  "deleted": true
+}</pre></div></div>
+      </article>
+
+      <article class="route" data-method="POST">
+        <div class="route-head"><span class="method post">POST</span><code class="path">/api/certificates/certificate-templates/:id/preview/pdf</code><span class="auth permission">Permission</span></div>
+        <p class="desc">Renders a stored template with fixed sample data, without issuing a certificate.</p>
+        <div class="grid"><div class="box"><h3>Access</h3><p>Bearer JWT. Requires <code>certificates.moderate</code>.</p></div><div class="box"><h3>Body</h3><p>No body is used. Save edits with PATCH first; preview reads stored source, paper format and orientation. System and caller-owned private templates are allowed.</p></div><div class="box"><h3>Response</h3><p>200 application/pdf, inline UUID-based filename, Cache-Control: no-store, X-Content-Type-Options: nosniff. One page; overflowing content is clipped. QR uses a preview verification URL rather than an issued record.</p></div><div class="box"><h3>Limits</h3><p>10 previews/minute per user. One active PDF render per API process, shared with issued PDFs; no queue. 20-second deadline, 3 MiB generated document and 5 MiB PDF limit. Busy: 503 with Retry-After; timeout: 504; rate limit: 429. Invalid content or unavailable fonts return 422.</p></div><div class="box"><h3>Placeholders</h3><p>Text placeholders: {{user.full_name}}, {{quiz.title}}, {{result.score_percentage}}, {{result.earned_points}}, {{result.max_points}}, {{certificate.number}}, {{certificate.issued_at}}. Only HTML text may contain these. {{certificate.qr_code_data_uri}} is allowed only as the entire img src; e.g. {{certificate.qr_code_data_uri.size_200.color_002244.dots_rounded}}. Invalid/duplicate QR styling or insufficient contrast returns 422. Unknown placeholders, expressions, attribute/CSS placeholders and triple braces are rejected.</p></div></div>
+      </article>
     </section>
     </div>
 
@@ -4371,10 +6305,10 @@ Subtitle text...</pre></div></div></article>
           <h2>Module boundaries</h2>
           <p>The backend is organized by domain, with shared infrastructure kept outside business modules.</p>
           <div class="doc-grid">
-            <div class="doc-card"><h3>Domain modules</h3><p><code>auth</code>, <code>videos</code>, <code>playlists</code>, <code>people</code>, <code>comments</code>, <code>channels</code>, <code>quizzes</code>, <code>analytics</code>, <code>reports</code>, <code>users</code>, <code>roles</code>, <code>authorization</code>, <code>video-indexing</code>, <code>live-streams</code>, <code>posts</code>, <code>post-comments</code>, and <code>notes</code>.</p></div>
+            <div class="doc-card"><h3>Domain modules</h3><p><code>auth</code>, <code>videos</code>, <code>playlists</code>, <code>people</code>, <code>comments</code>, <code>channels</code>, <code>quizzes-engine</code>, <code>collections</code>, <code>certificates</code>, <code>analytics</code>, <code>reports</code>, <code>users</code>, <code>roles</code>, <code>authorization</code>, <code>video-indexing</code>, <code>live-streams</code>, <code>posts</code>, <code>post-comments</code>, and <code>notes</code>.</p></div>
             <div class="doc-card"><h3>Cross-cutting code</h3><p><code>config</code>, <code>database</code>, <code>middleware</code>, and <code>common</code> hold environment, DB pools, request processing, ownership checks, validation, logging, and response helpers.</p></div>
             <div class="doc-card"><h3>Read/write separation</h3><p>Queries use explicit <code>readPool</code> and <code>writePool</code> connections. Production reads can be routed to a regional replica while writes remain on the leader.</p></div>
-            <div class="doc-card"><h3>Service integrations</h3><p>Mux handles video delivery, R2 stores uploaded images, n8n supports automation workflows, MaxMind resolves geography, and Puppeteer renders PDF reports and certificates.</p></div>
+            <div class="doc-card"><h3>Service integrations</h3><p>Mux handles video delivery, R2 stores uploaded images, n8n supports automation workflows, MaxMind resolves geography, and Puppeteer renders PDF reports; sandboxed Playwright Chromium renders certificate previews and issued PDFs.</p></div>
           </div>
           <div class="module-tree">src/
 ├── app.js                 Express configuration
@@ -4395,7 +6329,9 @@ Subtitle text...</pre></div></div></article>
     ├── videos/            Delivery and moderation
     ├── playlists/         Browsing and collection moderation
     ├── people/ comments/ channels/
-    ├── quizzes/           Learning and certificates
+    ├── quizzes-engine/    Banks, quiz configuration, attempts and grading
+    ├── collections/       Ordered playlist collections
+    ├── certificates/      Templates, issuance and PDF verification
     ├── analytics/         Video, channel, and platform metrics
     ├── reports/           PDF analytics export
     └── storage/           Cloudflare R2 client</div>
@@ -4419,9 +6355,9 @@ Subtitle text...</pre></div></div></article>
             <table class="doc-table">
               <thead><tr><th>Level</th><th>Token behavior</th><th>Typical usage</th></tr></thead>
               <tbody>
-                <tr><td><span class="doc-pill">Public</span></td><td>No Bearer token is required.</td><td>Registration, login, password reset, OAuth, health, and the signed Mux webhook.</td></tr>
-                <tr><td><span class="doc-pill">Optional</span></td><td>A valid token populates <code>req.user</code>; a missing header is anonymous, while an invalid supplied token returns 401.</td><td>Video discovery, playlists, people, comment replies, post reads, livestream viewing, and channel browsing with optional personalization. Video details, playback, similar videos, and video comment lists require authentication.</td></tr>
-                <tr><td><span class="doc-pill">Auth</span></td><td><code>requireAuth</code> verifies <code>Authorization: Bearer &lt;token&gt;</code>. Missing or invalid tokens return 401.</td><td>User profile, video details/playback, similar videos, video comment lists, post management lists, 2FA settings, effective permissions, and account deletion. Other protected routes also require their listed permissions.</td></tr>
+                <tr><td><span class="doc-pill">Public</span></td><td>No Bearer token is required.</td><td>Registration, login, password reset, OAuth, health, public certificate verification/PDF, and the signed Mux webhook.</td></tr>
+                <tr><td><span class="doc-pill">Optional</span></td><td>A valid token populates <code>req.user</code>; a missing header is anonymous, while an invalid supplied token returns 401.</td><td>Video discovery, details, playback, similar videos, video comments, playlists, collections, people, post reads, and channels accept optional authentication. Livestream details/playback require authentication; public livestream cards remain optional.</td></tr>
+                <tr><td><span class="doc-pill">Auth</span></td><td><code>requireAuth</code> verifies <code>Authorization: Bearer &lt;token&gt;</code>. Missing or invalid tokens return 401.</td><td>User profile, livestream details/playback, personal certificate lists, post management lists, 2FA settings, effective permissions, and account deletion. Other protected routes also require their listed permissions.</td></tr>
                 <tr><td><span class="doc-pill">Permission</span></td><td><code>requirePermission</code> and resource access middleware evaluate database-backed grants. Deny overrides allow; the Owner bypasses permission checks. Missing grants return 403.</td><td>Uploads, moderation, libraries, reactions, quizzes, analytics, people, roles, user administration, and PDF reporting.</td></tr>
               </tbody>
             </table>
@@ -4462,7 +6398,7 @@ Subtitle text...</pre></div></div></article>
             <div class="flow-step"><span class="flow-number">2</span><div><h3>Direct client transfer</h3><p>The browser uploads the media to the returned Mux URL. Mux receives the database video ID through passthrough metadata and can generate the requested subtitle track.</p></div></div>
             <div class="flow-step"><span class="flow-number">3</span><div><h3>Signed webhook</h3><p>Mux posts asset events to <code>/api/videos/webhook/mux</code>. The backend keeps the body raw until its HMAC signature is verified.</p></div></div>
             <div class="flow-step"><span class="flow-number">4</span><div><h3>Asset synchronization</h3><p>A ready event stores duration, asset ID, playback ID, status, and a default thumbnail URL. Error and deletion events update or remove the matching record.</p></div></div>
-            <div class="flow-step"><span class="flow-number">5</span><div><h3>Playback delivery</h3><p>Discovery and detail responses include generated thumbnail and preview URLs. Call POST /api/videos/:id/playback for stream credentials. Video details/playback require authentication. Public videos must be ready and published; uploaders can preview their own ready drafts and scheduled videos. Signed playback policy is independent of visibility.</p></div></div>
+            <div class="flow-step"><span class="flow-number">5</span><div><h3>Playback delivery</h3><p>Discovery and detail responses include generated thumbnail and preview URLs. Call POST /api/videos/:id/playback for stream credentials. Video details/playback accept optional authentication. Public videos must be ready and published; uploaders can preview their own ready drafts and scheduled videos. Signed playback policy is independent of visibility.</p></div></div>
             <div class="flow-step"><span class="flow-number">6</span><div><h3>Post-upload moderation</h3><p>Users with the corresponding update/delete permissions can edit metadata, change playback policy, upload thumbnails, manage subtitles, generate chapters, and delete videos.</p></div></div>
           </div>
         </div>
@@ -4485,8 +6421,8 @@ Subtitle text...</pre></div></div></article>
           <h2>Publishing and livestreams</h2>
           <div class="doc-grid">
             <div class="doc-card"><h3>Scheduled publishing</h3><p>PATCH video-details with an explicit published_at instant. Public ready videos appear when that time is reached; null means unpublished. Uploaders can preview their own ready drafts and scheduled videos. Rescheduling does not revoke already-issued signed URLs.</p></div>
-            <div class="doc-card"><h3>Live and DVR playback</h3><p>Create a livestream, fetch streaming-details for the encoder, and request viewer playback separately. Non-DVR uses the live playback ID; DVR uses the current unfinished recording. Public/unlisted streams allow guest viewing; private streams require their owner.</p></div>
-            <div class="doc-card"><h3>Recordings</h3><p>The existing Mux webhook creates one video per live asset. Completed recordings are published once ready unless a publication date already exists. Future dates are preserved. Finished recordings use the authenticated video playback endpoint.</p></div>
+            <div class="doc-card"><h3>Live and DVR playback</h3><p>Create a livestream, fetch streaming-details for the encoder, and request viewer playback separately. Non-DVR uses the live playback ID; DVR uses the current unfinished recording. Viewer details and playback require a Bearer token, even for public and unlisted streams. Private streams require their owner.</p></div>
+            <div class="doc-card"><h3>Recordings</h3><p>The existing Mux webhook creates one video per live asset. Completed recordings are published once ready unless a publication date already exists. Future dates are preserved. Finished recordings use the video playback endpoint with optional authentication.</p></div>
             <div class="doc-card"><h3>Personal notes</h3><p>Notes belong only to their author, with up to 100 notes per video. Each stores a title, text, timestamp, and optional color. Their author may edit or delete them after the video becomes inaccessible.</p></div>
           </div>
         </div>
@@ -4549,7 +6485,7 @@ Subtitle text...</pre></div></div></article>
         <div class="doc-panel">
           <div class="doc-panel-head">
             <h2>Database Schema</h2>
-            <p>The diagram shows the main database tables and relationships used by videos, playlists, users, comments, quiz attempts, certificates, categories, people, and analytics.</p>
+            <p>This ERD is an earlier schema snapshot. It predates the replacement quiz engine, question categories, collections, and certificate templates; use the current route groups for their contracts.</p>
           </div>
           <div class="erd-toolbar" aria-label="ERD zoom controls">
             <button type="button" data-erd-zoom="out" aria-label="Zoom out">-</button>
@@ -4572,7 +6508,9 @@ Subtitle text...</pre></div></div></article>
       </footer>
     </div>
   </main>
-  <button class="back-to-top" type="button" aria-label="Back to top">↑</button>
+  <button class="back-to-top" type="button" aria-label="Back to top">
+    <svg class="ui-icon" aria-hidden="true"><use href="#icon-arrow-up"></use></svg>
+  </button>
   <div class="toast" role="status" aria-live="polite"></div>
 
   <script>
@@ -5019,213 +6957,6 @@ Content-Type: application/pdf
 Content-Disposition: attachment; filename="video-analytics-2026-06-23.pdf"
 
 <binary PDF content>`,
-      "/api/quizzes/create": `{
-  "id": "quiz_uuid",
-  "title": "Quiz",
-  "description": "Description",
-  "time_limit_seconds": 600,
-  "max_attempts": 3,
-  "passing_score_percentage": 70,
-  "created_by": "user_uuid"
-}`,
-      "/api/quizzes/:quizId": `{
-  "id": "quiz_uuid",
-  "title": "Updated quiz",
-  "description": "Updated description",
-  "is_active": true,
-  "updated_at": "2026-06-23T00:00:00.000Z"
-}`,
-      "/api/quizzes/user": `{
-  "quizzes": [
-    {
-      "id": "quiz_uuid",
-      "title": "Quiz",
-      "question_count": 10,
-      "attempt_count": 24,
-      "is_active": true
-    }
-  ],
-  "pagination": { "page": 1, "limit": 20, "total": 5 }
-}`,
-      "/api/quizzes/certificates": `{
-  "certificates": [
-    {
-      "id": "certificate_uuid",
-      "quiz_id": "quiz_uuid",
-      "quiz_title": "Quiz",
-      "issued_at": "2026-06-23T00:00:00.000Z",
-      "score_percentage": 92
-    }
-  ]
-}`,
-      "/api/quizzes/certificate/generate": `HTTP 200
-Content-Type: application/pdf
-Content-Disposition: attachment; filename="certificate.pdf"
-
-<binary PDF content>`,
-      "/api/quizzes/:quizId/details": `{
-  "id": "quiz_uuid",
-  "title": "Quiz",
-  "description": "Description",
-  "time_limit_seconds": 600,
-  "max_attempts": 3,
-  "passing_score_percentage": 70,
-  "has_certificate": true
-}`,
-      "/api/quizzes/:quizId/requirements/videos": `{
-  "videos": [
-    {
-      "id": "video_uuid",
-      "title": "Required video",
-      "required_percentage": 80,
-      "progress_percentage": 65,
-      "met": false
-    }
-  ],
-  "all_met": false
-}`,
-      "/api/quizzes/:quizId/questions": `{
-  "questions": [
-    {
-      "id": "question_uuid",
-      "question_text": "Question text?",
-      "question_type": "single_choice",
-      "points": 1,
-      "options": [
-        { "id": "option_uuid", "option_text": "Answer A", "is_correct": true }
-      ],
-      "pairs": []
-    }
-  ],
-  "pagination": { "page": 1, "limit": 20, "total": 10 }
-}`,
-      "/api/quizzes/:quizId/question/create": `{
-  "id": "question_uuid",
-  "quiz_id": "quiz_uuid",
-  "question_text": "Question text?",
-  "question_type": "single_choice",
-  "points": 1,
-  "options": [
-    { "id": "option_uuid", "option_text": "Answer A", "is_correct": true }
-  ],
-  "pairs": []
-}`,
-      "/api/quizzes/question/:questionId": `{
-  "id": "question_uuid",
-  "question_text": "Updated question?",
-  "question_type": "single_choice",
-  "points": 2,
-  "options": [],
-  "pairs": []
-}`,
-      "/api/quizzes/:quizId/rules": `{
-  "rules": [
-    {
-      "id": "rule_uuid",
-      "quiz_id": "quiz_uuid",
-      "video_id": "video_uuid",
-      "playlist_id": null,
-      "required_percentage": 80,
-      "required_seconds": 300,
-      "is_active": true
-    }
-  ]
-}`,
-      "/api/quizzes/:quizId/rule/create": `{
-  "id": "rule_uuid",
-  "quiz_id": "quiz_uuid",
-  "video_id": "video_uuid",
-  "playlist_id": null,
-  "required_percentage": 80,
-  "required_seconds": 300,
-  "is_active": true
-}`,
-      "/api/quizzes/rule/:ruleId": `{
-  "id": "rule_uuid",
-  "required_percentage": 90,
-  "required_seconds": 360,
-  "is_active": true
-}`,
-      "/api/quizzes/:quizId/question-sources": `{
-  "sources": [
-    {
-      "id": "source_uuid",
-      "quiz_id": "quiz_uuid",
-      "source_type": "video",
-      "video_id": "video_uuid",
-      "playlist_id": null,
-      "question_count": 5
-    }
-  ]
-}`,
-      "/api/quizzes/:quizId/question-source/create": `{
-  "id": "source_uuid",
-  "quiz_id": "quiz_uuid",
-  "source_type": "video",
-  "video_id": "video_uuid",
-  "playlist_id": null,
-  "question_count": 5
-}`,
-      "/api/quizzes/question-source/:sourceId": `{
-  "id": "source_uuid",
-  "source_type": "video",
-  "question_count": 8,
-  "include_general_questions": true
-}`,
-      "/api/quizzes/:quizId/attempt/start": `{
-  "attempt": {
-    "id": "attempt_uuid",
-    "quiz_id": "quiz_uuid",
-    "attempt_number": 1,
-    "status": "in_progress",
-    "started_at": "2026-06-23T00:00:00.000Z"
-  },
-  "questions": [
-    { "id": "question_uuid", "question_text": "Question text?", "position": 1 }
-  ]
-}`,
-      "/api/quizzes/:quizId/attempts": `{
-  "attempts": [
-    {
-      "id": "attempt_uuid",
-      "attempt_number": 1,
-      "status": "submitted",
-      "score_percentage": 92,
-      "passed": true,
-      "submitted_at": "2026-06-23T00:00:00.000Z"
-    }
-  ]
-}`,
-      "/api/quizzes/attempt/:attemptId/questions": `{
-  "attempt_id": "attempt_uuid",
-  "questions": [
-    {
-      "id": "question_uuid",
-      "question_text": "Question text?",
-      "question_type": "single_choice",
-      "options": [
-        { "id": "option_uuid", "option_text": "Answer A" }
-      ],
-      "saved_answer": "option_uuid"
-    }
-  ]
-}`,
-      "/api/quizzes/attempt/:attemptId/question/:questionId/answer": `{
-  "attempt_id": "attempt_uuid",
-  "question_id": "question_uuid",
-  "answer_json": "option_uuid",
-  "is_correct": true,
-  "awarded_points": 1
-}`,
-      "/api/quizzes/attempt/:attemptId/submit": `{
-  "attempt_id": "attempt_uuid",
-  "status": "submitted",
-  "score": 9,
-  "max_score": 10,
-  "score_percentage": 90,
-  "passed": true,
-  "submitted_at": "2026-06-23T00:00:00.000Z"
-}`
     };
     responseExamples["GET /api/video-moderation/subtitle/:videoId"] = `WEBVTT\n\n00:00:00.000 --> 00:00:04.000\nSubtitle text...`;
     responseExamples["DELETE /api/video-moderation/subtitle/:videoId"] = `{
